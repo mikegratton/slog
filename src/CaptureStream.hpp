@@ -1,6 +1,5 @@
 #pragma once
 #include "LogCore.hpp"
-#include <cassert>
 #include <iosfwd>
 
 namespace slog {
