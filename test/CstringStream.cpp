@@ -5,6 +5,7 @@
 
 using namespace slog;
 
+# if 0
 TEST_CASE("BasicCStringStream")
 {
     char buf[32];
@@ -43,3 +44,4 @@ TEST_CASE("BasicCStringStream")
     CHECK(term == true);
     CHECK(buf[0] == 'W');
 }
+#endif

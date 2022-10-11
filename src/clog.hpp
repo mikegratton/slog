@@ -1,15 +1,36 @@
 #pragma once
 #include "LogCore.hpp"
+#include "CapturePrintf.hpp"
 
-#define Logf(level, ...) SLOG_LogBase(level, "", slog::DEFAULT_CHANNEL, __VA_ARGS__)
-#define Logft(level, tag, ...) SLOG_LogBase(level, tag, slog::DEFAULT_CHANNEL, __VA_ARGS__)
-#define Logftc(level, tag, channel, ...) SLOG_LogBase(level, tag, channel, __VA_ARGS__)
+/**
+ * printf logging interface.
+ * 
+ * This defines a set of macros that work like
+ * 
+ * ```
+ * Logf(INFO, "Log with no tag to the default channel at level %s", "INFO");
+ * Logft(WARN, "foo", "Log with %s tag to the default channel at level %s", "foo", "WARN");
+ * Logftc(DBUG, "", 1, "Log with no tag to channel %d at level %s", 1, "DBUG");
+ * ```
+ * 
+ * These macros never trigger allocating memory.
+ * 
+ * The macros are built such that if logging is suppressed for the combo of severity
+ * level/tag/channel, then the rest of the line IS NOT EXECUTED. Any formatting implied
+ * is just skipped. Internally, snprintf() is used to write to a fixed-size internal buffer. 
+ * If the message is longer than the buffer, the overrun is simply discarded.
+ * 
+ */
 
-#define SLOG_LogBase(level, tag, channel, format, ...) \
-        if (SLOG_LOGGING_ENABLED && slog::detail::should_log(level, tag, channel)) {  \
-            LogRecord* rec = slog::detail::allocate_record(channel); \
+#define Logf(severity, ...) SLOG_LogBase(severity, "", slog::DEFAULT_CHANNEL, __VA_ARGS__)
+#define Logft(severity, tag, ...) SLOG_LogBase(severity, tag, slog::DEFAULT_CHANNEL, __VA_ARGS__)
+#define Logftc(severity, tag, channel, ...) SLOG_LogBase(severity, tag, channel, __VA_ARGS__)
+
+#define SLOG_LogBase(severity, tag, channel, format, ...) \
+        if (SLOG_LOGGING_ENABLED && slog::will_log(severity, tag, channel)) {  \
+            LogRecord* rec = slog::get_fresh_record(channel, __FILE__, __FUNCTION__, \
+                                                           __LINE__, severity, tag); \
             if (rec) { \
-                slog::detail::take_record(rec->capture(__FILE__, __FUNCTION__, __LINE__, level, \
-                                          channel, tag, format, ##__VA_ARGS__)); \
+                slog::push_to_sink(slog::capture_message(rec, format, ##__VA_ARGS__)); \
             } \
         }

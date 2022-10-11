@@ -29,7 +29,7 @@ protected:
     char mfileLocation[256];
     char mfileName[128];
     char mfileEnd[128];
-    long msessionStartTime;
+    char msessionStartTime[20];
     int msequence;
     int mbytesWritten;
     int mmaxBytes;

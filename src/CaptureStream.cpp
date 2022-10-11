@@ -4,7 +4,7 @@
 #include <cstring>
 
 namespace slog {
-    
+
 namespace {
 class IntrusiveBuf : public std::streambuf {
 public:
@@ -25,7 +25,7 @@ protected:
     }
 
 
-    std::streamsize xsputn(char const* s, std::streamsize length) override {        
+    std::streamsize xsputn(char const* s, std::streamsize length) override {
         std::streamsize max_write = epptr() - pptr();
         if (length > max_write) {
             length = max_write;
@@ -74,23 +74,24 @@ private:
 thread_local IntrusiveStream st_stream;
 NullStream s_null;
 
+} // end of anon namespace
+
+CaptureStream::~CaptureStream() {
+    if (rec) {
+        st_stream.put(0);        
+        push_to_sink(rec); // Push to queue
+    }
 }
 
-namespace detail {
-std::ostream& get_stream(char* cstring, long maxLength) {
-    st_stream.setbuf(cstring, maxLength);
-    return st_stream;
+std::ostream& CaptureStream::stream() {
+    if (rec) {
+        st_stream.setbuf(rec->message, rec->message_max_size);
+        return st_stream;
+    } else {
+        return s_null;
+    }
 }
 
-void terminate() {
-    st_stream.put(0);
-}
-
-std::ostream& get_null_stream() 
-{
-    return s_null;
-}
-}
 
 }
 

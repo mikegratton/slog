@@ -16,9 +16,9 @@ using namespace slog;
  */
 TEST_CASE("NullPerformance")
 {
-    LogConfig config;
-    config.sink = std::unique_ptr<NullSink>(new NullSink);
-    config.threshold.set_default(DBUG);
+    LogConfig config;    
+    config.set_sink(new NullSink);
+    config.set_default_threshold(DBUG);
     start_logger(config);
     unsigned long JOB_SIZE = 10000000UL;
     auto start_time = std::chrono::system_clock::now();
@@ -34,9 +34,9 @@ TEST_CASE("NullPerformance")
 
 TEST_CASE("RejectPerformance")
 {
-    LogConfig config;
-    config.sink = std::unique_ptr<NullSink>(new NullSink);
-    config.threshold.set_default(ERRR);
+    LogConfig config;    
+    config.set_sink(new NullSink);
+    config.set_default_threshold(ERRR);
     start_logger(config);
     unsigned long JOB_SIZE = 10000000UL;
     auto start_time = std::chrono::system_clock::now();
@@ -53,10 +53,10 @@ TEST_CASE("RejectPerformance")
 
 TEST_CASE("RejectTagPerformance")
 {
-    LogConfig config;
-    config.sink = std::unique_ptr<NullSink>(new NullSink);
-    config.threshold.set_default(ERRR);
-    config.threshold.add_tag("moose", INFO);
+    LogConfig config;    
+    config.set_sink(new NullSink);
+    config.set_default_threshold(ERRR);
+    config.add_tag("moose", INFO);    
     start_logger(config);
     unsigned long JOB_SIZE = 10000000UL;
     auto start_time = std::chrono::system_clock::now();

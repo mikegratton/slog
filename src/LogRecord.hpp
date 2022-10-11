@@ -2,8 +2,8 @@
 #include "LogConfig.hpp"
 
 
-// Syslog compatible severity
-enum LogSeverity {
+// Syslog compatible severity levels
+enum LogSeverity : int {
     FATL = -100,
     EMER = 0,
     ALRT = 100,
@@ -18,32 +18,63 @@ enum LogSeverity {
 
 namespace slog {
 
-struct LogRecord {
-
-    LogRecord(long max_message_size_);
-
+/**
+ * Metadata associated with every log message
+ */
+struct LogRecordMetadata {
+    static constexpr unsigned long TAG_SIZE = 16;
+    
+    LogRecordMetadata();
     void reset();
+    
+    /**
+     * Capture the metadata. This assumes that filename and function are
+     * static strings in the program (i.e. those produced by __FILE__ and 
+     * __FUNCTION__ macros), while tag may change on the caller's thread.
+     * Therefore tag is copied, but filename and function just take the 
+     * pointer values.
+     */
+    void capture(char const* filename, char const* function, int line,
+                       int severity, int channel, const char* tag);
+        
+    char tag[TAG_SIZE];      //! Associated tag metadata
+    char const* filename;    //! filename containing the function where this message was recorded
+    char const* function;    //! name of the function where this message was recorded    
+    unsigned long time;      //! ns since Unix epoch
+    unsigned long thread_id; //! unique ID of the thread this message was recorded on
+    int line;                //!program line number
+    int severity;            //! Message importance. Lower numbers are more important
+    int channel;             //! Log channel this message is going to    
 
-    LogRecord* capture(char const* filename, char const* function, int line,
-                       int severity, int channel, const char* mtag, char const* format, ...);
+};
 
-    LogRecord* next;
+class MutexLogRecordPool;
+class LfLogRecordPool;
 
-    // Metadata
-    char const* filename;
-    char const* function;
-    unsigned long time; // ns since Unix epoch
-    unsigned long thread_id;
-    int line;
-    int severity;
-    int channel;
-    char const* tag;
+/**
+ * A LogRecord is a message string combined with the associated metadata.
+ * These objects are managed by LogRecordPool.
+ */
+struct LogRecord {
+protected:
+    friend class MutexLogRecordPool;
+    friend class LfLogRecordPool;
+    LogRecord(long max_message_size_);    
+public:
+    void reset(); //! Clean out this record
 
-    long message_max_size;
-    char* message; // This must be the final member
+    LogRecord* next;        //! Tracking pointer for pool and queue
+    LogRecordMetadata meta; //! Metadata
+    long message_max_size;  //! maximum size of the message string (including null terminator)
+    char* message;          //! Actual log message. 
 };
 
 constexpr int DEFAULT_CHANNEL = 0;
 constexpr int NO_LINE = -1;
+
+struct RecordNode {
+    LogRecord rec;
+    RecordNode* next;
+};
 
 }

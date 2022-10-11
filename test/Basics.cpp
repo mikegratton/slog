@@ -11,32 +11,13 @@
 using namespace slog;
 
 TEST_CASE("Allocate") {
-    LogRecordPool allocator;
+    LogRecordPool allocator(1024, 32);
     auto* item = allocator.allocate();
     REQUIRE(item != nullptr);
     allocator.deallocate(item);
     auto* item2 = allocator.allocate();
     REQUIRE(item2 != nullptr);
     REQUIRE(item == item2);
-}
-
-TEST_CASE("Queue") {
-    LogRecordPool allocator;
-    auto* item = allocator.allocate();
-    item->capture("", "", 0, INFO, 0, "", "Hello?");
-    LogQueue queue;
-    queue.push(item);
-    LogRecord* item2 = queue.pop(std::chrono::milliseconds(1000));
-    CHECK(item2 == item);
-    item2 = queue.pop(std::chrono::milliseconds(10));
-    CHECK(item2 == nullptr);
-    queue.push(item);
-    item = allocator.allocate();
-    item->capture("", "", 0, INFO, 0, "", "Goodbye");
-    queue.push(item);
-    LogRecord* head = queue.pop_all();
-    CHECK(head->next == item);
-    CHECK(head->next->next == nullptr);
 }
 
 TEST_CASE("ThresholdMap") {

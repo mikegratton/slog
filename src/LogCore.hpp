@@ -2,14 +2,11 @@
 #include "LogRecord.hpp"
 
 namespace slog {
-namespace detail
-{
-bool should_log(int level, char const* tag="", int channel=DEFAULT_CHANNEL);
+bool will_log(int severity, char const* tag="", int channel=DEFAULT_CHANNEL);
 
-void take_record(LogRecord* rec);
+void push_to_sink(LogRecord* rec);
 
-LogRecord* allocate_record(int channel=DEFAULT_CHANNEL);
-
-}
+LogRecord* get_fresh_record(int channel, char const* file, char const* function, int line, 
+                           int severity, char const* tag);
 }
 
