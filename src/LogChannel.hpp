@@ -59,7 +59,7 @@ public:
      * Will return nullptr if the pool is exhausted.
      * Thread safe.
      */
-    LogRecord* allocate() { return pool.allocate(); }
+    RecordNode* allocate() { return pool.take(); }
     
 
     ///////////////////////////////////////////////////////////////////
@@ -68,7 +68,7 @@ public:
      * Send a record to the worker thread. Ownership of
      * this pointer transfered to the queue. Thread safe.
      */
-    void push(LogRecord* rec);
+    void push(RecordNode* rec);
 
     //////////////////////////////////////////////////////////////////
     // SETUP STATE ONLY

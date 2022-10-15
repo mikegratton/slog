@@ -1,15 +1,17 @@
 #include "FileSink.hpp"
+
 #include <cstring>
 #include <cerrno>
 #include <limits>
-#include "SinkTools.hpp"
 #include <chrono>
 #include <ctime>
+
 namespace slog {
 
 FileSink::FileSink() {
     mfile = nullptr;
-    time_t t = std::chrono::duration_cast<std::chrono::seconds>(std::chrono::system_clock::now().time_since_epoch()).count();
+    time_t t = std::chrono::duration_cast<std::chrono::seconds>(
+        std::chrono::system_clock::now().time_since_epoch()).count();
     tm broken;
     gmtime_r(&t, &broken);
     strftime(msessionStartTime, sizeof(msessionStartTime), "%Y%m%dT%H%M%SZ", &broken);
@@ -55,7 +57,7 @@ void FileSink::open_or_rotate() {
     }
 }
 
-void FileSink::record(const LogRecord* rec) {
+void FileSink::record(LogRecord const& rec) {
     open_or_rotate();
     mbytesWritten += mformat(mfile, rec);
     fprintf(mfile, "\n");

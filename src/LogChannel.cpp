@@ -12,10 +12,11 @@ LogChannel::~LogChannel() {
     stop();
 }
 
-void LogChannel::push(LogRecord* rec) {    
-    if (rec) {
-        int level = rec->meta.severity;
-        queue.push(rec);
+
+void LogChannel::push(RecordNode* node) {    
+    if (node) {
+        int level = node->rec.meta.severity;
+        queue.push(node);
         if (level <= FATL) {
             abort();
         }
@@ -55,18 +56,18 @@ void LogChannel::set_threshold(ThresholdMap const& threshold_) {
 void LogChannel::logging_loop() {
     while (keepalive) {
         assert(logger_state == RUN);
-        LogRecord* rec = queue.pop(WAIT);
-        if (rec) {
-            sink->record(rec);
-            pool.deallocate(rec);
+        RecordNode* node = queue.pop(WAIT);
+        if (node) {
+            sink->record(node->rec);
+            pool.put(node);
         }
     }
     // Shutdown. Drain the queue.
-    LogRecord* head = queue.pop_all();
+    RecordNode* head = queue.pop_all();
     while (head) {
-        sink->record(head);
-        LogRecord* cursor = head->next;
-        pool.deallocate(head);
+        sink->record(head->rec);
+        RecordNode* cursor = head->next;
+        pool.put(head);
         head = cursor;
     }
 }

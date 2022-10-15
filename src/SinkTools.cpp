@@ -6,19 +6,14 @@
 namespace slog {
 
 
-int default_format(FILE* sink, LogRecord const* rec)
+int default_format(FILE* sink, LogRecord const& rec)
 {
     int count = 0;
     char severity_str[16];
     char time_str[32];
-    format_severity(severity_str, rec->meta.severity);
-    format_time(time_str, rec->meta.time, 3);
-    if (rec->meta.tag) {
-        count += fprintf(sink, "[%s %s %s] ", severity_str, rec->meta.tag, time_str);
-    } else {
-        count += fprintf(sink, "[%s %s] ", severity_str, time_str);
-    }
-    count += fprintf(sink, "%s", rec->message);
+    format_severity(severity_str, rec.meta.severity);
+    format_time(time_str, rec.meta.time, 3);    
+    count += fprintf(sink, "[%s %s %s] %s", severity_str, rec.meta.tag, time_str, rec.message);        
     return count;
 }
     

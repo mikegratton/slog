@@ -2,36 +2,38 @@
 
 namespace slog {
 
-LogRecord* LogQueue::pop_all() {
+RecordNode* LogQueue::pop_all() {
     std::unique_lock<std::mutex> guard(lock);
-    LogRecord* popped = mhead;
+    RecordNode* popped = mhead;
     mhead = mtail = nullptr;
     return popped;
 }
 
 
-void LogQueue::push(LogRecord* record) {
-
+void LogQueue::push(RecordNode* node) {
+    if (nullptr == node) {
+        return;
+    }
+    node->next = nullptr;
     std::unique_lock<std::mutex> guard(lock);
-    if (mtail) {
-        mtail->next = record;
-        mtail = record;
+    if (mtail) {        
+        mtail->next = node;
+        mtail = node;
     } else {
-        mtail = mhead = record;
+        mtail = mhead = node;
     }
     guard.unlock();
     pending.notify_one();
 }
 
-LogRecord* LogQueue::pop(std::chrono::milliseconds wait) {
+RecordNode* LogQueue::pop(std::chrono::milliseconds wait) {
     auto condition = [this]() -> bool {return mhead != nullptr; };
-    LogRecord* popped = nullptr;
+    RecordNode* popped = nullptr;
 
     std::unique_lock<std::mutex> guard(lock);
     if (pending.wait_for(guard, wait, condition)) {
         popped = mhead;        
-        mhead = mhead->next;
-        popped->next = nullptr;
+        mhead = mhead->next;        
         if (nullptr == mhead) {
             mtail = nullptr;
         }

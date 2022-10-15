@@ -76,17 +76,20 @@ bool will_log(int severity, char const* tag, int channel) {
     return severity <= get_channel(channel).threshold(tag);
 }
 
-void push_to_sink(LogRecord* rec) {
-    get_channel(rec->meta.channel).push(rec);
+void push_to_sink(RecordNode* node) {
+    if (node) {
+        get_channel(node->channel).push(node);
+    }
 }
 
-LogRecord* get_fresh_record(int channel, char const* file, char const* function, int line,
+RecordNode* get_fresh_record(int channel, char const* file, char const* function, int line,
                            int severity, char const* tag) {
-    LogRecord* rec = get_channel(channel).allocate();
-    if (rec) {
-        rec->meta.capture(file, function, line, severity, channel, tag);
+    RecordNode* node = get_channel(channel).allocate();    
+    if (node) {
+        node->channel = channel;
+        node->rec.meta.capture(file, function, line, severity, tag);
     }
-    return rec;
+    return node;
 }
 
 ////////////////////////////////////////////////////////////////////
@@ -130,6 +133,10 @@ void LogConfig::set_sink(std::unique_ptr<LogSink> sink_) {
     } else {
         sink = std::unique_ptr<LogSink>(new NullSink);
     }
+}
+
+long get_pool_missing_count() {
+    return s_allocator.count();
 }
 
 }

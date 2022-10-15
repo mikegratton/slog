@@ -57,6 +57,9 @@ void start_logger(std::vector<LogConfig>& configs);
  */
 void stop_logger();
 
+// For debug
+long get_pool_missing_count();
+
 /**
  * Configuration object for a logger channel. Setup your logging threshold, 
  * tags, and desired log sink here. By default, the sink is a NullSink that

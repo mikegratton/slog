@@ -4,15 +4,17 @@
 
 namespace slog {
 
+// A special ostream wrapper that writes to node's message buffer.
+// On destruction, the node is pushed to the back end
 class CaptureStream {
 public:
-    CaptureStream(LogRecord* rec_) : rec(rec_) { }
+    CaptureStream(RecordNode* node_) : node(node_) { }
 
     ~CaptureStream();
 
     std::ostream& stream();
 
 protected:
-    LogRecord* rec;
+    RecordNode* node;
 };
 }

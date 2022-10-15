@@ -1,5 +1,5 @@
 #include "doctest.h"
-#include "clog.hpp"
+#include "flog.hpp"
 #include "LogSetup.hpp"
 #include <chrono>
 #include <iostream>
@@ -23,7 +23,7 @@ TEST_CASE("NullPerformance")
     unsigned long JOB_SIZE = 10000000UL;
     auto start_time = std::chrono::system_clock::now();
     for (unsigned long i = 0; i < JOB_SIZE; i++) {
-        Logf(NOTE, "Hello");
+        Flog(NOTE, "Hello");
     }
     auto stop_time = std::chrono::system_clock::now();
     std::chrono::duration<double, std::milli>  elapsed = stop_time - start_time;
@@ -41,7 +41,7 @@ TEST_CASE("RejectPerformance")
     unsigned long JOB_SIZE = 10000000UL;
     auto start_time = std::chrono::system_clock::now();
     for (unsigned long i = 0; i <JOB_SIZE; i++) {
-        Logf(NOTE, "Hello");
+        Flog(NOTE, "Hello");
     }
     auto stop_time = std::chrono::system_clock::now();
     std::chrono::duration<double, std::milli>  elapsed = stop_time - start_time;
@@ -61,7 +61,7 @@ TEST_CASE("RejectTagPerformance")
     unsigned long JOB_SIZE = 10000000UL;
     auto start_time = std::chrono::system_clock::now();
     for (unsigned long i = 0; i <JOB_SIZE; i++) {
-        Logft(NOTE, "meep", "Hello");
+        Flogt(NOTE, "meep", "Hello");
     }
     auto stop_time = std::chrono::system_clock::now();
     std::chrono::duration<double, std::milli>  elapsed = stop_time - start_time;

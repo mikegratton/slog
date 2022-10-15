@@ -1,77 +1,92 @@
 #include "LogRecordPool.hpp"
+#include <cassert>
+#include <cstdlib>
+#include <new>
 
 namespace slog {
 
 #ifndef SLOG_LOCK_FREE
 
 MutexLogRecordPool::MutexLogRecordPool(long max_size, long message_size) {
-    long record_size = sizeof(LogRecord);
-    mmessageSize = message_size;
+    long record_size = sizeof(RecordNode);
     mchunkSize = record_size + message_size;
     mchunks = max_size / mchunkSize;
     if (mchunks < 1) {
         mchunks = 1;
     }
-    char* rawpool = (char*) malloc(mchunkSize*mchunks);
-    mpool = reinterpret_cast<LogRecord*>(rawpool);
-    LogRecord* prev = nullptr;
-    // Link chunks
+    mpool = (char*) malloc(mchunkSize*mchunks);
+    RecordNode* here = nullptr;
+    RecordNode* next = nullptr;
+    // Link nodes, invoking the LogRecord constructor via placement new
     for (long i=mchunks-1; i>=0; i--) {
-        LogRecord* here = reinterpret_cast<LogRecord*>(rawpool + i*mchunkSize);
-        new (here) LogRecord(mmessageSize);
-        here->next = prev;
-        prev = here;
+        here = reinterpret_cast<RecordNode*>(mpool + i*mchunkSize);
+        char* message = mpool + i*mchunkSize + record_size;
+        new (&here->rec) LogRecord(message, message_size);
+        here->next = next;
+        here->channel = DEFAULT_CHANNEL;
+        next = here;
     }
-    mcursor = mpool;
+    assert((char*)here == mpool);
+    mcursor = here;
 }
 
 MutexLogRecordPool::~MutexLogRecordPool() {
     free(mpool);
 }
 
-LogRecord* MutexLogRecordPool::allocate() {
-    LogRecord* allocated;
-
+RecordNode* MutexLogRecordPool::take() {    
     std::lock_guard<std::mutex> guard(mlock);
-    allocated = mcursor;
+    RecordPtr allocated = mcursor;
     if (mcursor) {
-        mcursor = mcursor->next;
+        mcursor = mcursor->next;        
     }
 
     return allocated;
 }
 
-void MutexLogRecordPool::deallocate(LogRecord* record) {
-    if (record) {
-        record->reset();
+void MutexLogRecordPool::put(RecordNode* node) {
+    if (node) {
+        node->rec.reset();
         std::lock_guard<std::mutex> guard(mlock);
-        record->next = mcursor;
-        mcursor = record;
+        node->next = mcursor;
+        mcursor = node;
     }
+}
+
+long MutexLogRecordPool::count() const {
+    std::lock_guard<std::mutex> guard(mlock);
+    long c = 0;
+    RecordPtr cursor = mcursor;
+    while (cursor) {
+        c++;
+        cursor = cursor->next;
+    }
+    return c - mchunks;
 }
 
 #else
 
 LfLogRecordPool::LfLogRecordPool(long max_size, long message_size) {
-    long record_size = sizeof(LogRecord);
-    mmessageSize = message_size;
+    long record_size = sizeof(RecordNode);
     mchunkSize = record_size + message_size;
     mchunks = max_size / mchunkSize;
     if (mchunks < 1) {
         mchunks = 1;
     }
-    char* rawpool = (char*) malloc(mchunkSize*mchunks);
-    mpool = reinterpret_cast<LogRecord*>(rawpool);
-    LogRecord* prev = nullptr;
-    // Link chunks & give them their space for the record
+    mpool = (char*) malloc(mchunkSize*mchunks);
+    RecordNode* here = nullptr;
+    RecordNode* next = nullptr;
+    // Link nodes, invoking the LogRecord constructor via placement new
     for (long i=mchunks-1; i>=0; i--) {
-        LogRecord* here = reinterpret_cast<LogRecord*>(rawpool + i*mchunkSize);
-        new (here) LogRecord(mmessageSize);
-        here->reset();
-        here->next = prev;
-        prev = here;
+        here = reinterpret_cast<RecordNode*>(mpool + i*mchunkSize);
+        char* message = mpool + i*mchunkSize + record_size;
+        new (&here->rec) LogRecord(message, message_size);
+        here->next = next;
+        here->channel = DEFAULT_CHANNEL;
+        next = here;
     }
-    mcursor = mpool;
+    assert((char*)here == mpool);
+    mcursor = here;
 }
 
 
@@ -79,24 +94,22 @@ LfLogRecordPool::~LfLogRecordPool() {
     free(mpool);
 }
 
-LogRecord* LfLogRecordPool::allocate() {
+RecordNode* LfLogRecordPool::take() {
     // Pop
-    LogRecord* record = mcursor.load(std::memory_order_relaxed);
+    RecordPtr record = mcursor.load(std::memory_order_relaxed);
     while (record && !mcursor.compare_exchange_weak(record, record->next,
             std::memory_order_acquire,
             std::memory_order_relaxed)) {
         ; // Empty
     }
-    if (record) {
-        record->reset();
-    }
     return record;
 }
 
-void LfLogRecordPool::deallocate(LogRecord* record) {
+void LfLogRecordPool::put(RecordNode* record) {
     // Push
     if (record) {
-        record->reset();
+        // TODO tag
+        record->rec.reset();
         record->next = mcursor.load(std::memory_order_relaxed);
         while (!mcursor.compare_exchange_weak(record->next, record,
                                               std::memory_order_acquire,
@@ -105,5 +118,16 @@ void LfLogRecordPool::deallocate(LogRecord* record) {
         }
     }
 }
+
+long LfLogRecordPool::count() const {
+    long c = 0;
+    RecordPtr cursor = mcursor;
+    while (cursor) {
+        c++;
+        cursor = cursor->next;
+    }
+    return c - mchunks;
+}
+
 #endif
 }

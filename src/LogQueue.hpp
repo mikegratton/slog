@@ -1,5 +1,5 @@
 #pragma once
-#include "LogRecord.hpp"
+#include "LogRecordPool.hpp"
 #include <mutex>
 #include <condition_variable>
 #include <chrono>
@@ -18,17 +18,17 @@ class LogQueue
 public:
     LogQueue() : mtail ( nullptr ), mhead ( nullptr ) { }
 
-    void push ( LogRecord* record );
+    void push ( RecordNode* record );
 
-    LogRecord* pop(std::chrono::milliseconds wait);
+    RecordNode* pop(std::chrono::milliseconds wait);
 
-    LogRecord* pop_all();
+    RecordNode* pop_all();
 
 protected:
     std::mutex lock;
     std::condition_variable pending;
 
-    LogRecord* mtail;
-    LogRecord* mhead;
+    RecordNode* mtail;
+    RecordNode* mhead;
 };
 }

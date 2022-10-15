@@ -35,7 +35,7 @@ struct LogRecordMetadata {
      * pointer values.
      */
     void capture(char const* filename, char const* function, int line,
-                       int severity, int channel, const char* tag);
+                       int severity, const char* tag);
         
     char tag[TAG_SIZE];      //! Associated tag metadata
     char const* filename;    //! filename containing the function where this message was recorded
@@ -43,8 +43,7 @@ struct LogRecordMetadata {
     unsigned long time;      //! ns since Unix epoch
     unsigned long thread_id; //! unique ID of the thread this message was recorded on
     int line;                //!program line number
-    int severity;            //! Message importance. Lower numbers are more important
-    int channel;             //! Log channel this message is going to    
+    int severity;            //! Message importance. Lower numbers are more important    
 
 };
 
@@ -59,22 +58,18 @@ struct LogRecord {
 protected:
     friend class MutexLogRecordPool;
     friend class LfLogRecordPool;
-    LogRecord(long max_message_size_);    
+    LogRecord(char* message_, long max_message_size_);    
 public:
     void reset(); //! Clean out this record
 
-    LogRecord* next;        //! Tracking pointer for pool and queue
     LogRecordMetadata meta; //! Metadata
     long message_max_size;  //! maximum size of the message string (including null terminator)
     char* message;          //! Actual log message. 
 };
 
 constexpr int DEFAULT_CHANNEL = 0;
-constexpr int NO_LINE = -1;
 
-struct RecordNode {
-    LogRecord rec;
-    RecordNode* next;
-};
+// Forward-declare node structure
+struct RecordNode;
 
 }

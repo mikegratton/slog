@@ -1,11 +1,14 @@
 #include <streambuf>
 #include <ostream>
-#include <CaptureStream.hpp>
 #include <cstring>
+#include "CaptureStream.hpp"
+#include "LogRecordPool.hpp" // For RecordNode
 
 namespace slog {
 
 namespace {
+    // A streambuf that writes to a fixed sized array. If the message 
+    // is too long, tack a null char on the end and discard the rest.
 class IntrusiveBuf : public std::streambuf {
 public:
 
@@ -41,6 +44,8 @@ protected:
     }
 };
 
+// An ostream using an IntrusiveBuf. Note that in general, the null terminator
+// must be manually added to the stream via terminate()
 class IntrusiveStream : public std::ostream {
 public:
     IntrusiveStream()
@@ -60,7 +65,7 @@ protected:
     IntrusiveBuf buf;
 };
 
-
+// An ostream that just discards all input
 class NullStream : public std::ostream {
 public:
     NullStream() : std::ostream(&m_sb) {}
@@ -71,23 +76,27 @@ private:
     } m_sb;
 };
 
-thread_local IntrusiveStream st_stream;
-NullStream s_null;
+thread_local IntrusiveStream st_stream; // Each thread has its own stream
+NullStream s_null; // Since NullStream has no state, all threads share a copy
 
 } // end of anon namespace
 
+// On destruction, terminate the cstring, then forward the node to the 
+// back end.
 CaptureStream::~CaptureStream() {
-    if (rec) {
+    if (node) {
         st_stream.put(0);        
-        push_to_sink(rec); // Push to queue
+        push_to_sink(node); // Push to channel queue
     }
 }
 
 std::ostream& CaptureStream::stream() {
-    if (rec) {
-        st_stream.setbuf(rec->message, rec->message_max_size);
+    if (node) {
+        // Set the stream to write to the message buffer
+        st_stream.setbuf(node->rec.message, node->rec.message_max_size);
         return st_stream;
     } else {
+        // Failure to allocate, just eat the message
         return s_null;
     }
 }

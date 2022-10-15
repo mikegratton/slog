@@ -1,5 +1,5 @@
 #include "doctest.h"
-#include "clog.hpp"
+#include "flog.hpp"
 #include "LogSetup.hpp"
 #include "LogRecordPool.hpp"
 #include "LogQueue.hpp"
@@ -10,12 +10,12 @@
 
 using namespace slog;
 
-TEST_CASE("Allocate") {
-    LogRecordPool allocator(1024, 32);
-    auto* item = allocator.allocate();
+TEST_CASE("RecordPool") {
+    LogRecordPool pool(1024, 32);
+    auto* item = pool.take();
     REQUIRE(item != nullptr);
-    allocator.deallocate(item);
-    auto* item2 = allocator.allocate();
+    pool.put(item);
+    auto* item2 = pool.take();
     REQUIRE(item2 != nullptr);
     REQUIRE(item == item2);
 }
@@ -40,29 +40,29 @@ TEST_CASE("ThresholdMap") {
 }
 
 TEST_CASE("Startup") {
-    Logf(ERRR, "This is before startup");
+    Flog(ERRR, "This is before startup");
     start_logger(INFO);
-    Logf(DBUG, "Can't see this");
-    Logf(INFO, "Can see this");
-    Logf(ERRR, "This is bad");
-    Logf(NOTE, "This is note");
-    Logf(WARN, "This is warn");
+    Flog(DBUG, "Can't see this");
+    Flog(INFO, "Can see this");
+    Flog(ERRR, "This is bad");
+    Flog(NOTE, "This is note");
+    Flog(WARN, "This is warn");
     stop_logger();
-    Logf(ERRR, "This is after shutdown");
+    Flog(ERRR, "This is after shutdown");
 
 }
 
 TEST_CASE("DieDieDie" * doctest::skip()) {    
     start_logger(INFO);
-    Logf(INFO, "Can see this");
-    Logf(FATL, "This is fatal");
-    Logf(NOTE, "This is note");    
+    Flog(INFO, "Can see this");
+    Flog(FATL, "This is fatal");
+    Flog(NOTE, "This is note");    
 }
 
 TEST_CASE("Escape" * doctest::skip()) {
     start_logger(INFO);
     for(;;) {
-        Logf(INFO, "Hello");
+        Flog(INFO, "Hello");
         std::this_thread::sleep_for(std::chrono::milliseconds(500));
     }
 }
@@ -76,7 +76,7 @@ TEST_CASE("Bomb" * doctest::skip()) {
         *p = 'p';
     });
     for(;;) {
-        Logf(INFO, "Hello");
+        Flog(INFO, "Hello");
         std::this_thread::sleep_for(std::chrono::milliseconds(500));
     }
 }

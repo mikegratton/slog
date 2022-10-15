@@ -6,10 +6,10 @@
 
 TEST_CASE("Basic Stream") {
     slog::start_logger(INFO);
-    Log(DBUG) <<  "Can't see this";
-    Log(INFO) << "Can see this";
-    Log(ERRR) << "This is bad";
-    Log(NOTE) << "This is note";
-    Log(WARN) << "This is warn";
+    Slog(DBUG) <<  "Can't see this";
+    Slog(INFO) << "Can see this";
+    Slog(ERRR) << "This is bad";
+    Slog(NOTE) << "This is note";
+    Slog(WARN) << "This is warn";
     slog::stop_logger();
 }

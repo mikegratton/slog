@@ -3,5 +3,5 @@
 
 namespace slog 
 {
-LogRecord* capture_message(LogRecord* rec, char const* format, ...);
+RecordNode* capture_message(RecordNode* rec, char const* format, ...);
 }

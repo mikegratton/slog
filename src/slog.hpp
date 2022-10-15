@@ -36,4 +36,4 @@
 
 // Overload Log() based on the argument count
 #define SLOG_GET_MACRO(_1,_2,_3,NAME,...) NAME
-#define Log(...) SLOG_GET_MACRO(__VA_ARGS__, SLOG_Logstc, SLOG_Logst, SLOG_Logs)(__VA_ARGS__)
+#define Slog(...) SLOG_GET_MACRO(__VA_ARGS__, SLOG_Logstc, SLOG_Logst, SLOG_Logs)(__VA_ARGS__)
