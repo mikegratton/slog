@@ -1,4 +1,4 @@
-#include "CapturePrintf.hpp"
+#include "slog.hpp"
 #include <cstdarg>
 #include <cstdio>
 #include "LogRecordPool.hpp" // For RecordNode

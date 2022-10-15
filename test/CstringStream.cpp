@@ -1,4 +1,4 @@
-#include "CaptureStream.hpp"
+#include "slog.hpp"
 #include <ostream>
 #include <iostream>
 #include "doctest.h"

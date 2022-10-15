@@ -1,5 +1,6 @@
 #pragma once
-#include "CaptureStream.hpp"
+#include <iosfwd>
+#include "LogRecord.hpp"
 
 /**
  * ostream logging interface.
@@ -37,3 +38,47 @@
 // Overload Log() based on the argument count
 #define SLOG_GET_MACRO(_1,_2,_3,NAME,...) NAME
 #define Slog(...) SLOG_GET_MACRO(__VA_ARGS__, SLOG_Logstc, SLOG_Logst, SLOG_Logs)(__VA_ARGS__)
+
+#define Flog(severity, ...) SLOG_LogBase(severity, "", slog::DEFAULT_CHANNEL, __VA_ARGS__)
+#define Flogt(severity, tag, ...) SLOG_LogBase(severity, tag, slog::DEFAULT_CHANNEL, __VA_ARGS__)
+#define Flogtc(severity, tag, channel, ...) SLOG_LogBase(severity, tag, channel, __VA_ARGS__)
+
+#define SLOG_LogBase(severity, tag, channel, format, ...) \
+        if (SLOG_LOGGING_ENABLED && slog::will_log(severity, tag, channel)) {  \
+            RecordNode* rec = slog::get_fresh_record(channel, __FILE__, __FUNCTION__, \
+                                                           __LINE__, severity, tag); \
+            if (rec) { \
+                slog::push_to_sink(slog::capture_message(rec, format, ##__VA_ARGS__)); \
+            } \
+        }
+
+        
+                                                    
+namespace slog {
+
+struct RecordNode;
+
+// A special ostream wrapper that writes to node's message buffer.
+// On destruction, the node is pushed to the back end
+class CaptureStream {
+public:
+    CaptureStream(RecordNode* node_) : node(node_) { }
+
+    ~CaptureStream();
+
+    std::ostream& stream();
+
+protected:
+    RecordNode* node;
+};
+
+RecordNode* capture_message(RecordNode* rec, char const* format, ...);
+
+bool will_log(int severity, char const* tag="", int channel=DEFAULT_CHANNEL);
+
+void push_to_sink(RecordNode* rec);
+
+RecordNode* get_fresh_record(int channel, char const* file, char const* function, int line, 
+                           int severity, char const* tag);
+    
+}

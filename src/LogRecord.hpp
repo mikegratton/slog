@@ -67,9 +67,5 @@ public:
     char* message;          //! Actual log message. 
 };
 
-constexpr int DEFAULT_CHANNEL = 0;
-
-// Forward-declare node structure
-struct RecordNode;
 
 }

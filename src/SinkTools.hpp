@@ -10,7 +10,20 @@ namespace slog {
 // written.
 using Formatter = std::function<int (FILE* sink, LogRecord const& rec)>;
 
+/**
+ * Writes the severity level as a four character string to severity_str
+ */
 void format_severity(char* severity_str, int severity);
+
+/**
+ * Format the time in ISO 8601/RFC 3339 format YYYY-MM-DD hh:mm:ss.fZ
+ * where 
+ *  (1) The timezone is always UTC
+ *  (2) The number of fractional second digits f is controlled by 
+ *      seconds_decimal_precision
+ * The string should be at least 21 characters long for zero fractional seconds.
+ * For the default form, 25 characters are required. 
+ */
 void format_time(char* time_str, unsigned long time, int seconds_decimal_precision=3);
 void format_location(char* location_str, char const* file_name, int line_number);
 int default_format(FILE* sink, LogRecord const& rec);

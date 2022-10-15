@@ -2,9 +2,11 @@
 #include "LogRecord.hpp"
 
 namespace slog {
+    
+struct RecordNode;
 
 #ifndef SLOG_LOCK_FREE
-    
+
 using RecordPtr = RecordNode*;
 
 #else

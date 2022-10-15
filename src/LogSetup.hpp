@@ -1,9 +1,9 @@
 #pragma once
 #include <memory>
+#include <vector>
 #include "LogRecord.hpp"
 #include "LogSink.hpp"
 #include "ThresholdMap.hpp"
-#include <vector>
 
 /**
  * This is only needed where you are starting/stopping the logger.
@@ -11,8 +11,8 @@
  * Quick version:
  * 
  * ```
- * #include <LogSetup.hpp>
- * #include <slog.hpp> // You must include slog.hpp or clog.hpp to use the logging macros
+ * #include <LogSetup.hpp> // Only needed in the cpp where setup occurs
+ * #include <slog.hpp> // You must include slog.hpp to use the logging macros
  * 
  * int main(int argc, char** argv) {
  *    
@@ -61,8 +61,8 @@ void stop_logger();
 long get_pool_missing_count();
 
 /**
- * Configuration object for a logger channel. Setup your logging threshold, 
- * tags, and desired log sink here. By default, the sink is a NullSink that
+ * Configuration class for a logger channel. Set your logging threshold, 
+ * tags, and log sink here. By default, the sink is a NullSink that
  * discards all messages.
  */
 class LogConfig

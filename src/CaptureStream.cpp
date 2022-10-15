@@ -1,7 +1,7 @@
 #include <streambuf>
 #include <ostream>
 #include <cstring>
-#include "CaptureStream.hpp"
+#include "slog.hpp"
 #include "LogRecordPool.hpp" // For RecordNode
 
 namespace slog {

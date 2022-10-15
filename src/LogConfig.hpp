@@ -18,3 +18,8 @@
 
 // #define SLOG_DUMP_TO_CONSOLE_WHEN_STOPPED
 #define SLOG_LOCK_FREE
+
+namespace slog
+{
+constexpr int DEFAULT_CHANNEL = 0;
+}

@@ -58,7 +58,14 @@ int FlatThresholdMap::operator[](const char* tag) const {
 
 
 void FlatThresholdMap::add_tag(const char* tag, int threshold_) {
-    // Push back
+    // Check if this is a known tag 
+    auto* found = (Threshold*) bsearch(tag, map, mapSize, sizeof(Threshold), map_compare);
+    if (found) {
+        found->threshold = threshold_;
+        return;
+    }
+    
+    // New tag, push it on the back
     if (mapSize == mapCapacity) {
         mapCapacity *= 2;
         Threshold* newMap = new Threshold[mapCapacity];

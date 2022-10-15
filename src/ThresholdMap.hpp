@@ -15,10 +15,21 @@ public:
     FlatThresholdMap& operator= (FlatThresholdMap const&);
     FlatThresholdMap(FlatThresholdMap const& other);
 
+    /**
+     * Defines the severity threshold to apply for unknown or empty
+     * tags 
+     */
     void set_default(int thr) { defaultThreshold = thr; }
 
+    /**
+     * Add (or replace) a tag, setting its threshold
+     */
     void add_tag(const char* tag, int threshold);
 
+    /**
+     * Look up the threshold for the given tag. If the tag isn't found, 
+     * is null, or empty, then return the defaultThreshold
+     */
     int operator[](const char* tag) const;
 
 protected:
@@ -37,35 +48,6 @@ protected:
     unsigned long mapSize;
     unsigned long mapCapacity;
 };
-
-#if 0
-// Testing shows these options are slower
-#include <map>
-#include <unordered_map>
-#include <string>
-template<class Map>
-class BasicThresholdMap {
-public:
-    BasicThresholdMap() : defaultThreshold(0) { }
-    
-    void set_default(int thr) {
-        defaultThreshold = thr;
-    }
-
-    void add_tag(const char* tag, int threshold) { map[tag] = threshold; }
-
-    int operator[](const char* tag) const {
-        auto it = map.find(tag);
-        if (it == map.end()) {
-            return defaultThreshold;
-        }
-        return it->second;
-    }
-protected:
-    int defaultThreshold;
-    Map map;
-};
-#endif
 
 using ThresholdMap = FlatThresholdMap;
 }

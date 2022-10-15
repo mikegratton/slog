@@ -1,8 +1,7 @@
 #include "doctest.h"
-#include "flog.hpp"
+#include "slog.hpp"
 #include "LogSetup.hpp"
 #include "LogRecordPool.hpp"
-#include "LogQueue.hpp"
 #include "ThresholdMap.hpp"
 
 #include <thread>

@@ -1,5 +1,5 @@
 #include "doctest.h"
-#include "flog.hpp"
+#include "slog.hpp"
 #include "LogSetup.hpp"
 #include <chrono>
 #include <iostream>
