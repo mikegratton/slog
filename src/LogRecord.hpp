@@ -2,28 +2,13 @@
 #include "LogConfig.hpp"
 
 
-// Syslog compatible severity levels
-enum LogSeverity : int {
-    FATL = -100,
-    EMER = 0,
-    ALRT = 100,
-    CRIT = 200,
-    ERRR = 300,
-    WARN = 400,
-    NOTE = 500,
-    INFO = 600,
-    DBUG = 700
-};
-
-
 namespace slog {
 
 /**
  * Metadata associated with every log message
  */
 struct LogRecordMetadata {
-    static constexpr unsigned long TAG_SIZE = 16;
-    
+
     LogRecordMetadata();
     void reset();
     

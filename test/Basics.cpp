@@ -59,7 +59,7 @@ TEST_CASE("DieDieDie" * doctest::skip()) {
 }
 
 TEST_CASE("Escape" * doctest::skip()) {
-    start_logger(INFO);
+    start_logger(slog::INFO);
     for(;;) {
         Flog(INFO, "Hello");
         std::this_thread::sleep_for(std::chrono::milliseconds(500));
@@ -68,7 +68,7 @@ TEST_CASE("Escape" * doctest::skip()) {
 
 
 TEST_CASE("Bomb" * doctest::skip()) {
-    start_logger(INFO);
+    start_logger(slog::INFO);
     std::thread t([]() {
         std::this_thread::sleep_for(std::chrono::seconds(2));
         char* p = nullptr;

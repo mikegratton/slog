@@ -60,11 +60,11 @@ void FileSink::open_or_rotate() {
 void FileSink::record(LogRecord const& rec) {
     open_or_rotate();
     mbytesWritten += mformat(mfile, rec);
-    fprintf(mfile, "\n");
+    fputc('\n', mfile);    
     fflush(mfile);
     if (mecho) {
         mformat(stdout, rec);
-        fprintf(stdout, "\n");
+        fputc('\n', stdout);        
         fflush(stdout);
     }
 }

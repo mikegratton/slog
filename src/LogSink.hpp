@@ -16,4 +16,11 @@ class NullSink : public LogSink
 public:
     void record(LogRecord const&) override { }
 };
+
+// Simple sink that dumps messages to the console
+class ConsoleSink : public LogSink
+{
+public:
+    void record(LogRecord const& rec) override;
+};
 }

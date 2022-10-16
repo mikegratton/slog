@@ -25,6 +25,15 @@ void format_severity(char* severity_str, int severity);
  * For the default form, 25 characters are required. 
  */
 void format_time(char* time_str, unsigned long time, int seconds_decimal_precision=3);
+
+/**
+ * Makes a code location string. By default, this removes the path from file_name,
+ * then appends the line number: "Foo.cpp@15"
+ */
 void format_location(char* location_str, char const* file_name, int line_number);
+
+/**
+ * A Formatter-compatible formatter that is used by ... well, by default
+ */
 int default_format(FILE* sink, LogRecord const& rec);
 }

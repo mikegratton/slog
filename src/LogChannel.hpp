@@ -1,5 +1,5 @@
 #pragma once
-
+#include "LogChannel.hpp"
 #include "LogRecord.hpp"
 #include "LogRecordPool.hpp"
 #include "ThresholdMap.hpp"
@@ -11,9 +11,6 @@
 #include <condition_variable>
 
 namespace slog {
-
-// All channels draw record from a central pool by default
-extern LogRecordPool s_allocator;
 
 /**
  * Principle worker of the slog system. The LogChannel provides
@@ -32,7 +29,7 @@ extern LogRecordPool s_allocator;
  */
 class LogChannel {
 public:
-    LogChannel(LogRecordPool& pool_ = s_allocator) : logger_state(SETUP), pool(pool_) { }
+    LogChannel();
     ~LogChannel();
 
     LogChannel& operator=(LogChannel const&) = delete;
@@ -76,6 +73,8 @@ public:
     void set_sink(std::unique_ptr<LogSink> sink_);
 
     void set_threshold(ThresholdMap const& threshold_);
+    
+    long allocator_count() const { return pool.count(); }
 
 protected:
     // Internal work function call on the workThread
@@ -110,10 +109,11 @@ protected:
     enum State {
         SETUP,
         RUN
-    } logger_state;
+    };
+    State logger_state() { return (keepalive? RUN : SETUP); }
 
 // These object have only thread-safe calls
-    LogRecordPool& pool;
+    LogRecordPool pool;
     LogQueue queue;
 
 // This state should not be mutated in RUN mode

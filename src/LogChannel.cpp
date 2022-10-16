@@ -6,7 +6,12 @@ namespace slog {
 
 constexpr std::chrono::milliseconds WAIT{50};
 
-LogRecordPool s_allocator(SLOG_LOG_POOL_SIZE, SLOG_LOG_MESSAGE_SIZE);
+LogChannel::LogChannel() 
+: pool(SLOG_POOL_SIZE, SLOG_MESSAGE_SIZE) 
+, keepalive(false)
+{ 
+    sink = std::unique_ptr<NullSink>(new NullSink);
+}
 
 LogChannel::~LogChannel() {
     stop();
@@ -25,7 +30,6 @@ void LogChannel::push(RecordNode* node) {
 
 void LogChannel::start() {
     stop();
-    logger_state = RUN;
     keepalive = true;
     workThread = std::thread([this]() { this->logging_loop(); });
 }
@@ -36,11 +40,10 @@ void LogChannel::stop() {
     if (workThread.joinable()) {
         workThread.join();
     }
-    logger_state = SETUP;
 }
 
 void LogChannel::set_sink(std::unique_ptr<LogSink> sink_) {
-    assert(logger_state == SETUP);
+    assert(logger_state() == SETUP);
     if (sink_) {
         sink = std::move(sink_);
     } else {
@@ -49,13 +52,13 @@ void LogChannel::set_sink(std::unique_ptr<LogSink> sink_) {
 }
 
 void LogChannel::set_threshold(ThresholdMap const& threshold_) {
-    assert(logger_state == SETUP);
+    assert(logger_state() == SETUP);
     thresholdMap = threshold_;
 }
 
 void LogChannel::logging_loop() {
+    assert(sink);
     while (keepalive) {
-        assert(logger_state == RUN);
         RecordNode* node = queue.pop(WAIT);
         if (node) {
             sink->record(node->rec);
@@ -82,9 +85,7 @@ RecordNode* LogChannel::LogQueue::pop_all() {
 
 
 void LogChannel::LogQueue::push(RecordNode* node) {
-    if (nullptr == node) {
-        return;
-    }
+    assert(node);
     node->next = nullptr;
     std::unique_lock<std::mutex> guard(lock);
     if (mtail) {        
@@ -103,13 +104,13 @@ RecordNode* LogChannel::LogQueue::pop(std::chrono::milliseconds wait) {
 
     std::unique_lock<std::mutex> guard(lock);
     if (pending.wait_for(guard, wait, condition)) {
-        popped = mhead;        
+        popped = mhead;
         mhead = mhead->next;        
         if (nullptr == mhead) {
             mtail = nullptr;
         }
+        popped->next = nullptr;
     }
-
     return popped;
 }
 

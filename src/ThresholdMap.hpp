@@ -1,4 +1,5 @@
 #pragma once
+#include "LogConfig.hpp"
 
 namespace slog {
 
@@ -37,8 +38,7 @@ protected:
     static int map_compare(void const* vkey, void const* velement);
     static int map_sort(void const* velement1, void const* velement2);
 
-    static constexpr unsigned long TAG_SIZE = 32 - sizeof(int);
-    struct alignas(32) Threshold {
+    struct Threshold {
         char tag[TAG_SIZE];
         int threshold;
     };

@@ -1,3 +1,4 @@
+#include "LogConfig.hpp"
 #include "LogSetup.hpp"
 #include "FileSink.hpp"
 #include "LogChannel.hpp"
@@ -15,14 +16,14 @@ namespace slog {
 // It's an array indexed by channel
 namespace {
 
-std::array<LogChannel, SLOG_LOG_MAX_CHANNEL> s_logger;
+std::array<LogChannel, SLOG_MAX_CHANNEL> s_logger;
 
 /**
  * Get a ref to the requested channel, doing a little
  * remapping to make things safe.
  */
 LogChannel& get_channel(int channel) {
-    if (channel < 0 || channel >= SLOG_LOG_MAX_CHANNEL) {
+    if (channel < 0 || channel >= SLOG_MAX_CHANNEL) {
         channel = DEFAULT_CHANNEL;
     }
     return s_logger[channel];
@@ -59,12 +60,30 @@ void start_all_channels() {
  */
 void stop_all_channels() {
     for (auto& chan : s_logger) {
-        chan.stop();
+       chan.stop();
     }
     signal(SIGABRT, SIG_DFL);
     signal(SIGINT, SIG_DFL);
     signal(SIGQUIT, SIG_DFL);
 }
+
+bool setup_console_channel() {    
+#ifdef SLOG_DUMP_TO_CONSOLE_WHEN_STOPPED
+    auto& chan = s_logger[DEFAULT_CHANNEL];
+    chan.stop();
+    chan.set_sink(std::unique_ptr<ConsoleSink>(new ConsoleSink));
+    ThresholdMap threshold;
+    threshold.set_default(DBUG);
+    chan.set_threshold(threshold);
+    chan.start();
+    return true;
+#else
+    return false;
+#endif
+}
+
+// This forces this to be run before main
+const bool s_DEFAULT_TO_CONSOLE = setup_console_channel();
 
 } // end of anon namespace
 
@@ -106,6 +125,7 @@ void start_logger(int severity) {
 }
 
 void start_logger(LogConfig& config) {
+    stop_all_channels();
     auto& channel = get_channel(DEFAULT_CHANNEL);
     channel.set_sink(config.take_sink());
     channel.set_threshold(config.get_threshold_map());
@@ -113,8 +133,9 @@ void start_logger(LogConfig& config) {
 }
 
 void start_logger(std::vector<LogConfig>& config) {
-    assert(config.size() <= SLOG_LOG_MAX_CHANNEL);
-    unsigned long extent = std::min<unsigned long>(config.size(), SLOG_LOG_MAX_CHANNEL);
+    stop_all_channels();
+    assert(config.size() <= SLOG_MAX_CHANNEL);
+    unsigned long extent = std::min<unsigned long>(config.size(), SLOG_MAX_CHANNEL);
     for (unsigned long i=0; i<extent; i++) {
         auto& chan = get_channel(i);
         chan.set_sink(config[i].take_sink());
@@ -125,6 +146,7 @@ void start_logger(std::vector<LogConfig>& config) {
 
 void stop_logger() {
     stop_all_channels();
+    setup_console_channel();
 }
 
 void LogConfig::set_sink(std::unique_ptr<LogSink> sink_) {
@@ -136,7 +158,12 @@ void LogConfig::set_sink(std::unique_ptr<LogSink> sink_) {
 }
 
 long get_pool_missing_count() {
-    return s_allocator.count();
+    long count = 0;
+    for (unsigned long i=0; i<SLOG_MAX_CHANNEL; i++) {
+        auto& chan = get_channel(i);
+        count += chan.allocator_count();
+    }
+    return count;
 }
 
 }

@@ -1,6 +1,10 @@
 #pragma once
+#ifdef SLOG_NO_STREAM
 #include <iosfwd>
-#include "LogRecord.hpp"
+#else
+#include <ostream>
+#endif
+#include "LogConfig.hpp"
 
 /**
  * ostream logging interface.
@@ -26,9 +30,9 @@
 // Baseline logging macro. Wrap the log check in an if() body, and get a stream
 // in the else clause (so that the << ... parts are on the else branch)
 #define SLOG_LogStreamBase(severity, tag, channel) \
-        if (!(SLOG_LOGGING_ENABLED && slog::will_log(severity, tag, channel))) { } \
+        if (!(SLOG_LOGGING_ENABLED && slog::will_log(slog::severity, tag, channel))) { } \
         else slog::CaptureStream(slog::get_fresh_record(channel, __FILE__, __FUNCTION__, \
-                                                        __LINE__, severity, tag)).stream()
+                                                        __LINE__, slog::severity, tag)).stream()
 
 // Specialize SLOG_LogStreamBase for different numbers of arguments
 #define SLOG_Logs(severity) SLOG_LogStreamBase(severity, "", slog::DEFAULT_CHANNEL)
@@ -44,9 +48,9 @@
 #define Flogtc(severity, tag, channel, ...) SLOG_LogBase(severity, tag, channel, __VA_ARGS__)
 
 #define SLOG_LogBase(severity, tag, channel, format, ...) \
-        if (SLOG_LOGGING_ENABLED && slog::will_log(severity, tag, channel)) {  \
+        if (SLOG_LOGGING_ENABLED && slog::will_log(slog::severity, tag, channel)) {  \
             RecordNode* rec = slog::get_fresh_record(channel, __FILE__, __FUNCTION__, \
-                                                           __LINE__, severity, tag); \
+                                                           __LINE__, slog::severity, tag); \
             if (rec) { \
                 slog::push_to_sink(slog::capture_message(rec, format, ##__VA_ARGS__)); \
             } \
@@ -56,7 +60,26 @@
                                                     
 namespace slog {
 
+// Internal record of a message
 struct RecordNode;
+
+/**
+ * Check if the current setup will log at the given severity (and optional tag an channel)
+ * This can be used to avoid building strings that are only intended for logging.
+ */
+bool will_log(int severity, char const* tag="", int channel=DEFAULT_CHANNEL);
+
+/**
+ * Internal method to send a completed record to the back end for recording.
+ */
+void push_to_sink(RecordNode* rec);
+
+/**
+ * Internal method to obtain a record from the pool
+ */
+RecordNode* get_fresh_record(int channel, char const* file, char const* function, int line, 
+                           int severity, char const* tag);
+
 
 // A special ostream wrapper that writes to node's message buffer.
 // On destruction, the node is pushed to the back end
@@ -72,13 +95,8 @@ protected:
     RecordNode* node;
 };
 
+// For printf-style messages, this provides variable argumnents
 RecordNode* capture_message(RecordNode* rec, char const* format, ...);
 
-bool will_log(int severity, char const* tag="", int channel=DEFAULT_CHANNEL);
 
-void push_to_sink(RecordNode* rec);
-
-RecordNode* get_fresh_record(int channel, char const* file, char const* function, int line, 
-                           int severity, char const* tag);
-    
 }
