@@ -1,6 +1,5 @@
 #pragma once
 #include "LogSink.hpp"
-#include "SinkTools.hpp"
 #include <cstdio>
 
 namespace slog {

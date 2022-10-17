@@ -43,3 +43,11 @@ set_package_properties(Journald PROPERTIES URL https://github.com/systemd
 
 # show the JOURNALD_INCLUDE_DIR and JOURNALD_LIBRARY variables only in the advanced view
 mark_as_advanced(JOURNALD_INCLUDE_DIR JOURNALD_LIBRARY)
+
+if(NOT TARGET Journald::Journald)
+message("Adding Journald target with ${JOURNALD_LIBRARIES}")
+    add_library(Journald::Journald SHARED IMPORTED)
+    set_target_properties(Journald::Journald PROPERTIES IMPORTED_LOCATION ${JOURNALD_LIBRARIES})    
+    target_include_directories(Journald::Journald INTERFACE ${JOURNALD_INCLUDE_DIR})
+    target_compile_definitions(Journald::Journald INTERFACE ${JOURNALD_DEFINITIONS})
+endif()

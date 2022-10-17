@@ -32,7 +32,7 @@
 #define SLOG_LogStreamBase(severity, tag, channel) \
         if (!(SLOG_LOGGING_ENABLED && slog::will_log(slog::severity, tag, channel))) { } \
         else slog::CaptureStream(slog::get_fresh_record(channel, __FILE__, __FUNCTION__, \
-                                                        __LINE__, slog::severity, tag)).stream()
+                                                        __LINE__, slog::severity, tag), channel).stream()
 
 // Specialize SLOG_LogStreamBase for different numbers of arguments
 #define SLOG_Logs(severity) SLOG_LogStreamBase(severity, "", slog::DEFAULT_CHANNEL)
@@ -52,7 +52,7 @@
             RecordNode* rec = slog::get_fresh_record(channel, __FILE__, __FUNCTION__, \
                                                            __LINE__, slog::severity, tag); \
             if (rec) { \
-                slog::push_to_sink(slog::capture_message(rec, format, ##__VA_ARGS__)); \
+                slog::push_to_sink(slog::capture_message(rec, format, ##__VA_ARGS__), channel); \
             } \
         }
 
@@ -72,7 +72,7 @@ bool will_log(int severity, char const* tag="", int channel=DEFAULT_CHANNEL);
 /**
  * Internal method to send a completed record to the back end for recording.
  */
-void push_to_sink(RecordNode* rec);
+void push_to_sink(RecordNode* rec, int channel);
 
 /**
  * Internal method to obtain a record from the pool
@@ -85,7 +85,7 @@ RecordNode* get_fresh_record(int channel, char const* file, char const* function
 // On destruction, the node is pushed to the back end
 class CaptureStream {
 public:
-    CaptureStream(RecordNode* node_) : node(node_) { }
+    CaptureStream(RecordNode* node_, int channel_) : node(node_), channel(channel_) { }
 
     ~CaptureStream();
 
@@ -93,6 +93,7 @@ public:
 
 protected:
     RecordNode* node;
+    int channel;
 };
 
 // For printf-style messages, this provides variable argumnents

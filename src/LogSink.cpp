@@ -1,4 +1,3 @@
-#include "SinkTools.hpp"
 #include "LogSink.hpp"
 #include <cstdio>
 #include <ctime>

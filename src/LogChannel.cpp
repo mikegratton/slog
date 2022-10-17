@@ -6,8 +6,8 @@ namespace slog {
 
 constexpr std::chrono::milliseconds WAIT{50};
 
-LogChannel::LogChannel() 
-: pool(SLOG_POOL_SIZE, SLOG_MESSAGE_SIZE) 
+LogChannel::LogChannel(LogRecordPool* pool_) 
+: pool(pool_) 
 , keepalive(false)
 { 
     sink = std::unique_ptr<NullSink>(new NullSink);
@@ -56,13 +56,20 @@ void LogChannel::set_threshold(ThresholdMap const& threshold_) {
     thresholdMap = threshold_;
 }
 
+void LogChannel::set_pool(LogRecordPool* pool_)
+{
+    assert(logger_state() == SETUP);
+    pool = pool_;
+}
+
 void LogChannel::logging_loop() {
     assert(sink);
+    assert(pool);
     while (keepalive) {
         RecordNode* node = queue.pop(WAIT);
-        if (node) {
+        if (node) {            
             sink->record(node->rec);
-            pool.put(node);
+            pool->put(node);
         }
     }
     // Shutdown. Drain the queue.
@@ -70,7 +77,7 @@ void LogChannel::logging_loop() {
     while (head) {
         sink->record(head->rec);
         RecordNode* cursor = head->next;
-        pool.put(head);
+        pool->put(head);
         head = cursor;
     }
 }

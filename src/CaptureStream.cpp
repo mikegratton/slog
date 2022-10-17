@@ -86,7 +86,7 @@ NullStream s_null; // Since NullStream has no state, all threads share a copy
 CaptureStream::~CaptureStream() {
     if (node) {
         st_stream << std::ends;          
-        push_to_sink(node); // Push to channel queue
+        push_to_sink(node, channel); // Push to channel queue
     }
 }
 
