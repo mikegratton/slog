@@ -8,33 +8,11 @@
 namespace slog {
 
 struct RecordNode;
-
-class RecordPtr {
-protected:    
-    uint32_t moffset; // Offset of ptr from pool start
-    uint32_t mtag; // modification tag for ABA'
-    
-public:
-    RecordPtr() : moffset(0), mtag(0) { }
-    
-    RecordPtr(RecordNode* node, char* origin, uint32_t tag_)         
-    {
-        set(node, origin, tag_);
-    }
-        
-    operator RecordNode*() { return reinterpret_cast<RecordNode*>(this); }
-    RecordPtr& operator=(RecordNode* ptr);
-    RecordNode* get(char* origin);
-    RecordPtr& set(RecordNode* node, char* origin, int tag);
-    
-    bool operator==(RecordNode const* ptr) const;
-    operator bool() const { return moffset != 0; }
-    uint32_t tag() const { return mtag; }
-};
+using RecordPtr = RecordNode*;
 
 struct RecordNode {
     RecordPtr next;
-    LogRecord rec; // Payload
+    LogRecord rec; 
 };
 
 
@@ -52,12 +30,19 @@ public:
     long count() const;
 
 protected:
+    
+    using AtomicPtr = std::atomic<RecordPtr>;
+    
+    void link(RecordPtr newTop, RecordPtr end);
+    RecordPtr to_full_ptr(RecordPtr packed) const;
+    RecordPtr to_packed(RecordPtr full, uint32_t tag = 0) const;
+    RecordPtr& packed_next(RecordPtr& packed) const;
+    void increment_packed(RecordPtr& packed) const;
+    bool is_packed_nullptr(RecordPtr const& packed) const;
 
-    using AtomicPtr = std::atomic<RecordPtr> ;
-
-    long mchunkSize;
-    long mmessageSize;
-    long mchunks;
+    uint32_t mchunkSize;
+    uint32_t mmessageSize;
+    uint32_t mchunks;
 
     AtomicPtr mcursor;  // head of the stack
     char* mpool; // Start of heap allocated region

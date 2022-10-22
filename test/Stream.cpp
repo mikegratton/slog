@@ -4,7 +4,7 @@
 #include <ostream>
 
 
-TEST_CASE("Basic Stream") {
+TEST_CASE("Stream") {
     slog::start_logger(slog::INFO);
     Slog(DBUG) <<  "Can't see this";
     Slog(INFO) << "Can see this";
