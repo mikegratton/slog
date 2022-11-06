@@ -1,20 +1,16 @@
 #pragma once
-#ifdef SLOG_NO_STREAM
-#include <iosfwd>
-#else
+#ifndef SLOG_NO_STREAM
 #include <ostream>
 #endif
 #include "LogConfig.hpp"
 
 /**
- * ostream logging interface.
- * 
  * This defines a set of macros that work like
  * 
  * ```
- * Log(INFO) << "Log with no tag to the default channel at level INFO";
- * Log(WARN, "foo") << "Log with foo tag to the default channel at level WARN";
- * Log(DBUG, "", 1) << "Log with no tag to channel 1 at level DBUG";
+ * Slog(INFO) << "Log with no tag to the default channel at level INFO";
+ * Slog(WARN, "foo") << "Log with foo tag to the default channel at level WARN";
+ * Slog(DBUG, "", 1) << "Log with no tag to channel 1 at level DBUG";
  * ```
  * 
  * These macros never trigger allocating memory.
@@ -27,30 +23,36 @@
  * 
  */
 
+#ifndef SLOG_NO_STREAM
 // Baseline logging macro. Wrap the log check in an if() body, and get a stream
 // in the else clause (so that the << ... parts are on the else branch)
 #define SLOG_LogStreamBase(severity, tag, channel) \
-        if (!(SLOG_LOGGING_ENABLED && slog::will_log(slog::severity, tag, channel))) { } \
-        else slog::CaptureStream(slog::get_fresh_record(channel, __FILE__, __FUNCTION__, \
-                                                        __LINE__, slog::severity, tag), channel).stream()
+        if (!(SLOG_LOGGING_ENABLED && slog::will_log((severity), (tag), (channel)))) { } \
+        else slog::CaptureStream(slog::get_fresh_record((channel), __FILE__, __FUNCTION__, \
+                                                        __LINE__, (severity), (tag)), (channel)).stream()
 
 // Specialize SLOG_LogStreamBase for different numbers of arguments
-#define SLOG_Logs(severity) SLOG_LogStreamBase(severity, "", slog::DEFAULT_CHANNEL)
-#define SLOG_Logst(severity, tag) SLOG_LogStreamBase(severity, tag, slog::DEFAULT_CHANNEL)
-#define SLOG_Logstc(severity, tag, channel) SLOG_LogStreamBase(severity, tag, channel)
+#define SLOG_Logs(severity) SLOG_LogStreamBase(slog::severity, "", slog::DEFAULT_CHANNEL)
+#define SLOG_Logst(severity, tag) SLOG_LogStreamBase(slog::severity, (tag), slog::DEFAULT_CHANNEL)
+#define SLOG_Logstc(severity, tag, channel) SLOG_LogStreamBase(slog::severity, (tag), (channel))
 
-// Overload Log() based on the argument count
+// Overload Slog() based on the argument count
 #define SLOG_GET_MACRO(_1,_2,_3,NAME,...) NAME
 #define Slog(...) SLOG_GET_MACRO(__VA_ARGS__, SLOG_Logstc, SLOG_Logst, SLOG_Logs)(__VA_ARGS__)
 
-#define Flog(severity, ...) SLOG_LogBase(severity, "", slog::DEFAULT_CHANNEL, __VA_ARGS__)
-#define Flogt(severity, tag, ...) SLOG_LogBase(severity, tag, slog::DEFAULT_CHANNEL, __VA_ARGS__)
-#define Flogtc(severity, tag, channel, ...) SLOG_LogBase(severity, tag, channel, __VA_ARGS__)
+#endif                                                        
+                                                        
+/**
+ * printf style macros. These take printf format string and variable argument lists
+ */
+#define Flog(severity, ...) SLOG_LogBase(slog::severity, "", slog::DEFAULT_CHANNEL, __VA_ARGS__)
+#define Flogt(severity, tag, ...) SLOG_LogBase(slog::severity, (tag), slog::DEFAULT_CHANNEL, __VA_ARGS__)
+#define Flogtc(severity, tag, channel, ...) SLOG_LogBase(slog::severity, (tag), (channel), __VA_ARGS__)
 
 #define SLOG_LogBase(severity, tag, channel, format, ...) \
-        if (SLOG_LOGGING_ENABLED && slog::will_log(slog::severity, tag, channel)) {  \
-            RecordNode* rec = slog::get_fresh_record(channel, __FILE__, __FUNCTION__, \
-                                                           __LINE__, slog::severity, tag); \
+        if (SLOG_LOGGING_ENABLED && slog::will_log((severity), (tag), (channel))) {  \
+            RecordNode* rec = slog::get_fresh_record((channel), __FILE__, __FUNCTION__, \
+                                                           __LINE__, (severity), (tag)); \
             if (rec) { \
                 slog::push_to_sink(slog::capture_message(rec, format, ##__VA_ARGS__), channel); \
             } \
@@ -81,6 +83,7 @@ RecordNode* get_fresh_record(int channel, char const* file, char const* function
                            int severity, char const* tag);
 
 
+#ifndef SLOG_NO_STREAM
 // A special ostream wrapper that writes to node's message buffer.
 // On destruction, the node is pushed to the back end
 class CaptureStream {
@@ -95,6 +98,7 @@ protected:
     RecordNode* node;
     int channel;
 };
+#endif
 
 // For printf-style messages, this provides variable argumnents
 RecordNode* capture_message(RecordNode* rec, char const* format, ...);

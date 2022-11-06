@@ -20,14 +20,13 @@ class Logger {
 protected:
     std::array<LogChannel, SLOG_MAX_CHANNEL> backend;
     LogRecordPool pool;
-    
-    Logger() : pool(SLOG_POOL_SIZE, SLOG_MESSAGE_SIZE)
-    {
+
+    Logger() : pool(SLOG_POOL_SIZE, SLOG_MESSAGE_SIZE) {
         for (int i=0; i<SLOG_MAX_CHANNEL; i++) {
             backend[i].set_pool(&pool);
         }
     }
-    
+
     static Logger& instance() {
         static Logger s_logger;
         return s_logger;
@@ -146,6 +145,9 @@ void start_logger(LogConfig& config) {
     auto& channel = Logger::get_channel(DEFAULT_CHANNEL);
     channel.set_sink(config.take_sink());
     channel.set_threshold(config.get_threshold_map());
+#ifndef SLOG_NO_STREAM
+    set_locale(config.get_locale());
+#endif
     Logger::start_all_channels();
 }
 
@@ -158,6 +160,11 @@ void start_logger(std::vector<LogConfig>& config) {
         chan.set_sink(config[i].take_sink());
         chan.set_threshold(config[i].get_threshold_map());
     }
+#ifndef SLOG_NO_STREAM
+    if (config.size() > 0) {
+        set_locale(config.front().get_locale());
+    }
+#endif
     Logger::start_all_channels();
 }
 

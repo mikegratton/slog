@@ -37,7 +37,11 @@ install(FILES
     DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/slog
     )
 # export(TARGETS slog NAMESPACE slog:: FILE SlogConfig.cmake)
-install(TARGETS slog EXPORT SlogConfig)
+install(TARGETS slog 
+    EXPORT SlogConfig
+    ARCHIVE DESTINATION lib
+    LIBRARY DESTINATION lib
+    )
 include(CMakePackageConfigHelpers)
 write_basic_package_version_file(
     SlogConfigVersion.cmake

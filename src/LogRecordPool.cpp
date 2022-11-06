@@ -6,6 +6,8 @@
 #include <new>
 
 namespace slog {
+    
+constexpr std::chrono::milliseconds WAIT{50};
 
 MutexLogRecordPool::MutexLogRecordPool(long max_size, long message_size) {
     long record_size = sizeof(RecordNode);
@@ -34,26 +36,39 @@ MutexLogRecordPool::~MutexLogRecordPool() {
 }
 
 RecordNode* MutexLogRecordPool::take() {    
-    std::lock_guard<std::mutex> guard(mlock);
+#ifdef SLOG_POOL_BLOCKS_WHEN_EMPTY
+    RecordPtr allocated = nullptr;
+    std::unique_lock<std::mutex> guard(mlock);    
+    if (mnonempty.wait_for(guard, WAIT, [this]() -> bool {return mcursor != nullptr;})) {
+        allocated = mcursor;
+        mcursor = mcursor->next; 
+    }    
+    return allocated;
+#else
+    std::unique_lock<std::mutex> guard(mlock);
     RecordPtr allocated = mcursor;
     if (mcursor) {
         mcursor = mcursor->next;        
     }
-
     return allocated;
+#endif
 }
 
 void MutexLogRecordPool::put(RecordNode* node) {
     if (node) {
         node->rec.reset();
-        std::lock_guard<std::mutex> guard(mlock);
+        std::unique_lock<std::mutex> guard(mlock);
         node->next = mcursor;
         mcursor = node;
+#ifdef SLOG_POOL_BLOCKS_WHEN_EMPTY
+        guard.unlock();
+        mnonempty.notify_one();
+#endif
     }
 }
 
 long MutexLogRecordPool::count() const {
-    std::lock_guard<std::mutex> guard(mlock);
+    std::unique_lock<std::mutex> guard(mlock);
     long c = 0;
     RecordPtr cursor = mcursor;
     while (cursor) {

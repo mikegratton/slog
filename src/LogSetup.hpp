@@ -4,6 +4,9 @@
 #include "LogRecord.hpp"
 #include "LogSink.hpp"
 #include "ThresholdMap.hpp"
+#ifndef SLOG_NO_STREAM
+#include <ostream>
+#endif
 
 /**
  * This is only needed where you are starting/stopping the logger.
@@ -57,6 +60,12 @@ void start_logger(std::vector<LogConfig>& configs);
  */
 void stop_logger();
 
+/*
+ * Set the log stream locale
+ */
+void set_locale(std::locale locale);
+void set_locale_to_global();
+
 // For debug
 long get_pool_missing_count();
 
@@ -86,9 +95,17 @@ public:
     
     ThresholdMap const& get_threshold_map() const { return threshold; }
     
+#ifndef SLOG_NO_STREAM    
+    void set_locale(std::locale locale_) { locale = locale_; }    
+    std::locale const& get_locale() const { return locale; }
+#endif
+    
 protected:
     std::unique_ptr<LogSink> sink;
     ThresholdMap threshold;
+#ifndef SLOG_NO_STREAM    
+    std::locale locale;
+#endif
 };
 
 }

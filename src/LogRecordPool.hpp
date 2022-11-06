@@ -6,6 +6,10 @@
 
 #include "LogRecord.hpp"
 #include <mutex>
+#ifdef SLOG_POOL_BLOCKS_WHEN_EMPTY
+#include <condition_variable>
+#endif
+
 namespace slog {
     
 struct RecordNode;
@@ -50,6 +54,9 @@ protected:
 
     RecordPtr mcursor; // head of the stack
     char* mpool; // Start of heap allocated region
+#ifdef SLOG_POOL_BLOCKS_WHEN_EMPTY
+    std::condition_variable mnonempty;
+#endif
 };
 using LogRecordPool = MutexLogRecordPool;
 }

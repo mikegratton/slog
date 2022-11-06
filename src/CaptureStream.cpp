@@ -1,3 +1,4 @@
+#ifndef SLOG_NO_STREAM
 #include <streambuf>
 #include <ostream>
 #include <cstring>
@@ -76,16 +77,46 @@ private:
     } m_sb;
 };
 
-thread_local IntrusiveStream st_stream; // Each thread has its own stream
+
+std::locale s_locale;
+int s_locale_version = 0;
+class StreamHolder {
+public:
+    StreamHolder() : m_locale_version(s_locale_version) { }
+    
+    IntrusiveStream& stream() {
+        if (m_locale_version < s_locale_version) {
+            m_stream.imbue(s_locale);
+            m_locale_version = s_locale_version;
+        }
+        return m_stream;
+    }
+    
+    IntrusiveStream& stream_direct() { return m_stream; }
+    
+protected:
+    IntrusiveStream m_stream;
+    int m_locale_version;
+};
+
+thread_local StreamHolder st_stream; // Each thread has its own stream
 NullStream s_null; // Since NullStream has no state, all threads share a copy
 
 } // end of anon namespace
+
+void set_locale(std::locale locale)
+{
+    s_locale = locale;
+    s_locale_version++;
+}
+
+void set_locale_to_global() { set_locale(std::locale()); }
 
 // On destruction, terminate the cstring, then forward the node to the 
 // back end.
 CaptureStream::~CaptureStream() {
     if (node) {
-        st_stream << std::ends;          
+        st_stream.stream_direct() << std::ends;          
         push_to_sink(node, channel); // Push to channel queue
     }
 }
@@ -93,8 +124,9 @@ CaptureStream::~CaptureStream() {
 std::ostream& CaptureStream::stream() {
     if (node) {
         // Set the stream to write to the message buffer
-        st_stream.setbuf(node->rec.message, node->rec.message_max_size);
-        return st_stream;
+        IntrusiveStream& s = st_stream.stream();
+        s.setbuf(node->rec.message, node->rec.message_max_size);
+        return s;
     } else {
         // Failure to allocate, just eat the message
         return s_null;
@@ -104,3 +136,4 @@ std::ostream& CaptureStream::stream() {
 
 }
 
+#endif
