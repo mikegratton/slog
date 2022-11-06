@@ -1,6 +1,5 @@
 #include "LogConfig.hpp"
-#if !SLOG_LOCK_FREE_POOL
-#include "LogRecordPool.hpp"
+#include "BlockingRecordPool.hpp"
 #include <cassert>
 #include <cstdlib>
 #include <new>
@@ -9,7 +8,7 @@ namespace slog {
     
 constexpr std::chrono::milliseconds WAIT{50};
 
-MutexLogRecordPool::MutexLogRecordPool(long max_size, long message_size) {
+BlockingRecordPool::BlockingRecordPool(long max_size, long message_size) {
     long record_size = sizeof(RecordNode);
     mchunkSize = record_size + message_size;
     mchunks = max_size / mchunkSize;
@@ -31,12 +30,11 @@ MutexLogRecordPool::MutexLogRecordPool(long max_size, long message_size) {
     mcursor = here;
 }
 
-MutexLogRecordPool::~MutexLogRecordPool() {
+BlockingRecordPool::~BlockingRecordPool() {
     free(mpool);
 }
 
-RecordNode* MutexLogRecordPool::take() {    
-#ifdef SLOG_POOL_BLOCKS_WHEN_EMPTY
+RecordNode* BlockingRecordPool::take() {    
     RecordPtr allocated = nullptr;
     std::unique_lock<std::mutex> guard(mlock);    
     if (mnonempty.wait_for(guard, WAIT, [this]() -> bool {return mcursor != nullptr;})) {
@@ -44,30 +42,20 @@ RecordNode* MutexLogRecordPool::take() {
         mcursor = mcursor->next; 
     }    
     return allocated;
-#else
-    std::unique_lock<std::mutex> guard(mlock);
-    RecordPtr allocated = mcursor;
-    if (mcursor) {
-        mcursor = mcursor->next;        
-    }
-    return allocated;
-#endif
 }
 
-void MutexLogRecordPool::put(RecordNode* node) {
+void BlockingRecordPool::put(RecordNode* node) {
     if (node) {
         node->rec.reset();
         std::unique_lock<std::mutex> guard(mlock);
         node->next = mcursor;
         mcursor = node;
-#ifdef SLOG_POOL_BLOCKS_WHEN_EMPTY
         guard.unlock();
         mnonempty.notify_one();
-#endif
     }
 }
 
-long MutexLogRecordPool::count() const {
+long BlockingRecordPool::count() const {
     std::unique_lock<std::mutex> guard(mlock);
     long c = 0;
     RecordPtr cursor = mcursor;
@@ -78,4 +66,3 @@ long MutexLogRecordPool::count() const {
     return c - mchunks;
 }
 }
-#endif

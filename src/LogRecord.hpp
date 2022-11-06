@@ -32,17 +32,16 @@ struct LogRecordMetadata {
 
 };
 
-class MutexLogRecordPool;
-class LfLogRecordPool;
 
 /**
  * A LogRecord is a message string combined with the associated metadata.
  * These objects are managed by LogRecordPool.
  */
 struct LogRecord {
-protected:
-    friend class MutexLogRecordPool;
-    friend class LfLogRecordPool;
+protected:    
+    friend class AllocatingRecordPool;
+    friend class BlockingRecordPool;
+    friend class DiscardRecordPool;
     LogRecord(char* message_, long max_message_size_);    
 public:
     void reset(); //! Clean out this record

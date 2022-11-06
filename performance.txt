@@ -1,0 +1,82 @@
+Allocating pool:
+**************************************************************
+Threads: 1, messages: 250000
+**************************************************************
+File sink
+Elapsed: 0.852368 secs 293300 msg/sec, pre: 0.124147 sec, 2013744
+Journal sink
+Elapsed: 3.45473 secs 72364 msg/sec, pre: 0.0898877 sec, 2781247
+Null sink
+Elapsed: 0.401319 secs 622946 msg/sec, pre: 0.228758 sec, 1092856
+**************************************************************
+Threads: 4, messages: 250000
+**************************************************************
+File sink
+Elapsed: 0.751494 secs 332670 msg/sec, pre: 0.0959533 sec, 2605432
+Journal sink
+Elapsed: 2.2536 secs 110933 msg/sec, pre: 0.0956681 sec, 2613201
+Null sink
+Elapsed: 0.250912 secs 996366 msg/sec, pre: 0.115188 sec, 2170364
+
+
+Discard pool, small size:
+**************************************************************
+Threads: 1, messages: 250000
+**************************************************************
+File sink
+Elapsed: 0.201399 secs 1241318 msg/sec, pre: 0.0720801 sec, 3468365
+Journal sink
+Elapsed: 0.251455 secs 994215 msg/sec, pre: 0.0730421 sec, 3422681
+Null sink
+Elapsed: 0.351557 secs 711121 msg/sec, pre: 0.166976 sec, 1497224
+**************************************************************
+Threads: 4, messages: 250000
+**************************************************************
+File sink
+Elapsed: 0.200588 secs 1246336 msg/sec, pre: 0.0682635 sec, 3662276
+Journal sink
+Elapsed: 0.300839 secs 831010 msg/sec, pre: 0.153134 sec, 1632558
+Null sink
+Elapsed: 0.351302 secs 711637 msg/sec, pre: 0.174992 sec, 1428640
+
+
+Discard pool, large size
+**************************************************************
+Threads: 1, messages: 250000
+**************************************************************
+File sink
+Elapsed: 0.752077 secs 332412 msg/sec, pre: 0.0883652 sec, 2829169
+Journal sink
+Elapsed: 3.30562 secs 75628 msg/sec, pre: 0.0963256 sec, 2595364
+Null sink
+Elapsed: 0.401766 secs 622252 msg/sec, pre: 0.233233 sec, 1071887
+**************************************************************
+Threads: 4, messages: 250000
+**************************************************************
+File sink
+Elapsed: 0.751481 secs 332676 msg/sec, pre: 0.0942821 sec, 2651615
+Journal sink
+Elapsed: 2.60404 secs 96004 msg/sec, pre: 0.0945564 sec, 2643925
+Null sink
+Elapsed: 0.351674 secs 710885 msg/sec, pre: 0.193264 sec, 1293570
+
+
+Blocking pool, small size
+**************************************************************
+Threads: 1, messages: 250000
+**************************************************************
+File sink
+Elapsed: 1.00199 secs 249504 msg/sec, pre: 0.91365 sec, 273627
+Journal sink
+Elapsed: 4.1561 secs 60152 msg/sec, pre: 4.07818 sec, 61301
+Null sink
+Elapsed: 0.401794 secs 622209 msg/sec, pre: 0.20266 sec, 1233590
+**************************************************************
+Threads: 4, messages: 250000
+**************************************************************
+File sink
+Elapsed: 1.30218 secs 191986 msg/sec, pre: 1.16922 sec, 213817
+Journal sink
+Elapsed: 3.15497 secs 79240 msg/sec, pre: 3.00412 sec, 83219
+Null sink
+Elapsed: 0.95256 secs 262450 msg/sec, pre: 0.758948 sec, 329403
