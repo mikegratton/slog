@@ -1,6 +1,7 @@
 #include "LogConfig.hpp"
 #include "LogSetup.hpp"
 #include "FileSink.hpp"
+#include "ConsoleSink.hpp"
 #include "LogChannel.hpp"
 
 #include <cassert>
@@ -25,6 +26,11 @@ protected:
         for (int i=0; i<SLOG_MAX_CHANNEL; i++) {
             backend[i].set_pool(&pool);
         }
+        setup_console_channel();
+    }
+    
+    ~Logger() {
+        stop_all_channels();
     }
 
     static Logger& instance() {
@@ -99,8 +105,6 @@ public:
     }
 };
 
-// This forces this to be run before main
-const bool s_DEFAULT_TO_CONSOLE = Logger::setup_console_channel();
 
 } // end of anon namespace
 

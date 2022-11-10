@@ -16,7 +16,9 @@ public:
     ~PoolMemory() 
     {
         for (char* ptr : allocations) {
-            free(ptr);
+            if (ptr) {
+                free(ptr);
+            }
         }
     }
     
@@ -33,6 +35,9 @@ void AllocatingRecordPool::allocate()
     long record_size = sizeof(RecordNode);
     long message_size = mchunkSize - record_size;
     char* pool = mpool->allocate(mchunkSize*mchunks);
+    if (nullptr == pool) { // Memory exhausted
+        return;
+    }
     RecordNode* here = nullptr;
     RecordNode* next = nullptr;
     // Link nodes, invoking the LogRecord constructor via placement new
@@ -43,7 +48,7 @@ void AllocatingRecordPool::allocate()
         here->next = next;
         next = here;
     }
-    assert((char*)here == mpool);
+    
     if (mcursor) {
         // put existing records at end of new stack
         RecordNode* bottom = reinterpret_cast<RecordNode*>(pool + (mchunks-1)*mchunkSize);

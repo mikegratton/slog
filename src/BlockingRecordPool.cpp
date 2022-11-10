@@ -6,7 +6,7 @@
 
 namespace slog {
     
-constexpr std::chrono::milliseconds WAIT{50};
+constexpr std::chrono::milliseconds WAIT{SLOG_MAX_BLOCK_TIME_MS};
 
 BlockingRecordPool::BlockingRecordPool(long max_size, long message_size) {
     long record_size = sizeof(RecordNode);

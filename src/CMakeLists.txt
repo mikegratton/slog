@@ -33,6 +33,7 @@ install(FILES
     LogSetup.hpp
     LogSink.hpp
     FileSink.hpp
+    ConsoleSink.hpp
     $<$<BOOL:JOURNALD_FOUND>:${CMAKE_CURRENT_SOURCE_DIR}/JournaldSink.hpp>
     DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/slog
     )
@@ -53,4 +54,3 @@ install(EXPORT SlogConfig
         NAMESPACE slog::
         DESTINATION lib/cmake/slog
          )
-# TODO dependencies

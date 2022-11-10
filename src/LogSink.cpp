@@ -1,4 +1,5 @@
 #include "LogSink.hpp"
+#include "ConsoleSink.hpp"
 #include <cstdio>
 #include <ctime>
 #include <cstring>
@@ -67,7 +68,7 @@ void format_location(char* location_str, char const* file_name, int line_number)
 
 void ConsoleSink::record(LogRecord const& rec)
 { 
-    default_format(stdout, rec);
+    mformat(stdout, rec);
     fputc('\n', stdout);
     fflush(stdout);
 }

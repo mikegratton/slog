@@ -9,6 +9,7 @@ set(SLOG_POOL_POLICY "SLOG_EMPTY_POOL_ALLOCATES" CACHE STRING
 set(SLOG_MAX_CHANNEL 1 CACHE STRING "Total number of log channels to provide")
 set(SLOG_MESSAGE_SIZE 1024 CACHE STRING "Maximum size in bytes of a log message")
 set(SLOG_POOL_SIZE 1048576 CACHE STRING "Bytes allocated per channel")
+set(SLOG_MAX_BLOCK_TIME_MS 50 CACHE STRING "Maximum time to block waiting for a free record in ms")
 
 # TODO sanity check options
 

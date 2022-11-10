@@ -20,13 +20,6 @@ public:
     void record(LogRecord const&) override { }
 };
 
-// Simple sink that dumps messages to the console
-class ConsoleSink : public LogSink
-{
-public:
-    void record(LogRecord const& rec) override;
-};
-
 
 // Standard form for message formatters. This should
 // write rec to sink and return the number of bytes
