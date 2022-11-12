@@ -11,7 +11,50 @@ appeal to you.
 
 ## Design 
 
+Slog has three design goals:
+
+1. Do as little work on the business thread as possible 
+2. Minimize the include size for `slog.hpp` and 
+3. Provide clear failure modes.
+
+For (1), Slog is asynchronous (see below). It also uses a special pre-allocated pool of log 
+records to avoid allocating memory during log capture.  It agressively checks to see if a message 
+will be logged at all, avoiding formatting the log string if the result would be ignored. This all 
+means Slog stays out of the way of your program as much as possible.
+
+Likewise for (2), Slog only includes `<iostream>` (and then only when streams are enabled).  It 
+doesn't use any templates in the logging API, keeping the compile-time cost of including 
+`slog.hpp` as small as possible. Goal (2) also precludes a header-only design, but building Slog
+as part of your project is very easy and recommended.
+
+Failure modes (3) are important for critical applications.  Memory and time resources are finite,
+so careful programs should have plans for cases where these run short. Slog provides three policies
+to control logging behavior when resources are tight:
+
+1. Allocate: If the log record pool becomes exhausted, Slog will attempt to allocate more memory.
+This will slow down business code, but for general use, it ensures that the logger will function
+provided there's free memory. This is the default.
+2. Block: If the pool is empty, block the business thread until records become available. The 
+maximum time to block is configurable.  If it is exhausted, the log record is ignored. This mode 
+ensures that the memory used by the logger is bounded, and places a bound on the time per 
+log message. With appropriate tuning, this policy can meet needs for real time systems.
+3. Discard: If the pool is empty, discard the log record. This is the most extreme, never allocating 
+or blocking. This choice is intended for real time applications where delay of the business 
+logic could result in loss of life or grevious harm.
+
+
+
 ## Asynchronous Logging
+
+Slog is an *asynchronous* logger, meaning log records are written to sinks (files, sockets, etc.)
+on dedicated worker threads.  "Logging" on a business thread captures the message to an internal 
+buffer.  This is then pushed into a thread-safe queue.  This design minimizes blocking calls that 
+are made on the business thread. The risk with asynchronous logging is that the program may terminate
+before this queue is written to disk.  Slog ties into the signal system to ensure that the queue
+is written out before the program exists in most cases.  Note that calling `exit()` is not one
+of these cases -- this exits the program via a means that evades all signal trapping.  Slog will
+drain its queue on all trappable signals (ctrl-C -- SIG_INT -- included), as well as when
+`abort()` is called.
 
 ## API
 
@@ -135,7 +178,8 @@ function object as `FileSink`.
 
 Slog uses a thread-local stream object that is initialized in an order you can't control (the old 
 static intitialization fiasco of C++ lore). As such, if you change the global locale, the streams 
-will not pick up on this by default.  To force Slog to update the stream locale, call 
+will not pick up on this by default.  Slog will pick up the global locate on a `start_logger()` call,
+but you can force Slog to update the stream locale at any time via
 `void set_locale(std::locale locale)` or `void set_locale_to_global()`.
 
 ## Building Slog
@@ -156,11 +200,24 @@ can do this via
 ```
 apt install libsystemd-dev
 ```
-Note that this doesn't add any *runtime* dependencies to your application, we just need the 
+Note that this doesn't add any *runtime* dependencies to your application, you just need the 
 headers for building.
 
 ## Configuring Slog
 
+Slog has many build-time configuration options.  The easiest way to set these is to use 
+`ccmake` to see the full list.  Here's a rundown:
+
++-------------------------+-----------------------------+----------------------------------------+
+| Name                    |    Default                  |    Notes                               |
++-------------------------+-----------------------------+----------------------------------------+
+| `SLOG_ALWAYS_LOG`       |   OFF                       | When the logger is stopped, dump records to the console |
+| `SLOG_MAX_BLOCK_TIME_MS`|   50                        | When SLOG_EMPTY_POOL_BLOCKS is set, this is the maximum time to wait for a free record |
+| `SLOG_MAX_CHANNEL`      |   1                         | Number of logger channels |
+| `SLOG_MESSAGE_SIZE`     |   1024                      | Maximum message size in bytes |
+| `SLOG_POOL_POLICY`      |   SLOG_EMPTY_POOL_BLOCKS    | One of SLOG_EMPTY_POOL_BLOCKS, SLOG_EMPTY_POOL_ALLOCATES, or SLOG_EMPTY_POOL_DISCARDS|
+| `SLOG_POOL_SIZE`        |   1024000                   | Size of pre-allocated record pool |
++-------------------------+-----------------------------+-----------------------------------+
 
 ## Customization
 

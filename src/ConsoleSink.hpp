@@ -8,7 +8,7 @@ class ConsoleSink : public LogSink
 {
 public:
     ConsoleSink() : mformat(default_format) { }
-    void record(LogRecord const& rec) override;
+    void record(RecordNode const* node) override;
     void set_formatter(Formatter format) { mformat = format; }
 protected:
     Formatter mformat;

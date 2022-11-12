@@ -7,12 +7,18 @@
 namespace slog {
 
 
-int default_format(FILE* sink, LogRecord const& rec) {    
+int default_format(FILE* sink, RecordNode const* node) {
+    LogRecord const& rec = node->rec;
     char severity_str[16];
     char time_str[32];
     format_severity(severity_str, rec.meta.severity);
-    format_time(time_str, rec.meta.time, 3);
-    return fprintf(sink, "[%s %s %s] %s", severity_str, rec.meta.tag, time_str, rec.message);    
+    format_time(time_str, rec.meta.time, 3);    
+    int count = fprintf(sink, "[%s %s %s] %s", severity_str, rec.meta.tag, time_str, rec.message);
+    while (node->jumbo) {
+        count += fprintf(sink, "%s", node->jumbo->rec.message);
+        node = node->jumbo;
+    }
+    return count;
 }
 
 void format_severity(char* severity_str, int severity) {
@@ -66,9 +72,9 @@ void format_location(char* location_str, char const* file_name, int line_number)
     snprintf(location_str, 64, "%s@%d", basename(file_name), line_number);
 }
 
-void ConsoleSink::record(LogRecord const& rec)
+void ConsoleSink::record(RecordNode const* node)
 { 
-    mformat(stdout, rec);
+    mformat(stdout, node);
     fputc('\n', stdout);
     fflush(stdout);
 }

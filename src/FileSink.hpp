@@ -9,7 +9,7 @@ public:
     FileSink();
     ~FileSink() { if (mfile) { fclose(mfile); } }
 
-    virtual void record(LogRecord const& rec) override;
+    virtual void record(RecordNode const* node) override;
 
     void set_formatter(Formatter format) { mformat = format; }
 

@@ -3,8 +3,10 @@
 #include <systemd/sd-journal.h>
 
 namespace slog {
-    void JournaldSink::record(LogRecord const& rec)
+    void JournaldSink::record(RecordNode const* node)
     {
+        // FIXME
+        LogRecord const& rec = node->rec;
         char isoTime[32];
         format_time(isoTime, rec.meta.time);
         sd_journal_send(
@@ -17,7 +19,7 @@ namespace slog {
             "MESSAGE=%s",   rec.message,
             NULL);            
         if (mecho) {
-            mformat(stdout, rec);
+            mformat(stdout, node);
             fputc('\n', stdout);
             fflush(stdout);                
         }

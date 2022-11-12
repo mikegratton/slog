@@ -12,14 +12,20 @@ namespace {
     // is too long, tack a null char on the end and discard the rest.
 class IntrusiveBuf : public std::streambuf {
 public:
-
+    void set_record(RecordNode* node) {
+        m_node = node;
+        pubsetbuf(node->rec.message, node->rec.message_max_size);
+    }
+    
 protected:
 
+    RecordNode* m_node;
+    
     std::streambuf* setbuf(char* buffer, std::streamsize length_) override {
         setp(buffer, buffer + length_);
         return this;
     }
-
+    
     int overflow(int) override {
         char* last = epptr();
         if (last) {
@@ -31,12 +37,23 @@ protected:
 
     std::streamsize xsputn(char const* s, std::streamsize length) override {
         std::streamsize max_write = epptr() - pptr();
-        if (length > max_write) {
-            length = max_write;
+        if (length < max_write) {
+            memcpy(pptr(), s, length);
+            pbump(length);
+        } else {
+            std::streamsize write_length = max_write - 1;
+            memcpy(pptr(), s, write_length);
+            m_node->rec.message[m_node->rec.message_max_size-1] = '\0';            
+            s += write_length;
+            length -= write_length;
+                        
+            long channel_somehow = 0; // TODO
+            RecordNode* extra = get_fresh_record(channel_somehow, nullptr, nullptr, 0, m_node->rec.meta.severity,
+                                               m_node->rec.meta.tag);                      
+            m_node->jumbo = extra;
+            set_record(extra);
+            xsputn(s, length);            
         }
-
-        memcpy(pptr(), s, length);
-        pbump(length);
 
         if (pptr() == epptr()) {
             overflow(0);
@@ -53,8 +70,8 @@ public:
         : std::ostream(&buf) {
     }
 
-    void setbuf(char* cstring, long maxlength) {
-        buf.pubsetbuf(cstring, maxlength);
+    void setbuf(RecordNode* record) {
+        buf.set_record(record);
         clear();
     }
 
@@ -125,7 +142,7 @@ std::ostream& CaptureStream::stream() {
     if (node) {
         // Set the stream to write to the message buffer
         IntrusiveStream& s = st_stream.stream();
-        s.setbuf(node->rec.message, node->rec.message_max_size);
+        s.setbuf(node);
         return s;
     } else {
         // Failure to allocate, just eat the message

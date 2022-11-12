@@ -2,6 +2,7 @@
 #include <memory>
 #include <vector>
 #include "LogRecord.hpp"
+#include "LogRecordPool.hpp"
 #include "LogSink.hpp"
 #include "ThresholdMap.hpp"
 #ifndef SLOG_NO_STREAM
@@ -46,13 +47,13 @@ void start_logger(int severity = INFO);
 /*
  * Start a logger on the default channel with the given config.
  */
-void start_logger(LogConfig& config);
+void start_logger(LogConfig const& config);
 
 /*
  * Start loggers on channels [0, configs.size()) with the 
  * given configs.
  */
-void start_logger(std::vector<LogConfig>& configs);
+void start_logger(std::vector<LogConfig> const& configs);
 
 /*
  * Stop all channels, draining the queue into the sinks.
@@ -71,39 +72,40 @@ long get_pool_missing_count();
 
 /**
  * Configuration class for a logger channel. Set your logging threshold, 
- * tags, and log sink here. By default, the sink is a NullSink that
- * discards all messages.
+ * tags, log sink here, and record pool here. By default, the sink is a 
+ * NullSink that discards all messages and the pool is a shared global
+ * pool that allocates when empty.
  */
+
 class LogConfig
 {
 public:
-    LogConfig() : sink(new NullSink) { }
+    LogConfig() = default;
     
     void set_default_threshold(int thr) { threshold.set_default(thr); }
 
     void add_tag(const char* tag, int thr) { threshold.add_tag(tag, thr); }
     
-    void set_sink(std::unique_ptr<LogSink> sink_);
+    void set_sink(std::shared_ptr<LogSink> sink_) { sink = sink_; }
+
+    void set_pool(std::shared_ptr<LogRecordPool> pool_) { pool = pool_; }
     
-    /**
-     * Takes ownership of the sink pointer.
-     */
-    void set_sink(LogSink* sink_) { set_sink(std::unique_ptr<LogSink>(sink_)); }
-    
-    
-    std::unique_ptr<LogSink> take_sink() { return std::move(sink); }
+    std::shared_ptr<LogSink> get_sink() const { return sink; }
     
     ThresholdMap const& get_threshold_map() const { return threshold; }
     
-#ifndef SLOG_NO_STREAM    
-    void set_locale(std::locale locale_) { locale = locale_; }    
-    std::locale const& get_locale() const { return locale; }
-#endif
+    std::shared_ptr<LogRecordPool> get_pool() const { return pool; }
     
 protected:
-    std::unique_ptr<LogSink> sink;
+    std::shared_ptr<LogRecordPool> pool;
+    std::shared_ptr<LogSink> sink;
     ThresholdMap threshold;
+
 #ifndef SLOG_NO_STREAM    
+public:
+    void set_locale(std::locale locale_) { locale = locale_; }    
+    std::locale const& get_locale() const { return locale; }
+protected:
     std::locale locale;
 #endif
 };

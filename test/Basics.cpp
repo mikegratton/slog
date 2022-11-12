@@ -1,6 +1,7 @@
 #include "doctest.h"
 #include "slog.hpp"
 #include "LogSetup.hpp"
+#include "LogChannel.hpp"
 #include "LogRecordPool.hpp"
 #include "ThresholdMap.hpp"
 
@@ -10,13 +11,18 @@
 using namespace slog;
 
 TEST_CASE("RecordPool") {
-    LogRecordPool pool(1024, 32);
+    LogRecordPool pool(DISCARD, 1024, 32);
     auto* item = pool.take();
     REQUIRE(item != nullptr);
     pool.put(item);
     auto* item2 = pool.take();
     REQUIRE(item2 != nullptr);
     REQUIRE(item == item2);
+}
+
+TEST_CASE("channelctor")
+{
+    LogChannel c(std::make_shared<NullSink>(), ThresholdMap(), std::make_shared<LogRecordPool>(ALLOCATE, 1024*1024, 1024));
 }
 
 TEST_CASE("ThresholdMap") {

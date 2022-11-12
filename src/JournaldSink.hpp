@@ -18,7 +18,7 @@ public:
     JournaldSink() : mformat(default_format), mecho(false) { }
     ~JournaldSink() = default;
 
-    virtual void record(LogRecord const& rec) override;
+    virtual void record(RecordNode const* node) override;
 
     /*
      * This only applies to console echo. Structured logging is 

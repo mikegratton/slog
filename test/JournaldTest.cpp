@@ -7,7 +7,7 @@ TEST_CASE("Journald")
 {
     slog::LogConfig config;
     config.set_default_threshold(slog::INFO);    
-    config.set_sink(new slog::JournaldSink);
+    config.set_sink(std::make_shared<slog::JournaldSink>());
     slog::start_logger(config);
     
     Slog(INFO) << "Hello, journal!";

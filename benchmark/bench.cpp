@@ -31,7 +31,7 @@ void bench_threaded_logging(size_t threads, int iters) {
     {
     std::cout << "File sink\n";
     slog::LogConfig config;
-    slog::FileSink* sink = new slog::FileSink;
+    auto sink = std::make_shared<slog::FileSink>();
     sink->set_file("./", "bench");
     sink->set_echo(false);    
     config.set_sink(sink);
@@ -42,7 +42,7 @@ void bench_threaded_logging(size_t threads, int iters) {
     {
     std::cout << "Journal sink\n";    
     slog::LogConfig config;
-    slog::JournaldSink* sink = new slog::JournaldSink;
+    auto sink = std::make_shared<slog::JournaldSink>();
     sink->set_echo(false);
     config.set_sink(sink);    
     config.set_default_threshold(slog::INFO);
@@ -52,7 +52,7 @@ void bench_threaded_logging(size_t threads, int iters) {
     {        
     std::cout << "Null sink\n";    
     slog::LogConfig config;
-    config.set_sink(new slog::NullSink);    
+    config.set_sink(std::make_shared<slog::NullSink>());
     config.set_default_threshold(slog::INFO);
     bench_mt(iters, config, threads);
     }

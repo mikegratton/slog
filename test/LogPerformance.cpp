@@ -17,7 +17,7 @@ using namespace slog;
 TEST_CASE("NullPerformance")
 {
     LogConfig config;    
-    config.set_sink(new NullSink);
+    config.set_sink(std::make_shared<NullSink>());
     config.set_default_threshold(slog::DBUG);
     start_logger(config);
     unsigned long JOB_SIZE = 10000000UL;
@@ -35,7 +35,7 @@ TEST_CASE("NullPerformance")
 TEST_CASE("RejectPerformance")
 {
     LogConfig config;    
-    config.set_sink(new NullSink);
+    config.set_sink(std::make_shared<NullSink>());
     config.set_default_threshold(slog::ERRR);
     start_logger(config);
     unsigned long JOB_SIZE = 10000000UL;
@@ -54,7 +54,7 @@ TEST_CASE("RejectPerformance")
 TEST_CASE("RejectTagPerformance")
 {
     LogConfig config;    
-    config.set_sink(new NullSink);
+    config.set_sink(std::make_shared<NullSink>());
     config.set_default_threshold(slog::ERRR);
     config.add_tag("moose", INFO);    
     start_logger(config);

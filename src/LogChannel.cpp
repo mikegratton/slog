@@ -4,21 +4,30 @@
 
 namespace slog {
 
+// This controls how fast the worker thread loop responds
+// to signals to shut down.  50 ms is generally too short
+// to notice at the console.
 constexpr std::chrono::milliseconds WAIT{50};
 
-LogChannel::LogChannel(LogRecordPool* pool_) 
-: pool(pool_) 
-, keepalive(false)
-{ 
-    sink = std::unique_ptr<NullSink>(new NullSink);
+LogChannel::LogChannel(std::shared_ptr<LogSink> sink_,
+                       ThresholdMap const& threshold_, 
+                       std::shared_ptr<LogRecordPool> pool_)
+: pool(pool_)
+, thresholdMap(threshold_)
+, sink(sink_)
+, keepalive(false) {    
 }
 
 LogChannel::~LogChannel() {
     stop();
 }
 
+LogChannel::LogChannel(LogChannel const& i_rhs) 
+: LogChannel(i_rhs.sink, i_rhs.thresholdMap, i_rhs.pool)
+{ 
+}
 
-void LogChannel::push(RecordNode* node) {    
+void LogChannel::push(RecordNode* node) {
     if (node) {
         int level = node->rec.meta.severity;
         queue.push(node);
@@ -42,40 +51,20 @@ void LogChannel::stop() {
     }
 }
 
-void LogChannel::set_sink(std::unique_ptr<LogSink> sink_) {
-    assert(logger_state() == SETUP);
-    if (sink_) {
-        sink = std::move(sink_);
-    } else {
-        sink = std::unique_ptr<LogSink>(new NullSink);
-    }
-}
-
-void LogChannel::set_threshold(ThresholdMap const& threshold_) {
-    assert(logger_state() == SETUP);
-    thresholdMap = threshold_;
-}
-
-void LogChannel::set_pool(LogRecordPool* pool_)
-{
-    assert(logger_state() == SETUP);
-    pool = pool_;
-}
-
 void LogChannel::logging_loop() {
     assert(sink);
     assert(pool);
     while (keepalive) {
         RecordNode* node = queue.pop(WAIT);
-        if (node) {            
-            sink->record(node->rec);
+        if (node) {
+            sink->record(node);
             pool->put(node);
         }
     }
     // Shutdown. Drain the queue.
     RecordNode* head = queue.pop_all();
     while (head) {
-        sink->record(head->rec);
+        sink->record(head);
         RecordNode* cursor = head->next;
         pool->put(head);
         head = cursor;
@@ -95,7 +84,7 @@ void LogChannel::LogQueue::push(RecordNode* node) {
     assert(node);
     node->next = nullptr;
     std::unique_lock<std::mutex> guard(lock);
-    if (mtail) {        
+    if (mtail) {
         mtail->next = node;
         mtail = node;
     } else {
@@ -112,7 +101,7 @@ RecordNode* LogChannel::LogQueue::pop(std::chrono::milliseconds wait) {
     std::unique_lock<std::mutex> guard(lock);
     if (pending.wait_for(guard, wait, condition)) {
         popped = mhead;
-        mhead = mhead->next;        
+        mhead = mhead->next;
         if (nullptr == mhead) {
             mtail = nullptr;
         }

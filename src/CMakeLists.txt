@@ -30,6 +30,7 @@ install(FILES
     ${CMAKE_CURRENT_BINARY_DIR}/LogConfig.hpp
     slog.hpp    
     LogRecord.hpp
+    LogRecordPool.hpp
     LogSetup.hpp
     LogSink.hpp
     FileSink.hpp

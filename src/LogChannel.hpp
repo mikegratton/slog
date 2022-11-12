@@ -32,7 +32,8 @@ public:
     /**
      * Ctor.
      */
-    LogChannel(LogRecordPool* pool_ = nullptr);
+    LogChannel(std::shared_ptr<LogSink> sink_, 
+        ThresholdMap const& threshold_, std::shared_ptr<LogRecordPool> pool_);
     
     /**
      * Dtor. Calls stop() so that all enqued messages will
@@ -40,12 +41,8 @@ public:
      */
     ~LogChannel();
     
-    /**
-     * No copying
-     */
-    LogChannel& operator=(LogChannel const&) = delete;
-    LogChannel(LogChannel const&) = delete;
-
+    LogChannel(LogChannel const& i_rhs);
+    
     /**
      * Start the worker thread. Transition to RUN state.
      * Thread safe.
@@ -82,26 +79,12 @@ public:
 
     //////////////////////////////////////////////////////////////////
     // SETUP STATE ONLY
-    /*
-     * Set the sink that records the messages. Not thread safe.
-     */
-    void set_sink(std::unique_ptr<LogSink> sink_);
 
-    /*
-     * Set the severity threshold for accepting messages. Not thread safe.
-     */
-    void set_threshold(ThresholdMap const& threshold_);
-    
     /*
      * For debugging. Compare the number of messages in the pool to the expected number. 
      * Not thread safe.
      */
     long allocator_count() const { return pool->count(); }
-    
-    /*
-     * Set the pool for records. Not thread safe.
-     */
-    void set_pool(LogRecordPool* pool_);
 
 protected:
     // Internal work function call on the workThread
@@ -140,12 +123,12 @@ protected:
     State logger_state() { return (keepalive? RUN : SETUP); }
 
     // These object have only thread-safe calls
-    LogRecordPool* pool;
+    std::shared_ptr<LogRecordPool> pool;
     LogQueue queue;
 
     // This state should not be mutated in RUN mode
     ThresholdMap thresholdMap;
-    std::unique_ptr<LogSink> sink;
+    std::shared_ptr<LogSink> sink;
 
     // Worker thread stuff
     std::thread workThread;

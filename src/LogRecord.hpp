@@ -39,9 +39,7 @@ struct LogRecordMetadata {
  */
 struct LogRecord {
 protected:    
-    friend class AllocatingRecordPool;
-    friend class BlockingRecordPool;
-    friend class DiscardRecordPool;
+    friend class LogRecordPool;
     LogRecord(char* message_, long max_message_size_);    
 public:
     void reset(); //! Clean out this record
