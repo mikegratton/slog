@@ -39,8 +39,7 @@ TEST_CASE("StreamStatsPerformance") {
     std::chrono::duration<double, std::milli>  elapsed = stop_time - start_time;
     std::cout << "Stats stream logged " << JOB_SIZE << " records in " << elapsed.count() << " ms \n";
     std::cout << "Per log: " << (elapsed.count()/JOB_SIZE) << " ms/log\n";
-    stop_logger();
-    std::cout << "Records missing in the pool: " << get_pool_missing_count() << "\n";
+    stop_logger();    
 }
 
 TEST_CASE("StreamRejectPerformance") {

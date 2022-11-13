@@ -4,8 +4,11 @@
 #include <ostream>
 #include "ConsoleSink.hpp"
 
+#include <iostream>
+
 TEST_CASE("Stream") {
     slog::start_logger(slog::INFO);
+    std::cout << "\n";
     Slog(DBUG) <<  "Can't see this";
     Slog(INFO) << "Can see this";
     Slog(ERRR) << "This is bad";
@@ -19,7 +22,9 @@ TEST_CASE("JumboMessage") {
     slog::LogConfig config;
     config.set_sink(std::make_shared<slog::ConsoleSink>());
     config.set_default_threshold(slog::INFO);
-    config.set_pool(std::make_shared<slog::LogRecordPool>(slog::ALLOCATE, 1024*1024, 64));
+    auto pool = std::make_shared<slog::LogRecordPool>(slog::ALLOCATE, 1024*1024, 64);
+    long initial_pool_size = pool->count();
+    config.set_pool(pool);
     slog::start_logger(config);
     int N = 64*8;
     std::string biggun;
@@ -29,4 +34,5 @@ TEST_CASE("JumboMessage") {
     Slog(INFO) << biggun;
     
     slog::stop_logger();
+    REQUIRE(pool->count() == initial_pool_size);
 }

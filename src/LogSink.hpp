@@ -1,7 +1,6 @@
 #pragma once
 #include "LogConfig.hpp"
 #include "LogRecord.hpp"
-#include "LogRecordPool.hpp"
 #include <functional>
 #include <cstdio>
 

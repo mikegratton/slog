@@ -149,6 +149,6 @@ long LogRecordPool::count() const {
         c++;
         cursor = cursor->next;
     }
-    return c - m_chunks;
+    return c;
 }
 }

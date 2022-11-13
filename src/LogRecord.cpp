@@ -3,6 +3,8 @@
 #include <thread>
 #include <cstring>
 
+#include<iostream>
+
 namespace slog {
 
 constexpr int NO_LINE = -1;
