@@ -57,14 +57,14 @@ void LogChannel::logging_loop() {
     while (keepalive) {
         RecordNode* node = queue.pop(WAIT);
         if (node) {
-            sink->record(node);
+            sink->record(node->rec);
             pool->put(node);
         }
     }
     // Shutdown. Drain the queue.
     RecordNode* head = queue.pop_all();
     while (head) {
-        sink->record(head);
+        sink->record(head->rec);
         RecordNode* cursor = head->next;
         pool->put(head);
         head = cursor;

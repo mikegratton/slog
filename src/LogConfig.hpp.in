@@ -1,12 +1,11 @@
 #pragma once
 
-#define SLOG_MAX_CHANNEL @SLOG_MAX_CHANNEL@
-
 #ifndef SLOG_LOGGING_ENABLED
 #define SLOG_LOGGING_ENABLED 1
 #endif
 
 #cmakedefine01 SLOG_LOG_TO_CONSOLE_WHEN_STOPPED
+#cmakedefine01 SLOG_STREAM
 
 namespace slog
 {

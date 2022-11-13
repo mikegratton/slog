@@ -57,13 +57,13 @@ void FileSink::open_or_rotate() {
     }
 }
 
-void FileSink::record(RecordNode const* node) {
+void FileSink::record(LogRecord const& rec) {
     open_or_rotate();
-    mbytesWritten += mformat(mfile, node);
+    mbytesWritten += mformat(mfile, rec);
     fputc('\n', mfile);    
     fflush(mfile);
     if (mecho) {
-        mformat(stdout, node);
+        mformat(stdout, rec);
         fputc('\n', stdout);        
         fflush(stdout);
     }

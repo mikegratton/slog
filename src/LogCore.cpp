@@ -187,6 +187,9 @@ void start_logger(LogConfig const& config) {
 
 void start_logger(std::vector<LogConfig> const& config) {
     Logger::stop_all_channels();
+    if (config.empty()) {
+        return;
+    }
     Logger::setup_channels(config);
 #ifndef SLOG_NO_STREAM
     if (config.size() > 0) {
@@ -209,6 +212,11 @@ long get_pool_missing_count() {
     }
     return count;
 }
+
+LogConfig::LogConfig()
+: pool(nullptr)
+, sink(std::make_shared<FileSink>())
+{ }
 
 }
 

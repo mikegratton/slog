@@ -29,7 +29,6 @@ struct LogRecordMetadata {
     unsigned long thread_id; //! unique ID of the thread this message was recorded on
     int line;                //!program line number
     int severity;            //! Message importance. Lower numbers are more important    
-
 };
 
 
@@ -37,16 +36,17 @@ struct LogRecordMetadata {
  * A LogRecord is a message string combined with the associated metadata.
  * These objects are managed by LogRecordPool.
  */
-struct LogRecord {
-protected:    
-    friend class LogRecordPool;
-    LogRecord(char* message_, long max_message_size_);    
+struct LogRecord {    
 public:
-    void reset(); //! Clean out this record
-
     LogRecordMetadata meta; //! Metadata
     long message_max_size;  //! maximum size of the message string (including null terminator)
     char* message;          //! Actual log message. 
+    LogRecord const* more;  //! If non-null, message continued here
+
+protected:    
+    friend class LogRecordPool;
+    LogRecord(char* message_, long max_message_size_);
+    void reset(); //! Clean out this record
 };
 
 

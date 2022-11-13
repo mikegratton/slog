@@ -27,34 +27,32 @@ void bench_threaded_logging(size_t threads, int iters) {
     std::cout << "**************************************************************\n";
     std::cout << "Threads: " << threads << ", messages: " << iters << "\n";
     std::cout << "**************************************************************\n";
-    
-    {
-    std::cout << "File sink\n";
+
+    auto pool = std::make_shared<slog::LogRecordPool>(slog::DISCARD, 256*250000, 256);
     slog::LogConfig config;
-    auto sink = std::make_shared<slog::FileSink>();
-    sink->set_file("./", "bench");
-    sink->set_echo(false);    
-    config.set_sink(sink);
-    config.set_default_threshold(slog::INFO);    
-    bench_mt(iters, config, threads);
+    config.set_default_threshold(slog::INFO);
+    config.set_pool(pool);
+    {
+        std::cout << "File sink\n";
+        auto sink = std::make_shared<slog::FileSink>();
+        sink->set_file("./", "bench");
+        sink->set_echo(false);
+        config.set_sink(sink);
+        bench_mt(iters, config, threads);
     }
 
     {
-    std::cout << "Journal sink\n";    
-    slog::LogConfig config;
-    auto sink = std::make_shared<slog::JournaldSink>();
-    sink->set_echo(false);
-    config.set_sink(sink);    
-    config.set_default_threshold(slog::INFO);
-    bench_mt(iters, config, threads);
+        std::cout << "Journal sink\n";
+        auto sink = std::make_shared<slog::JournaldSink>();
+        sink->set_echo(false);
+        config.set_sink(sink);
+        bench_mt(iters, config, threads);
     }
-    
-    {        
-    std::cout << "Null sink\n";    
-    slog::LogConfig config;
-    config.set_sink(std::make_shared<slog::NullSink>());
-    config.set_default_threshold(slog::INFO);
-    bench_mt(iters, config, threads);
+
+    {
+        std::cout << "Null sink\n";
+        config.set_sink(std::make_shared<slog::NullSink>());
+        bench_mt(iters, config, threads);
     }
 }
 
@@ -105,7 +103,7 @@ void bench_mt(int howmany, slog::LogConfig& config, size_t thread_count) {
     slog::stop_logger(); // Force backend to drain queue
     auto delta = high_resolution_clock::now() - start;
     auto delta_d = duration_cast<duration<double>>(delta).count();
-    std::cout << "Elapsed: " << delta_d << " secs " << int(howmany / delta_d) 
-    << " msg/sec, pre: " << delta_pre_d << " sec, " << int(howmany / delta_pre_d) 
-    << "\n";
+    std::cout << "Elapsed: " << delta_d << " secs " << int(howmany / delta_d)
+              << " msg/sec, pre: " << delta_pre_d << " sec, " << int(howmany / delta_pre_d)
+              << "\n";
 }

@@ -12,14 +12,16 @@ namespace {
     // is too long, tack a null char on the end and discard the rest.
 class IntrusiveBuf : public std::streambuf {
 public:
-    void set_record(RecordNode* node) {
+    void set_node(RecordNode* node, long channel) {
         m_node = node;
+        m_channel = channel;
         pubsetbuf(node->rec.message, node->rec.message_max_size);
     }
     
 protected:
 
     RecordNode* m_node;
+    long m_channel;
     
     std::streambuf* setbuf(char* buffer, std::streamsize length_) override {
         setp(buffer, buffer + length_);
@@ -47,11 +49,10 @@ protected:
             s += write_length;
             length -= write_length;
                         
-            long channel_somehow = 0; // TODO
-            RecordNode* extra = get_fresh_record(channel_somehow, nullptr, nullptr, 0, m_node->rec.meta.severity,
+            RecordNode* extra = get_fresh_record(m_channel, nullptr, nullptr, 0, m_node->rec.meta.severity,
                                                m_node->rec.meta.tag);                      
-            m_node->jumbo = extra;
-            set_record(extra);
+            attach(m_node, extra);
+            set_node(extra, m_channel);
             xsputn(s, length);            
         }
 
@@ -70,8 +71,8 @@ public:
         : std::ostream(&buf) {
     }
 
-    void setbuf(RecordNode* record) {
-        buf.set_record(record);
+    void set_node(RecordNode* node, long channel) {
+        buf.set_node(node, channel);
         clear();
     }
 
@@ -142,7 +143,7 @@ std::ostream& CaptureStream::stream() {
     if (node) {
         // Set the stream to write to the message buffer
         IntrusiveStream& s = st_stream.stream();
-        s.setbuf(node);
+        s.set_node(node, channel);
         return s;
     } else {
         // Failure to allocate, just eat the message

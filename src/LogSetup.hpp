@@ -80,7 +80,7 @@ long get_pool_missing_count();
 class LogConfig
 {
 public:
-    LogConfig() = default;
+    LogConfig();
     
     void set_default_threshold(int thr) { threshold.set_default(thr); }
 

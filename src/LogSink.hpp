@@ -11,21 +11,21 @@ class LogSink
 {
 public:
     virtual ~LogSink() = default;
-    virtual void record(RecordNode const* node) = 0;
+    virtual void record(LogRecord const& node) = 0;
 };
 
 // Simple sink that ignores messages
 class NullSink : public LogSink
 {
 public:
-    void record(RecordNode const*) override { }
+    void record(LogRecord const&) override { }
 };
 
 
 // Standard form for message formatters. This should
 // write rec to sink and return the number of bytes
 // written.
-using Formatter = std::function<int (FILE* sink, RecordNode const* node)>;
+using Formatter = std::function<int (FILE* sink, LogRecord const& node)>;
 
 /**
  * Writes the severity level as a four character string to severity_str
@@ -52,6 +52,6 @@ void format_location(char* location_str, char const* file_name, int line_number)
 /**
  * A Formatter-compatible formatter that is used by ... well, by default
  */
-int default_format(FILE* sink, RecordNode const* node);
+int default_format(FILE* sink, LogRecord const& node);
 
 }

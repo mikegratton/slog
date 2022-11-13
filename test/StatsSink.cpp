@@ -2,8 +2,8 @@
 #include <chrono>
 #include <cstdio>
 
-void StatsSink::record(const slog::RecordNode* node) {
-    long delta = std::chrono::system_clock::now().time_since_epoch().count() - node->rec.meta.time;
+void StatsSink::record(const slog::LogRecord& rec) {
+    long delta = std::chrono::system_clock::now().time_since_epoch().count() - rec.meta.time;
     sample.push_back(delta);
 }
 

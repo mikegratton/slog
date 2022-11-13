@@ -20,7 +20,7 @@
  * 
  */
 
-#ifndef SLOG_NO_STREAM
+#if SLOG_STREAM
 // Baseline logging macro. Wrap the log check in an if() body, and get a stream
 // in the else clause (so that the << ... parts are on the else branch)
 #define SLOG_LogStreamBase(severity, tag, channel) \
@@ -92,7 +92,7 @@ RecordNode* get_fresh_record(int channel, char const* file, char const* function
 RecordNode* capture_message(RecordNode* rec, char const* format, ...);
 }
 
-#ifndef SLOG_NO_STREAM
+#if SLOG_STREAM
 #include <ostream>
 namespace slog 
 {

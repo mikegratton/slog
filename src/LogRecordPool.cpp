@@ -7,6 +7,23 @@
 namespace slog {
 
 
+NodePtr toNodePtr(LogRecord const* i_rec)
+{
+    constexpr std::ptrdiff_t OFFSET = sizeof(NodePtr);
+    if (i_rec) {
+        // This is some ugly pointer math.
+        char* rec = reinterpret_cast<char*>(const_cast<LogRecord*>(i_rec));
+        return reinterpret_cast<NodePtr>(rec - OFFSET);
+    }
+    return nullptr;
+}
+
+void attach(NodePtr io_rec, NodePtr i_jumbo)
+{
+    if (io_rec && i_jumbo) {
+        io_rec->rec.more = &i_jumbo->rec;
+    }
+}
 
 class PoolMemory {
 public:
@@ -44,7 +61,6 @@ void LogRecordPool::allocate() {
         char* message = pool + i*m_chunkSize + record_size;
         new (&here->rec) LogRecord(message, message_size);
         here->next = next;
-        here->jumbo = nullptr;
         next = here;
     }
 
@@ -75,7 +91,7 @@ LogRecordPool::LogRecordPool(LogRecordPoolPolicy i_policy, long i_alloc_size,
 LogRecordPool::~LogRecordPool() { delete m_pool; }
 
 RecordNode* LogRecordPool::take() {    
-    RecordPtr allocated = nullptr;
+    NodePtr allocated = nullptr;
     switch (m_policy) {
     case ALLOCATE: {
         std::unique_lock<std::mutex> guard(m_lock);
@@ -84,17 +100,17 @@ RecordNode* LogRecordPool::take() {
             assert(m_cursor);
         }
         allocated = m_cursor;
-        m_cursor = m_cursor->next;
-        return allocated;
+        m_cursor = m_cursor->next;        
+        break;
     }
     case BLOCK: {
-        std::unique_lock<std::mutex> guard(m_lock);
         std::chrono::milliseconds wait{m_max_blocking_time_ms};
+        std::unique_lock<std::mutex> guard(m_lock);        
         if (m_nonempty.wait_for(guard, wait, [this]() -> bool {return m_cursor != nullptr;})) {
             allocated = m_cursor;
             m_cursor = m_cursor->next;
         }
-        return allocated;
+        break;
     }
     case DISCARD: 
     default : {
@@ -103,17 +119,17 @@ RecordNode* LogRecordPool::take() {
         if (m_cursor) {
             m_cursor = m_cursor->next;
         }
-        return allocated;
+        break;
     }
     }    
+    return allocated;
 }
 
 void LogRecordPool::put(RecordNode* node) {
     if (node) {
-        if (node->jumbo) {
-            put(node->jumbo);
+        if (node->rec.more) {
+            put(toNodePtr(node->rec.more));
         }
-        node->jumbo = nullptr;
         node->rec.reset();
         std::unique_lock<std::mutex> guard(m_lock);
         node->next = m_cursor;
@@ -128,7 +144,7 @@ void LogRecordPool::put(RecordNode* node) {
 long LogRecordPool::count() const {
     std::unique_lock<std::mutex> guard(m_lock);
     long c = 0;
-    RecordPtr cursor = m_cursor;
+    NodePtr cursor = m_cursor;
     while (cursor) {
         c++;
         cursor = cursor->next;

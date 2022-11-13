@@ -7,13 +7,20 @@ namespace slog {
     
 struct RecordNode;
 
-using RecordPtr = RecordNode*;
+using NodePtr = RecordNode*;
 
+// The layout of this struct is important. Do 
+// not change it without fixing the functions
+// below.
 struct RecordNode {    
-    RecordPtr next;
-    RecordPtr jumbo;
+    NodePtr next;
     LogRecord rec; // Payload
 };
+
+// Convert a LogRecord ptr into a RecordPtr by doing some arithmetic
+NodePtr toNodePtr(LogRecord const* i_rec);
+// Link two records together
+void attach(NodePtr io_rec, NodePtr i_jumbo);
 
 class PoolMemory;
 
@@ -60,7 +67,7 @@ protected:
     long m_chunkSize;    
     long m_chunks;
 
-    RecordPtr m_cursor; // head of the stack
+    NodePtr m_cursor; // head of the stack
     PoolMemory* m_pool; // Start of heap allocated region
 };
 }

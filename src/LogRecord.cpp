@@ -40,6 +40,7 @@ LogRecord::LogRecord(char* message_, long max_message_size_) {
 
 void LogRecord::reset() {    
     meta.reset();
+    more = nullptr;
     message[0] = '\0';
 }
 
