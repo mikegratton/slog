@@ -8,58 +8,56 @@
 namespace slog {
 
 namespace {
-    // A streambuf that writes to a fixed sized array. If the message 
-    // is too long, tack a null char on the end and discard the rest.
+// A streambuf that writes to a fixed sized array. If the message
+// is too long, tack a null char on the end and discard the rest.
 class IntrusiveBuf : public std::streambuf {
 public:
     void set_node(RecordNode* node, long channel) {
         m_node = node;
         m_channel = channel;
-        pubsetbuf(node->rec.message, node->rec.message_max_size);
+        m_cursor = node->rec.message;
+        m_end = m_cursor + node->rec.message_max_size-1;
     }
-    
+
+    void terminate() {
+        if (m_cursor < m_end) {
+            *m_cursor = 0;
+            m_cursor++;
+        } else {
+            *m_end = 0;
+        }
+    }
+
 protected:
 
     RecordNode* m_node;
     long m_channel;
-    
-    std::streambuf* setbuf(char* buffer, std::streamsize length_) override {
-        setp(buffer, buffer + length_);
-        return this;
-    }
-    
-    int overflow(int) override {
-        char* last = epptr();
-        if (last) {
-            *(last-1) = '\0';
-        }
-        return traits_type().eof();
-    }
+    char* m_cursor;
+    char* m_end;
 
+    std::streamsize write_some(char const* s, std::streamsize count) {
+        count = std::min(count, m_end - m_cursor);
+        memcpy(m_cursor, s, count);
+        m_cursor += count;
+        return count;
+    }
 
     std::streamsize xsputn(char const* s, std::streamsize length) override {
-        std::streamsize max_write = epptr() - pptr();
-        if (length < max_write) {
-            memcpy(pptr(), s, length);
-            pbump(length);
-        } else {
-            std::streamsize write_length = max_write - 1;
-            memcpy(pptr(), s, write_length);
-            m_node->rec.message[m_node->rec.message_max_size-1] = '\0';            
-            s += write_length;
-            length -= write_length;
-                        
-            RecordNode* extra = get_fresh_record(m_channel, nullptr, nullptr, 0, m_node->rec.meta.severity,
-                                               m_node->rec.meta.tag);                      
-            attach(m_node, extra);
-            set_node(extra, m_channel);
-            xsputn(s, length);            
-        }
+        std::streamsize count = 0;
+        do {
+            count += write_some(s, length);
+            if (count < length) {
 
-        if (pptr() == epptr()) {
-            overflow(0);
-        }
-        return length;
+                RecordNode* extra = get_fresh_record(m_channel, nullptr, nullptr, 0, m_node->rec.meta.severity,
+                                                     m_node->rec.meta.tag);
+                if (nullptr == extra) {
+                    return count;
+                }
+                attach(m_node, extra);
+                set_node(extra, m_channel);
+            }
+        } while (count < length);
+        return count;
     }
 };
 
@@ -77,7 +75,7 @@ public:
     }
 
     void terminate() {
-        buf.sputc(0);
+        buf.terminate();
     }
 
 protected:
@@ -101,7 +99,7 @@ int s_locale_version = 0;
 class StreamHolder {
 public:
     StreamHolder() : m_locale_version(s_locale_version) { }
-    
+
     IntrusiveStream& stream() {
         if (m_locale_version < s_locale_version) {
             m_stream.imbue(s_locale);
@@ -109,9 +107,9 @@ public:
         }
         return m_stream;
     }
-    
+
     IntrusiveStream& stream_direct() { return m_stream; }
-    
+
 protected:
     IntrusiveStream m_stream;
     int m_locale_version;
@@ -122,19 +120,18 @@ NullStream s_null; // Since NullStream has no state, all threads share a copy
 
 } // end of anon namespace
 
-void set_locale(std::locale locale)
-{
+void set_locale(std::locale locale) {
     s_locale = locale;
     s_locale_version++;
 }
 
 void set_locale_to_global() { set_locale(std::locale()); }
 
-// On destruction, terminate the cstring, then forward the node to the 
+// On destruction, terminate the cstring, then forward the node to the
 // back end.
 CaptureStream::~CaptureStream() {
     if (node) {
-        st_stream.stream_direct() << std::ends;          
+        st_stream.stream_direct().terminate();
         push_to_sink(node, channel); // Push to channel queue
     }
 }
