@@ -393,12 +393,11 @@ works fine.
 ## Compile-time Configuration
 Slog has two compile-time cmake configuration options:
 
-+-------------------------+-----------------------------+----------------------------------------+
+
 | Name                    |    Default                  |    Notes                               |
-+-------------------------+-----------------------------+----------------------------------------+
+|-------------------------|-----------------------------|----------------------------------------|
 | `SLOG_ALWAYS_LOG`       |   OFF                       | When the logger is stopped, dump records to the console |
 | `SLOG_STREAM`           |   ON                        | Turn this off to avoid including <iostream> and Slog() macros |
-+-------------------------+-----------------------------+-----------------------------------+
 
 In addition, building with `-DSLOG_LOGGING_ENABLED=0` will suppress all logging in this translation
 unit.
