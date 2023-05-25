@@ -1,20 +1,21 @@
 #pragma once
+#include <atomic>
+#include <condition_variable>
+#include <mutex>
+#include <thread>
+
 #include "LogChannel.hpp"
 #include "LogRecord.hpp"
 #include "LogRecordPool.hpp"
-#include "ThresholdMap.hpp"
 #include "LogSink.hpp"
-
-#include <thread>
-#include <atomic>
-#include <mutex>
-#include <condition_variable>
+#include "ThresholdMap.hpp"
 
 namespace slog {
 
 /**
- * Principle worker of the slog system. The LogChannel provides
- * a thread-safe interface to the log sink and the pool.
+ * @brief Principle worker of the slog system.
+ *
+ * The LogChannel provides a thread-safe interface to the log sink and the pool.
  *
  * This creates a thread on start() that watches a queue.  When
  * messages arrive, the thread dequeues them, sending them to
@@ -28,21 +29,20 @@ namespace slog {
  *
  */
 class LogChannel {
-public:
+   public:
     /**
      * Ctor.
      */
-    LogChannel(std::shared_ptr<LogSink> sink_, 
-        ThresholdMap const& threshold_, std::shared_ptr<LogRecordPool> pool_);
-    
+    LogChannel(std::shared_ptr<LogSink> sink_, ThresholdMap const& threshold_, std::shared_ptr<LogRecordPool> pool_);
+
     /**
      * Dtor. Calls stop() so that all enqued messages will
      * be sent to the sink before returning.
      */
     ~LogChannel();
-    
+
     LogChannel(LogChannel const& i_rhs);
-    
+
     /**
      * Start the worker thread. Transition to RUN state.
      * Thread safe.
@@ -68,7 +68,6 @@ public:
      */
     RecordNode* get_fresh_record() { return pool->take(); }
 
-
     ///////////////////////////////////////////////////////////////////
     // RUN STATE ONLY
     /**
@@ -81,15 +80,14 @@ public:
     // SETUP STATE ONLY
 
     /*
-     * For debugging. Compare the number of messages in the pool to the expected number. 
+     * For debugging. Compare the number of messages in the pool to the expected number.
      * Not thread safe.
      */
     long allocator_count() const { return pool->count(); }
 
-protected:
+   protected:
     // Internal work function call on the workThread
     void logging_loop();
-
 
     /**
      * A concurrent queue implemented as a linked list using the
@@ -99,8 +97,8 @@ protected:
      * by the OS efficiently.
      */
     class LogQueue {
-    public:
-        LogQueue() : mtail(nullptr), mhead(nullptr) { }
+       public:
+        LogQueue() : mtail(nullptr), mhead(nullptr) {}
 
         void push(RecordNode* record);
 
@@ -108,7 +106,7 @@ protected:
 
         RecordNode* pop_all();
 
-    protected:
+       protected:
         std::mutex lock;
         std::condition_variable pending;
 
@@ -116,11 +114,8 @@ protected:
         RecordNode* mhead;
     };
 
-    enum State {
-        SETUP,
-        RUN
-    };
-    State logger_state() { return (keepalive? RUN : SETUP); }
+    enum State { SETUP, RUN };
+    State logger_state() { return (keepalive ? RUN : SETUP); }
 
     // These object have only thread-safe calls
     std::shared_ptr<LogRecordPool> pool;
@@ -135,4 +130,4 @@ protected:
     std::atomic_bool keepalive;
 };
 
-}
+}  // namespace slog

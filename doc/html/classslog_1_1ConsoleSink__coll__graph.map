@@ -1,0 +1,4 @@
+<map id="slog::ConsoleSink" name="slog::ConsoleSink">
+<area shape="rect" id="node1" title="Simple sink that dumps messages to stdout." alt="" coords="5,80,143,107"/>
+<area shape="rect" id="node2" href="$classslog_1_1LogSink.html" title="Base class for all log sinks." alt="" coords="20,5,128,32"/>
+</map>

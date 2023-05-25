@@ -1,0 +1,7 @@
+<map id="slog::LogRecordPool" name="slog::LogRecordPool">
+<area shape="rect" id="node1" title="A memory pool for unused log records." alt="" coords="59,273,213,300"/>
+<area shape="rect" id="node2" href="$classslog_1_1PoolMemory.html" title=" " alt="" coords="5,184,144,211"/>
+<area shape="rect" id="node3" href="$structslog_1_1RecordNode.html" title=" " alt="" coords="168,184,304,211"/>
+<area shape="rect" id="node4" href="$structslog_1_1LogRecord.html" title="A LogRecord is a message string combined with the associated metadata." alt="" coords="173,95,299,121"/>
+<area shape="rect" id="node5" href="$structslog_1_1LogRecordMetadata.html" title="Metadata associated with every log message." alt="" coords="143,5,329,32"/>
+</map>

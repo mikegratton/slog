@@ -1,0 +1,6 @@
+<map id="slog::LogChannel::LogQueue" name="slog::LogChannel::LogQueue">
+<area shape="rect" id="node1" title=" " alt="" coords="5,288,212,315"/>
+<area shape="rect" id="node2" href="$structslog_1_1RecordNode.html" title=" " alt="" coords="41,184,177,211"/>
+<area shape="rect" id="node3" href="$structslog_1_1LogRecord.html" title="A LogRecord is a message string combined with the associated metadata." alt="" coords="46,95,171,121"/>
+<area shape="rect" id="node4" href="$structslog_1_1LogRecordMetadata.html" title="Metadata associated with every log message." alt="" coords="15,5,202,32"/>
+</map>
