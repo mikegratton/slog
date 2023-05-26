@@ -1,0 +1,5 @@
+<map id="slog::LogConfig" name="slog::LogConfig">
+<area shape="rect" id="node1" title=" " alt="" coords="32,199,153,225"/>
+<area shape="rect" id="node2" href="$classslog_1_1FlatThresholdMap.html" title="A char const* to int map with a default value for missing/empty/null keys." alt="" coords="5,109,180,136"/>
+<area shape="rect" id="node3" href="$structslog_1_1FlatThresholdMap_1_1Threshold.html" title=" " alt="" coords="5,5,180,47"/>
+</map>
