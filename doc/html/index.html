@@ -90,8 +90,13 @@ $(document).ready(function(){initNavTree('index.html',''); initResizable(); });
 </div><!--header-->
 <div class="contents">
 <div class="textblock"><p><a class="anchor" id="md__home_mike_git_slog_README"></a></p>
+<ul>
+<li><a href="https://github.com/mikegratton/slog">GitHub Repository</a></li>
+<li><a href="https://mikegratton.github.io/slog/">Documentation</a></li>
+</ul>
 <p>Slog is an asynchronous stream-based logger with a memory pool. It is designed for applications where the business logic cannot wait for disk or network IO to complete before continuing. For many server and robotic programs, log traffic comes in bursts as sessions open, plans are formed, and so on. Slog queues up messages during the busy times and catches up on IO during the lulls. For critical applications, Slog can guarantee it will not allocate memory beyond its initial pool. For "normal" applications, Slog will allocate more memory if you are logging faster than it can keep up.</p>
-<p>Features:</p>
+<h1><a class="anchor" id="autotoc_md0"></a>
+Features:</h1>
 <ul>
 <li>Slog is configurable, but with sensible an unsurprising defaults. Write your own backend or formatter, or use one of those provided</li>
 <li>Flexible memory pool policies to control allocation in critical code</li>
@@ -102,7 +107,7 @@ $(document).ready(function(){initNavTree('index.html',''); initResizable(); });
 <li>Slog's mutex-guarded sections are very short &ndash; about four instructions maximum</li>
 </ul>
 <p>In fact, Slog began life as a lock-free project, but transitioned to mutexes when testing showed no significant performance boost. This is likely because Slog's main thread-safe queue has the back-end worker thread waiting for new records to arrive, and this is best handled using condition variables. Condition variables and mutexes allow the kernel insight into how to best schedule Slog's activities.</p>
-<h1><a class="anchor" id="autotoc_md0"></a>
+<h1><a class="anchor" id="autotoc_md1"></a>
 Quickstart</h1>
 <div class="fragment"><div class="line"><span class="comment">/*** other_stuff.hpp ***/</span></div>
 <div class="line"><span class="preprocessor">#pragma once</span></div>
@@ -141,7 +146,7 @@ Quickstart</h1>
 <div class="ttc" id="aclassslog_1_1LogConfig_html_a79639436a5f95c63422194d6d64af189"><div class="ttname"><a href="classslog_1_1LogConfig.html#a79639436a5f95c63422194d6d64af189">slog::LogConfig::add_tag</a></div><div class="ttdeci">void add_tag(const char *tag, int thr)</div><div class="ttdoc">Add a custom threshold for a tag.</div><div class="ttdef"><b>Definition:</b> LogSetup.hpp:94</div></div>
 <div class="ttc" id="aclassslog_1_1LogConfig_html_a8cafc838a4c0a4d28aa68c61bc76b437"><div class="ttname"><a href="classslog_1_1LogConfig.html#a8cafc838a4c0a4d28aa68c61bc76b437">slog::LogConfig::set_default_threshold</a></div><div class="ttdeci">void set_default_threshold(int thr)</div><div class="ttdoc">Set the default threshold at which to accept records.</div><div class="ttdef"><b>Definition:</b> LogSetup.hpp:86</div></div>
 </div><!-- fragment --><p>See the example project in <code>example</code> for a basic setup.</p>
-<h1><a class="anchor" id="autotoc_md1"></a>
+<h1><a class="anchor" id="autotoc_md2"></a>
 Design</h1>
 <p>Slog has three design goals:</p>
 <ol type="1">
@@ -157,15 +162,15 @@ Design</h1>
 <li>Block: If the pool is empty, block the business thread until records become available. The maximum time to block is configurable. If it is exhausted, the log record is ignored. This mode ensures that the memory used by the logger is bounded, and places a bound on the time per log message. With appropriate tuning, this policy can meet needs for real time systems.</li>
 <li>Discard: If the pool is empty, discard the log record. This is the most extreme, never allocating or blocking. This choice is intended for real time applications where delay of the business logic could result in loss of life or grevious harm.</li>
 </ol>
-<h1><a class="anchor" id="autotoc_md2"></a>
+<h1><a class="anchor" id="autotoc_md3"></a>
 Asynchronous Logging</h1>
 <p>Slog is an <em>asynchronous</em> logger, meaning log records are written to sinks (files, sockets, etc.) on dedicated worker threads. "Logging" on a business thread captures the message to an internal buffer. This is then pushed into a thread-safe queue where a worker thread pops the message and performs the (blocking) IO call. This design minimizes blocking calls that are made on the business thread. The risk with asynchronous logging is that the program may terminate before this queue is written to disk. Slog ties into the signal system to ensure that the queue is processed before the program exits in most cases. These cases include normal end of program (<code>return</code> from main) and the signals SIGINT, SIGABRT, and SIGQUIT. Thus Slog will drain its queue on all trappable signals (ctrl-C &ndash; SIG_INT &ndash; included), as well as when <code>abort()</code> is called. Note that calling <code>exit()</code> from <code>stdlib.h</code> is not one of these cases &ndash; this exits the program via a means that can evade the destructor of Slog's singleton. If you are slogging in a context where you need to call exit (i.e. you have forked), you must call <code>slog::stop_logger()</code> first to ensure a proper shutdown.</p>
-<h1><a class="anchor" id="autotoc_md3"></a>
+<h1><a class="anchor" id="autotoc_md4"></a>
 API</h1>
 <p>Slog's API is split into two parts: a very light-weight general include for code that needs to write logs (<code><a class="el" href="slog_8hpp_source.html">slog.hpp</a></code>), and a larger setup header that is used to configure the logger (<code><a class="el" href="LogSetup_8hpp_source.html">LogSetup.hpp</a></code>).</p>
-<h2><a class="anchor" id="autotoc_md4"></a>
+<h2><a class="anchor" id="autotoc_md5"></a>
 Slog Concepts</h2>
-<h3><a class="anchor" id="autotoc_md5"></a>
+<h3><a class="anchor" id="autotoc_md6"></a>
 Severity</h3>
 <p>Each message in Slog has an attached severity integer. These match the traditional syslog levels of DBUG, INFO, NOTE, WARN, ERRR, CRIT, ALRT, and EMER. You may "add" your own levels by using integers between the severity levels you want. For instance, to add a COOL level, we could set </p><div class="fragment"><div class="line"><span class="keywordtype">int</span> COOL = (slog::NOTE + slog::WARN)/2;</div>
 </div><!-- fragment --><p> Note that higher numbers are treated as less severe. In addition, negative severity is considered "FATL" by Slog, triggering the draining of all log queues and a call to <code>abort()</code> ending the program.</p>
@@ -173,17 +178,17 @@ Severity</h3>
 <div class="line">Slog(INFO) &lt;&lt; <span class="stringliteral">&quot;Hello, I am incrementing a: &quot;</span> &lt;&lt; a++;</div>
 </div><!-- fragment --><p> will not be executed. The value of <code>a</code> will be zero at the end. <br  />
  Thresholds are set up in <code>LogConfig</code> before logging begins and cannot be changed while logging is happening. You can check if a message would be logged by calling <code>slog::will_log(int severity, char* tag = "", int channel = 0)</code>.</p>
-<h3><a class="anchor" id="autotoc_md6"></a>
+<h3><a class="anchor" id="autotoc_md7"></a>
 Tags</h3>
 <p>Each message may have an optional tag associated. These are size-limited strings (the default limit is 16 characters) that can have custom log thresholds. Tags that don't have defined thresholds use the default. For instance </p><div class="fragment"><div class="line"><span class="keywordtype">int</span> a = 0;</div>
 <div class="line">Slog(INFO, <span class="stringliteral">&quot;noisy&quot;</span>) &lt;&lt; <span class="stringliteral">&quot;Increment a: &quot;</span> &lt;&lt; a++;</div>
 <div class="line">Slog(INFO) &lt;&lt; <span class="stringliteral">&quot;Increment a: &quot;</span>&lt;&lt; a++;</div>
 </div><!-- fragment --><p> could log zero, one, or two times. <br  />
 </p>
-<h3><a class="anchor" id="autotoc_md7"></a>
+<h3><a class="anchor" id="autotoc_md8"></a>
 Channels</h3>
 <p>Slog can be configured to have multiple <em>channels</em> &ndash; independent back-ends. Each channel has its own worker thread, its own sink, and its own set of severity thresholds. You can use this to separate events and data, for instance. Note that a particular message can be sent to only one channel. Channels can have independent pools with different policies, sizes, and so on, or they can share pools.</p>
-<h2><a class="anchor" id="autotoc_md8"></a>
+<h2><a class="anchor" id="autotoc_md9"></a>
 General Use</h2>
 <p>Slog provides a set of macro-like functions in <code><a class="el" href="slog_8hpp_source.html">slog.hpp</a></code> for logging. In general, this is the only include you'll need in locations where you log. The macros are</p>
 <ul>
@@ -196,7 +201,7 @@ General Use</h2>
 </ul>
 <p>All of these macros agressively check if the message will be logged given the current severity threshold for the tag and channel. If the message won't be logged, the code afterwards <em>will not be executed</em>. That is, no strings are formatted, no work is done. Moreover, depending on setup, if the message pool is empty, these macros may (a) allocate, causing a delay (b) block for a configurable amount of time waiting for a message to become available or (c) simply discard the log message.</p>
 <p>Slog uses a custom <code>std::ostream</code> class that avoids the inefficiencies of <code>std::stringstream</code>. For the Flog family of macros, formatting is performed with <code>vsnprintf</code>.</p>
-<h2><a class="anchor" id="autotoc_md9"></a>
+<h2><a class="anchor" id="autotoc_md10"></a>
 Setup</h2>
 <p>For your main, <code><a class="el" href="LogSetup_8hpp_source.html">LogSetup.hpp</a></code> provides the API for configuring your log. There are three start calls:</p>
 <ol type="1">
@@ -212,15 +217,15 @@ Setup</h2>
 <li><code>LogConfig::set_sink(LogSink* sink)</code> : Takes the log sink instance given to use for the back end. Slog takes ownership of the pointer and will perform cleanup when required.</li>
 </ul>
 <p>In addition, you may call <code>stop_logger()</code> to cease logging, but this isn't required before program termination.</p>
-<h2><a class="anchor" id="autotoc_md10"></a>
+<h2><a class="anchor" id="autotoc_md11"></a>
 Log Sinks</h2>
 <p>Slog comes with three built-in sinks for recording messages, <code>ConsoleSink</code>, <code>FileSink</code> and <code>JournaldSink</code>. You may also make your own sinks by implementing the very small API.</p>
-<h3><a class="anchor" id="autotoc_md11"></a>
+<h3><a class="anchor" id="autotoc_md12"></a>
 ConsoleSink</h3>
 <p><code>ConsoleSink</code> writes messages to <code>stdout</code>. It has only one feature:</p><ul>
 <li><code>set_formatter(Formatter format)</code>: Adjust the format of log messages. See below.</li>
 </ul>
-<h3><a class="anchor" id="autotoc_md12"></a>
+<h3><a class="anchor" id="autotoc_md13"></a>
 FileSink</h3>
 <p><code>FileSink</code> writes log messages to a file via the C <code>fprintf()</code> API. It can also optionally echo those messages to <code>stdout</code>. It has a handful of useful features:</p>
 <ol type="1">
@@ -250,7 +255,7 @@ FileSink</h3>
 <div class="line"><span class="keywordtype">int</span> line;                </div>
 <div class="line"><span class="keywordtype">int</span> severity;            <span class="comment">//! Message importance. Lower numbers are more important    </span></div>
 </div><!-- fragment --><p> As you can see, the default formatter doesn't include all of this information, but you can easily customize it.</p>
-<h3><a class="anchor" id="autotoc_md13"></a>
+<h3><a class="anchor" id="autotoc_md14"></a>
 JournaldSink</h3>
 <p>The Journald sink uses the structured logging features of Jornald to record the metadata. These are logged as </p><div class="fragment"><div class="line">sd_journal_send(</div>
 <div class="line">    <span class="stringliteral">&quot;CODE_FUNC=%s&quot;</span>, rec.meta.function,</div>
@@ -263,11 +268,11 @@ JournaldSink</h3>
 <div class="line">    NULL); </div>
 </div><!-- fragment --><p> allowing you to use the Jornald features to filter the logs. For a great introduction to this, see <a href="http://0pointer.de/blog/projects/journalctl.html">http://0pointer.de/blog/projects/journalctl.html</a>.</p>
 <p>The sink also provides optional echoing to the console. The echoed logs use the same <code>Formatter</code> function object as <code>FileSink</code>.</p>
-<h2><a class="anchor" id="autotoc_md14"></a>
+<h2><a class="anchor" id="autotoc_md15"></a>
 Tweaking the Format</h2>
 <p>The built-in sinks all use the <code>Formatter</code> functor defined in <code><a class="el" href="LogSink_8hpp_source.html">LogSink.hpp</a></code> to format messages: </p><div class="fragment"><div class="line"><span class="keyword">using</span> Formatter = std::function&lt;int (FILE* sink, LogRecord <span class="keyword">const</span>&amp; node)&gt;;</div>
 </div><!-- fragment --><p> This should return the number of bytes written to the <code>sink</code>. You can use a lambda in the setup to customize the format to your liking. The helper functions in <code><a class="el" href="LogSink_8hpp_source.html">LogSink.hpp</a></code> provide date, severity, and code location format helpers, but are not required.</p>
-<h2><a class="anchor" id="autotoc_md15"></a>
+<h2><a class="anchor" id="autotoc_md16"></a>
 Writing Your Own Sink</h2>
 <p>Log sinks derive from this abstract class defined in <code><a class="el" href="LogSink_8hpp_source.html">LogSink.hpp</a></code>: </p><div class="fragment"><div class="line"><span class="keyword">class </span>LogSink</div>
 <div class="line">{</div>
@@ -276,16 +281,16 @@ Writing Your Own Sink</h2>
 <div class="line">    <span class="keyword">virtual</span> <span class="keywordtype">void</span> record(LogRecord <span class="keyword">const</span>&amp; record) = 0;</div>
 <div class="line">};</div>
 </div><!-- fragment --><p> As you can see, you can do what you like in <code>record</code>. The <code>Formatter</code> functor provides a convenient way to allow users to customize the format, but you don't have to use it.</p>
-<h2><a class="anchor" id="autotoc_md16"></a>
+<h2><a class="anchor" id="autotoc_md17"></a>
 Locale Setting</h2>
 <p>Slog uses a thread-local stream object that is initialized in an order you can't control (the old static intitialization fiasco of C++ lore). As such, if you change the global locale after starting the logger, the streams will not pick up on this by default. You can force Slog to update the stream locale via <code>void set_locale(std::locale locale)</code> or <code>void set_locale_to_global()</code>.</p>
-<h1><a class="anchor" id="autotoc_md17"></a>
+<h1><a class="anchor" id="autotoc_md18"></a>
 Building Slog</h1>
 <p>Slog is written in C++11 and has no required dependencies. You'll probably be happiest building it as part of a CMake superbuild. To do so, add this project as a subdirectory of your code and put </p><div class="fragment"><div class="line">add_subdirectory(slog)</div>
 </div><!-- fragment --><p> in your <code>CMakeLists.txt</code> file. This will give you the target <code>slog</code> that you can depend on. Slog is a very small library and won't significantly impact compile times.</p>
 <p>Slog has an optional dependency on libsystemd for the journal sink. To use this, you'll need to install the systemd development package for your OS. In Debian or Ubuntu, you can do this via </p><div class="fragment"><div class="line">apt install libsystemd-dev</div>
 </div><!-- fragment --><p> Note that this doesn't add any <em>runtime</em> dependencies to your application, you just need the headers for building.</p>
-<h1><a class="anchor" id="autotoc_md18"></a>
+<h1><a class="anchor" id="autotoc_md19"></a>
 LogConfig</h1>
 <p>The <code>LogConfig</code> object is declared in <code><a class="el" href="LogSetup_8hpp_source.html">LogSetup.hpp</a></code> and offers control over the logging process. You supply one LogConfig per channel you want to log (a <code>std::vector&lt;LogConfig&gt;</code>). If you just need one channel, you can pass a bare <code>LogConfig</code>.</p>
 <p>The setup methods are:</p>
@@ -295,7 +300,7 @@ LogConfig</h1>
 <li><code>set_sink(std::shared_ptr&lt;LogSink&gt; sink_)</code>: Set the sink you'd like to use (FileSink, JournaldSink, etc.). The default sink is the FileSink.</li>
 <li><code>set_pool(std::shared_ptr&lt;LogRecordPool&gt; pool_)</code>: Set the record pool. The default pool is an allocating record pool that allocates in 1 MB chunks with 1 kB records.</li>
 </ul>
-<h2><a class="anchor" id="autotoc_md19"></a>
+<h2><a class="anchor" id="autotoc_md20"></a>
 LogRecordPool</h2>
 <p>The <code>LogRecordPool</code> constructor sets up the pool policies: </p><div class="fragment"><div class="line">LogRecordPool(LogRecordPoolPolicy i_policy, <span class="keywordtype">long</span> i_pool_alloc_size, <span class="keywordtype">long</span> i_message_size,</div>
 <div class="line">        <span class="keywordtype">long</span> i_max_blocking_time_ms = 50);</div>
@@ -310,7 +315,7 @@ LogRecordPool</h2>
 <li><code>i_max_blocking_time_ms</code> sets the maximum blocking time in milliseconds when <code>i_policy</code> is <code>BLOCK</code>. It has no impact for ALLOCATE or DISCARD policies.</li>
 </ul>
 <p>The record pool is fully thread-safe, so sharing one pool <code>shared_ptr</code> between multiple channels works fine.</p>
-<h1><a class="anchor" id="autotoc_md20"></a>
+<h1><a class="anchor" id="autotoc_md21"></a>
 Compile-time Configuration</h1>
 <p>Slog has two compile-time cmake configuration options:</p>
 <table class="markdownTable">

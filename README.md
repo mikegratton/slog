@@ -1,6 +1,10 @@
 Slog: A C++ Logging Library for Robotic Systems
 =================================================
 
+* [GitHub Repository](https://github.com/mikegratton/slog)
+* [Documentation](https://mikegratton.github.io/slog/)
+
+
 Slog is an asynchronous stream-based logger with a memory pool.  It is designed for applications 
 where the business logic cannot wait for disk or network IO to complete before continuing.  For 
 many server and robotic programs, log traffic comes in bursts as sessions open, plans are formed,
@@ -9,7 +13,7 @@ For critical applications, Slog can guarantee it will not allocate memory beyond
 For "normal" applications, Slog will allocate more memory if you are logging faster than it can 
 keep up.
 
-Features:
+## Features:
 
 * Slog is configurable, but with sensible an unsurprising defaults. Write your own backend or
 formatter, or use one of those provided

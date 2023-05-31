@@ -26,31 +26,32 @@ var NAVTREE =
 [
   [ "Slog", "index.html", [
     [ "Slog: A C++ Logging Library for Robotic Systems", "index.html", [
-      [ "Quickstart", "index.html#autotoc_md0", null ],
-      [ "Design", "index.html#autotoc_md1", null ],
-      [ "Asynchronous Logging", "index.html#autotoc_md2", null ],
-      [ "API", "index.html#autotoc_md3", [
-        [ "Slog Concepts", "index.html#autotoc_md4", [
-          [ "Severity", "index.html#autotoc_md5", null ],
-          [ "Tags", "index.html#autotoc_md6", null ],
-          [ "Channels", "index.html#autotoc_md7", null ]
+      [ "Features:", "index.html#autotoc_md0", null ],
+      [ "Quickstart", "index.html#autotoc_md1", null ],
+      [ "Design", "index.html#autotoc_md2", null ],
+      [ "Asynchronous Logging", "index.html#autotoc_md3", null ],
+      [ "API", "index.html#autotoc_md4", [
+        [ "Slog Concepts", "index.html#autotoc_md5", [
+          [ "Severity", "index.html#autotoc_md6", null ],
+          [ "Tags", "index.html#autotoc_md7", null ],
+          [ "Channels", "index.html#autotoc_md8", null ]
         ] ],
-        [ "General Use", "index.html#autotoc_md8", null ],
-        [ "Setup", "index.html#autotoc_md9", null ],
-        [ "Log Sinks", "index.html#autotoc_md10", [
-          [ "ConsoleSink", "index.html#autotoc_md11", null ],
-          [ "FileSink", "index.html#autotoc_md12", null ],
-          [ "JournaldSink", "index.html#autotoc_md13", null ]
+        [ "General Use", "index.html#autotoc_md9", null ],
+        [ "Setup", "index.html#autotoc_md10", null ],
+        [ "Log Sinks", "index.html#autotoc_md11", [
+          [ "ConsoleSink", "index.html#autotoc_md12", null ],
+          [ "FileSink", "index.html#autotoc_md13", null ],
+          [ "JournaldSink", "index.html#autotoc_md14", null ]
         ] ],
-        [ "Tweaking the Format", "index.html#autotoc_md14", null ],
-        [ "Writing Your Own Sink", "index.html#autotoc_md15", null ],
-        [ "Locale Setting", "index.html#autotoc_md16", null ]
+        [ "Tweaking the Format", "index.html#autotoc_md15", null ],
+        [ "Writing Your Own Sink", "index.html#autotoc_md16", null ],
+        [ "Locale Setting", "index.html#autotoc_md17", null ]
       ] ],
-      [ "Building Slog", "index.html#autotoc_md17", null ],
-      [ "LogConfig", "index.html#autotoc_md18", [
-        [ "LogRecordPool", "index.html#autotoc_md19", null ]
+      [ "Building Slog", "index.html#autotoc_md18", null ],
+      [ "LogConfig", "index.html#autotoc_md19", [
+        [ "LogRecordPool", "index.html#autotoc_md20", null ]
       ] ],
-      [ "Compile-time Configuration", "index.html#autotoc_md20", null ]
+      [ "Compile-time Configuration", "index.html#autotoc_md21", null ]
     ] ],
     [ "Classes", "annotated.html", [
       [ "Class List", "annotated.html", "annotated_dup" ],
