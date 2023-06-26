@@ -6,17 +6,18 @@ Slog: A C++ Logging Library for Robotic Systems
 
 
 Slog is an asynchronous stream-based logger with a memory pool.  It is designed for applications 
-where the business logic cannot wait for disk or network IO to complete before continuing.  For 
-many server and robotic programs, log traffic comes in bursts as sessions open, plans are formed,
-and so on.  Slog queues up messages during the busy times and catches up on IO during the lulls.
-For critical applications, Slog can guarantee it will not allocate memory beyond its initial pool.
-For "normal" applications, Slog will allocate more memory if you are logging faster than it can 
-keep up.
+where the business logic cannot wait for disk or network IO to complete recording a log record 
+before continuing.  For many server and robotic programs, log traffic comes in bursts as sessions 
+open, plans are formed, and so on.  Slog queues up messages during the busy times and catches up 
+on IO during the lulls. For critical applications, Slog can guarantee it will not allocate memory 
+beyond its initial pool. For "normal" applications, Slog will allocate more memory if you are 
+logging faster than it can keep up.
 
 ## Features:
 
-* Slog is configurable, but with sensible an unsurprising defaults. Write your own backend or
-formatter, or use one of those provided
+* Slog is configurable, but with sensible an unsurprising defaults 
+
+* Write your own backend or formatter, or use one of those provided
 
 * Flexible memory pool policies to control allocation in critical code
 
@@ -24,23 +25,18 @@ formatter, or use one of those provided
 
 * Slog uses a custom `ostream` that writes directly to a preallocated buffer
 
-* Your own overloads of `operator<<` for your class just work with the logger
-
-* Log records are never copied interally in Slog
+* Log records are never copied, just moved
 
 * Slog's mutex-guarded sections are very short -- about four instructions maximum 
 
 
 In fact, Slog began life as a lock-free project, but transitioned to mutexes when testing showed
-no significant performance boost.  This is likely because Slog's main thread-safe queue has the 
-back-end worker thread waiting for new records to arrive, and this is best handled using condition
-variables.  Condition variables and mutexes allow the kernel insight into how to best schedule
-Slog's activities.
+that the lock-free design no significant worst-case performance boost.  
 
 ## Quickstart
 
+Using slog is as simple as
 ```cpp
-
 /*** other_stuff.hpp ***/
 #pragma once
 #include "slog.hpp" // All that's needed where logging is happening
@@ -50,11 +46,11 @@ inline void do_other_stuff()
     Slog(DBUG) << "You can see this";
     Slog(INFO, "net") << "But not this";
 }
-
-
+```
+In the main.cpp, we can put some additional setup code
+```cpp
 /*** main.cpp ***/
 #include "LogSetup.hpp" // Required for advanced setup
-
 #include "other_stuff.hpp" // Your logic here...
 
 int main()
@@ -74,8 +70,7 @@ int main()
     return 0;
 }
 ```
-
-See the example project in `example` for a basic setup.
+The `LogConfig` object contains the configuration for the logger. See the example project in `example` for a basic setup.
 
 ## Design 
 
@@ -85,15 +80,15 @@ Slog has three design goals:
 2. Minimize the include size for `slog.hpp` and 
 3. Provide clear failure modes.
 
-For (1), Slog is asynchronous (see below). It also uses a special pre-allocated pool of log 
-records to avoid allocating memory during log capture.  It agressively checks to see if a message 
+For (1), Slog is asynchronous (see below). It also uses a special preallocated pool of log 
+records to avoid allocating memory during log capture.  It aggressively checks to see if a message 
 will be logged at all, avoiding formatting the log string if the result would be ignored. This all 
 means Slog stays out of the way of your program as much as possible.
 
 Likewise for (2), Slog only includes `<iostream>` (and then only when streams are enabled).  It 
 doesn't use any templates in the logging API, keeping the compile-time cost of including 
 `slog.hpp` as small as possible. Goal (2) also precludes a header-only design, but building Slog
-as part of your project is very easy and recommended.
+as part of your project is very easy.
 
 Failure modes (3) are important for critical applications.  Memory and time resources are finite,
 so careful programs should have plans for cases where these run short. Slog provides three policies
@@ -108,8 +103,7 @@ ensures that the memory used by the logger is bounded, and places a bound on the
 log message. With appropriate tuning, this policy can meet needs for real time systems.
 3. Discard: If the pool is empty, discard the log record. This is the most extreme, never allocating 
 or blocking. This choice is intended for real time applications where delay of the business 
-logic could result in loss of life or grevious harm.
-
+logic could result in loss of life or grievous harm.
 
 
 ## Asynchronous Logging
@@ -120,7 +114,7 @@ buffer.  This is then pushed into a thread-safe queue where a worker thread pops
 performs the (blocking) IO call.  This design minimizes blocking calls that 
 are made on the business thread. The risk with asynchronous logging is that the program may terminate
 before this queue is written to disk.  Slog ties into the signal system to ensure that the queue
-is processed before the program exits in most cases.  These cases include normal end of program 
+is processed before at exit in most cases.  These cases include normal end of program 
 (`return` from main) and the signals SIGINT, SIGABRT, and SIGQUIT. 
 Thus Slog will drain its queue on all trappable signals (ctrl-C -- SIG_INT -- included), as well 
 as when `abort()` is called. Note that calling `exit()` from `stdlib.h` is not one of these cases -- 
@@ -130,7 +124,7 @@ are slogging in a context where you need to call exit (i.e. you have forked), yo
 
 ## API
 
-Slog's API is split into two parts: a very light-weight general include for code that
+Slog's API is split into two parts: a very lightweight general include for code that
 needs to write logs (`slog.hpp`), and a larger setup header that is used to configure the logger
 (`LogSetup.hpp`).
 
@@ -138,7 +132,7 @@ needs to write logs (`slog.hpp`), and a larger setup header that is used to conf
 
 #### Severity
 Each message in Slog has an attached severity integer.  These match the traditional syslog levels of
-DBUG, INFO, NOTE, WARN, ERRR, CRIT, ALRT, and EMER.  You may "add" your own levels by using 
+DBUG, INFO, NOTE, WARN, ERRR, CRIT, ALRT, and EMER.  You may add your own levels by using 
 integers between the severity levels you want.  For instance, to add a COOL level, we could set 
 ```cpp
 int COOL = (slog::NOTE + slog::WARN)/2;
@@ -147,39 +141,39 @@ Note that higher numbers are treated as less severe.  In addition, negative seve
 "FATL" by Slog, triggering the draining of all log queues and a call to `abort()` ending the 
 program. 
 
-Slog filters messages based on a severity threshold per channel and per tag (see below).  If the 
-threshold is set to e.g. NOTE, a call like
+Slog filters messages based on a severity threshold per channel and per tag (see below).  For example,
+if the threshold is set to NOTE, the code
 ```cpp
 int a = 0;
 Slog(INFO) << "Hello, I am incrementing a: " << a++;
 ```
-will not be executed.  The value of `a` will be zero at the end.  
-Thresholds are set up in `LogConfig` before logging begins
-and cannot be changed while logging is happening.
-You can check if a message
-would be logged by calling `slog::will_log(int severity, char* tag = "", int channel = 0)`.
+will not log. Moreover, the line right of `Slog()` will not be executed.  (In the example, the value of 
+`a` will be zero at the end.) Thresholds are set up in `LogConfig` before logging begins
+and cannot be changed while logging is happening. You can check if a message would be logged by calling 
+`slog::will_log(severity, tag, channel)`.
 
 #### Tags
 Each message may have an optional tag associated.  These are size-limited strings (the default 
 limit is 16 characters) that can have custom log thresholds.  Tags that don't have defined
-thresholds use the default. For instance
+thresholds use the default. For instance, keeping the same default threshold of NOTE as before,
 ```cpp
 int a = 0;
 Slog(INFO, "noisy") << "Increment a: " << a++;
 Slog(INFO) << "Increment a: "<< a++;
 ```
-could log zero, one, or two times.  
+would log at most once, if we set the threshold for tag "noisy" to INFO or lower.
 
 #### Channels
-Slog can be configured to have multiple *channels* -- independent back-ends.  Each channel
-has its own worker thread, its own sink, and its own set of severity thresholds.  You can use this
-to separate events and data, for instance.  Note that a particular message can be sent to only one
-channel.  Channels can have independent pools with different policies, sizes, and so on, or they
-can share pools.
+Slog can be configured to have multiple *channels*. A channel corresponds to an independent back-end.  
+Each channel has its own worker thread, its own sink, and its own set of severity thresholds.  You can 
+use this to separate events from data, for instance.  Note that a particular message can be sent to only 
+one channel.  Channels may have independent memory pools with different policies and sizes or they can 
+share pools with other channels. Slog represents a channel by an integer, with the default channel being
+channel 0.
 
 ### General Use
 
-Slog provides a set of macro-like functions in `slog.hpp` for logging. In general, this is
+Slog provides a set of function-like macros in `slog.hpp` for logging. In general, this is
 the only include you'll need in locations where you log.  The macros are
 
 * `Slog(SEVERITY) << "My message"` : Log "My message" at level SEVERITY to the default channel
@@ -195,7 +189,7 @@ with tag "tag". This uses printf-style formatting.
 * `Flogtc(SEVERITY, "tag", 2, "A good number is %d", 42)` : Log "A good number is 42" to channel 2
 with tag "tag". This uses printf-style formatting.
 
-All of these macros agressively check if the message will be logged given the current severity threshold
+All of these macros aggressively check if the message will be logged given the current severity threshold
 for the tag and channel.  If the message won't be logged, the code afterwards *will not be executed*.
 That is, no strings are formatted, no work is done.  Moreover, depending on setup, if the message
 pool is empty, these macros may (a) allocate, causing a delay (b) block for a configurable 
@@ -229,14 +223,14 @@ termination.
 
 ### Log Sinks
 Slog comes with three built-in sinks for recording messages, `ConsoleSink`, `FileSink` and 
-`JournaldSink`.  You may also make your own sinks by implementing the very small API.
+`JournaldSink`.  If none of these work for you, you may also make your own sinks by implementing the very simple API.
 
 #### ConsoleSink
 `ConsoleSink` writes messages to `stdout`.  It has only one feature:
-* `set_formatter(Formatter format)`: Adjust the format of log messages. See below.
+* `set_formatter(Formatter format)`: Adjust the format of log messages. See below about Formatters.
 
 #### FileSink
-`FileSink` writes log messages to a file via the C `fprintf()` API. It can also optionally echo
+`FileSink` writes log messages to a file via the `fprintf()` API. It can also optionally echo
 those messages to `stdout`.  It has a handful of useful features:
 
 1. `set_echo(bool)` : Echo (or don't) messages to the console. Defaults to true.
@@ -309,8 +303,8 @@ The built-in sinks all use the `Formatter` functor defined in `LogSink.hpp` to f
 using Formatter = std::function<int (FILE* sink, LogRecord const& node)>;
 ```
 This should return the number of bytes written to the `sink`.  You can use a lambda in the setup
-to customize the format to your liking. The helper functions in `LogSink.hpp`
-provide date, severity, and code location format helpers, but are not required.
+to customize the format to your liking. Functions in `LogSink.hpp` provide date, severity, and code 
+location format helpers that should make creating your own formatter easy.
 
 ### Writing Your Own Sink
 Log sinks derive from this abstract class defined in `LogSink.hpp`:
@@ -328,14 +322,14 @@ a convenient way to allow users to customize the format, but you don't have to u
 ### Locale Setting
 
 Slog uses a thread-local stream object that is initialized in an order you can't control (the old 
-static intitialization fiasco of C++ lore). As such, if you change the global locale after starting
+static initialization fiasco of C++ lore). As such, if you change the global locale after starting
 the logger, the streams will not pick up on this by default.  You can force Slog to update the 
 stream locale via `void set_locale(std::locale locale)` or `void set_locale_to_global()`.
 
 ## Building Slog
 
 Slog is written in C++11 and has no required dependencies.  You'll probably be happiest building it 
-as part of a CMake superbuild.  To do so, add this project as a subdirectory of your
+as part of a CMake super-build.  To do so, add this project as a subdirectory of your
 code and put
 ```cpp
 add_subdirectory(slog)
@@ -385,8 +379,8 @@ The available policies are
 The other parameters are
 * `i_pool_alloc_size` controls the size of each pool allocation. The default pool uses a 1 MB allocation.
 * `i_message_size` controls the size of a single message. Longer messages are formed using the "jumbo" 
-   pointer -- concatinating multiple records from the pool. Choosing this to be a bit longer than your 
-   typical message can give you good performance. The defaulty pool uses 1 kB messages, roughly ten 
+   pointer -- concatenating multiple records from the pool. Choosing this to be a bit longer than your 
+   typical message can give you good performance. The default pool uses 1 kB messages, roughly ten 
    terminal lines of text.
 * `i_max_blocking_time_ms` sets the maximum blocking time in milliseconds when `i_policy` is `BLOCK`. 
    It has no impact for ALLOCATE or DISCARD policies.
