@@ -1,16 +1,17 @@
-#include "doctest.h"
-#include "slog.hpp"
-#include "LogSetup.hpp"
-#include "LogChannel.hpp"
-#include "LogRecordPool.hpp"
-#include "ThresholdMap.hpp"
-
-#include <thread>
 #include <iostream>
+#include <thread>
+
+#include "doctest.h"
+#include "slog/LogChannel.hpp"
+#include "slog/LogRecordPool.hpp"
+#include "slog/LogSetup.hpp"
+#include "slog/ThresholdMap.hpp"
+#include "slog/slog.hpp"
 
 using namespace slog;
 
-TEST_CASE("RecordPool") {
+TEST_CASE("RecordPool")
+{
     LogRecordPool pool(DISCARD, 1024, 32);
     auto* item = pool.take();
     REQUIRE(item != nullptr);
@@ -22,10 +23,12 @@ TEST_CASE("RecordPool") {
 
 TEST_CASE("channelctor")
 {
-    LogChannel c(std::make_shared<NullSink>(), ThresholdMap(), std::make_shared<LogRecordPool>(ALLOCATE, 1024*1024, 1024));
+    LogChannel c(std::make_shared<NullSink>(), ThresholdMap(),
+                 std::make_shared<LogRecordPool>(ALLOCATE, 1024 * 1024, 1024));
 }
 
-TEST_CASE("ThresholdMap") {
+TEST_CASE("ThresholdMap")
+{
     FlatThresholdMap map;
     map.set_default(INFO);
     map.add_tag("moose", WARN);
@@ -44,7 +47,8 @@ TEST_CASE("ThresholdMap") {
     CHECK(map2["mouse"] == DBUG);
 }
 
-TEST_CASE("Startup") {
+TEST_CASE("Startup")
+{
     Flog(ERRR, "This is before startup");
     start_logger(INFO);
     Flog(DBUG, "Can't see this");
@@ -54,33 +58,34 @@ TEST_CASE("Startup") {
     Flog(WARN, "This is warn");
     stop_logger();
     Flog(ERRR, "This is after shutdown");
-
 }
 
-TEST_CASE("DieDieDie" * doctest::skip()) {    
+TEST_CASE("DieDieDie" * doctest::skip())
+{
     start_logger(INFO);
     Flog(INFO, "Can see this");
     Flog(FATL, "This is fatal");
-    Flog(NOTE, "This is note");    
+    Flog(NOTE, "This is note");
 }
 
-TEST_CASE("Escape" * doctest::skip()) {
+TEST_CASE("Escape" * doctest::skip())
+{
     start_logger(slog::INFO);
-    for(;;) {
+    for (;;) {
         Flog(INFO, "Hello");
         std::this_thread::sleep_for(std::chrono::milliseconds(500));
     }
 }
 
-
-TEST_CASE("Bomb" * doctest::skip()) {
+TEST_CASE("Bomb" * doctest::skip())
+{
     start_logger(slog::INFO);
     std::thread t([]() {
         std::this_thread::sleep_for(std::chrono::seconds(2));
         char* p = nullptr;
         *p = 'p';
     });
-    for(;;) {
+    for (;;) {
         Flog(INFO, "Hello");
         std::this_thread::sleep_for(std::chrono::milliseconds(500));
     }

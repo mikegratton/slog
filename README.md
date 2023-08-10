@@ -39,7 +39,7 @@ Using slog is as simple as
 ```cpp
 /*** other_stuff.hpp ***/
 #pragma once
-#include "slog.hpp" // All that's needed where logging is happening
+#include "slog/slog.hpp" // All that's needed where logging is happening
 
 inline void do_other_stuff()
 {
@@ -50,7 +50,7 @@ inline void do_other_stuff()
 In the main.cpp, we can put some additional setup code
 ```cpp
 /*** main.cpp ***/
-#include "LogSetup.hpp" // Required for advanced setup
+#include "slog/LogSetup.hpp" // Required for advanced setup
 #include "other_stuff.hpp" // Your logic here...
 
 int main()

@@ -1,13 +1,14 @@
 #pragma once
-#include "LogSink.hpp"
 #include <vector>
 
-class StatsSink : public slog::LogSink
-{
-public:
+#include "slog/LogSink.hpp"
+
+class StatsSink : public slog::LogSink {
+   public:
     StatsSink(long capacity) { sample.reserve(capacity); }
     ~StatsSink();
     void record(slog::LogRecord const& rec) override;
-protected:
+
+   protected:
     std::vector<long> sample;
 };

@@ -1,11 +1,12 @@
-#include "slog.hpp"
-#include <ostream>
 #include <iostream>
+#include <ostream>
+
 #include "doctest.h"
+#include "slog/slog.hpp"
 
 using namespace slog;
 
-# if 0
+#if 0
 TEST_CASE("BasicCStringStream")
 {
     char buf[32];
