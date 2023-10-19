@@ -1,0 +1,12 @@
+#include "doctest.h"
+#include "slog/LogSetup.hpp"
+#include "slog/slog.hpp"
+
+TEST_CASE("JumboTest")
+{
+    slog::start_logger(slog::DBUG);
+    Slog(INFO)
+        << R"(<?xml version="1.0" encoding="UTF-8"?><kml xmlns="http://www.opengis.net/kml/2.2" xmlns:gx="http://www.google.com/kml/ext/2.2" xmlns:kml="http://www.opengis.net/kml/2.2" xmlns:atom="http://www.w3.org/2005/Atom"><Document><Folder><name>Markers</name><Folder><name>foo.test</name><Placemark><name>test</name><TimeSpan><end>2023-10-10T00:00:00.000Z</end></TimeSpan><Style><IconStyle><color>ff804ef2</color><scale>1</scale><Icon><href>http://maps.google.com/mapfiles/kml/shapes/placemark_circle.png</href></Icon></IconStyle></Style><Point><altitudeMode>absolute</altitudeMode><coordinates>-71.2,40.5,-0</coordinates></Point></Placemark><Placemark><name>test</name><TimeSpan><begin>2023-10-10T00:00:00.001Z</begin><end>2023-10-10T00:00:01.000Z</end></TimeSpan><Style><IconStyle><color>ff5da702</color><scale>1</scale><Icon><href>http://maps.google.com/mapfiles/kml/shapes/placemark_circle.png</href></Icon></IconStyle></Style><Point><altitudeMode>absolute</altitudeMode><coordinates>-71.2,40.5,-0</coordinates></Point></Placemark></Folder></Document></kml>)"
+        << R"(<?xml version="1.0" encoding="UTF-8"?><kml xmlns="http://www.opengis.net/kml/2.2" xmlns:gx="http://www.google.com/kml/ext/2.2" xmlns:kml="http://www.opengis.net/kml/2.2" xmlns:atom="http://www.w3.org/2005/Atom"><Document><Folder><name>Markers</name><Folder><name>foo.test</name><Placemark><name>test</name><TimeSpan><end>2023-10-10T00:00:00.000Z</end></TimeSpan><Style><IconStyle><color>ff804ef2</color><scale>1</scale><Icon><href>http://maps.google.com/mapfiles/kml/shapes/placemark_circle.png</href></Icon></IconStyle></Style><Point><altitudeMode>absolute</altitudeMode><coordinates>-71.2,40.5,-0</coordinates></Point></Placemark><Placemark><name>test</name><TimeSpan><begin>2023-10-10T00:00:00.001Z</begin><end>2023-10-10T00:00:01.000Z</end></TimeSpan><Style><IconStyle><color>ff5da702</color><scale>1</scale><Icon><href>http://maps.google.com/mapfiles/kml/shapes/placemark_circle.png</href></Icon></IconStyle></Style><Point><altitudeMode>absolute</altitudeMode><coordinates>-71.2,40.5,-0</coordinates></Point></Placemark></Folder></Document></kml>)";
+    ;
+}

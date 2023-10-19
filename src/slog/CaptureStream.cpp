@@ -10,7 +10,7 @@ namespace slog {
 
 namespace {
 /// A streambuf that writes to a fixed sized array. If the message
-/// is too long, tack a null char on the end and discard the rest.
+/// is too long, allocate another node
 class IntrusiveBuf : public std::streambuf {
    public:
     void set_node(RecordNode* node, long channel)
@@ -19,16 +19,6 @@ class IntrusiveBuf : public std::streambuf {
         m_channel = channel;
         m_cursor = node->rec.message;
         m_end = m_cursor + node->rec.message_max_size - 1;
-    }
-
-    void terminate()
-    {
-        if (m_cursor < m_end) {
-            *m_cursor = 0;
-            m_cursor++;
-        } else {
-            *m_end = 0;
-        }
     }
 
    protected:
@@ -42,6 +32,7 @@ class IntrusiveBuf : public std::streambuf {
         count = std::min(count, m_end - m_cursor);
         memcpy(m_cursor, s, count);
         m_cursor += count;
+        *m_cursor = '\0';
         return count;
     }
 
@@ -49,7 +40,7 @@ class IntrusiveBuf : public std::streambuf {
     {
         std::streamsize count = 0;
         do {
-            count += write_some(s, length);
+            count += write_some(s + count, length - count);
             if (count < length) {
                 RecordNode* extra =
                     get_fresh_record(m_channel, nullptr, nullptr, 0, m_node->rec.meta.severity, m_node->rec.meta.tag);
@@ -62,8 +53,7 @@ class IntrusiveBuf : public std::streambuf {
     }
 };
 
-/// An ostream using an IntrusiveBuf. Note that in general, the null terminator
-/// must be manually added to the stream via terminate()
+/// An ostream using an IntrusiveBuf
 class IntrusiveStream : public std::ostream {
    public:
     IntrusiveStream() : std::ostream(&buf) {}
@@ -73,8 +63,6 @@ class IntrusiveStream : public std::ostream {
         buf.set_node(node, channel);
         clear();
     }
-
-    void terminate() { buf.terminate(); }
 
    protected:
     IntrusiveBuf buf;
@@ -92,8 +80,15 @@ class NullStream : public std::ostream {
     } m_sb;
 };
 
+namespace {
+/// Global locale for slog
 std::locale s_locale;
+
+/// Tracking of the current locale
 int s_locale_version = 0;
+}  // namespace
+
+/// A locale manaing stream
 class StreamHolder {
    public:
     StreamHolder() : m_locale_version(s_locale_version) {}
@@ -130,12 +125,10 @@ void set_locale_to_global()
     set_locale(std::locale());
 }
 
-// On destruction, terminate the cstring, then forward the node to the
-// back end.
+// On destruction, forward the node to the backend.
 CaptureStream::~CaptureStream()
 {
     if (node) {
-        st_stream.stream_direct().terminate();
         push_to_sink(node, channel);  // Push to channel queue
     }
 }
