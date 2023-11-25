@@ -399,3 +399,8 @@ Slog has two compile-time cmake configuration options:
 
 In addition, building with `-DSLOG_LOGGING_ENABLED=0` will suppress all logging in this translation
 unit.
+
+# Version History
+
+* *1.0.0* Initial release.
+* *1.1.0* Alter main include path to be `slog/slog.hpp`. Fix bug with "jumbo" messages being truncated.
