@@ -6,6 +6,7 @@
 #include "LogRecordPool.hpp"
 #include "LogSink.hpp"
 #include "ThresholdMap.hpp"
+#include "slog.hpp"
 #ifndef SLOG_NO_STREAM
 #include <ostream>
 #endif
@@ -21,14 +22,13 @@ namespace slog {
  *
  * ```
  * #include <LogSetup.hpp> // Only needed in the cpp where setup occurs
- * #include <slog.hpp> // You must include slog.hpp to use the logging macros
  *
  * int main(int argc, char** argv) {
  *
  *    Log(WARN) << "No one will see this message.";
  *
  *    slog::start_logger(NOTE);
- *    Log(NOTE) << "This is logged using the FileSink with the default setup";
+ *    Log(NOTE) << "This is logged using the ConsoleSink with the default setup";
  *    Log(INFO) << "This isn't logged because INFO < NOTE";
  *
  *    slog::stop_logger(); // This is not required, but will stop all messages from printing
@@ -39,11 +39,6 @@ namespace slog {
  * ```
  */
 class LogConfig;
-
-/**
- * @brief start logging using a FileSink and a global threshold
- */
-void start_logger(int severity = INFO);
 
 /**
  * @brief Start a logger on the default channel with the given config.
@@ -69,9 +64,6 @@ void stop_logger();
 void set_locale(std::locale locale);
 void set_locale_to_global();
 
-/// (For debugging the logger) Check that all pool records are either free or in a queue
-long get_pool_missing_count();
-
 /**
  * Configuration class for a logger channel. Set your logging threshold,
  * tags, log sink here, and record pool here. By default, the sink is a
@@ -89,7 +81,7 @@ class LogConfig {
      * @brief Add a custom threshold for a tag
      *
      * Note you don't need to register all tags here, only those where you
-     * want to log that tag at a higher/lower threshold than the default.
+     * want to log that tag at a different threshold than the default.
      */
     void add_tag(const char* tag, int thr) { threshold.add_tag(tag, thr); }
 
@@ -124,10 +116,12 @@ class LogConfig {
 
 #ifndef SLOG_NO_STREAM
    public:
+    /// Set the locale for the stream
     void set_locale(std::locale locale_)
     {
         locale = locale_;
     }
+
     std::locale const& get_locale() const
     {
         return locale;
@@ -137,5 +131,8 @@ class LogConfig {
     std::locale locale;
 #endif
 };
+
+/// (For debugging the logger) Check that all pool records are either free or in a queue
+long get_pool_missing_count();
 
 }  // namespace slog

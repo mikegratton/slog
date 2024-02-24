@@ -5,7 +5,7 @@ find_package(Threads REQUIRED)
 find_package(Journald)
 
 if(NOT JOURNALD_FOUND)
-    message("libsystemd-dev not found, journal log sink disabled")
+    message(STATUS "libsystemd-dev not found, journal log sink disabled")
     list(REMOVE source JournaldSink.cpp)
 endif()
 
@@ -36,6 +36,7 @@ install(FILES
     LogSink.hpp
     FileSink.hpp
     ConsoleSink.hpp
+    SyslogSink.hpp
     $<$<BOOL:JOURNALD_FOUND>:${CMAKE_CURRENT_SOURCE_DIR}/JournaldSink.hpp>
     DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/slog
 )

@@ -13,10 +13,10 @@ using namespace slog;
 TEST_CASE("RecordPool")
 {
     LogRecordPool pool(DISCARD, 1024, 32);
-    auto* item = pool.take();
+    auto* item = pool.allocate();
     REQUIRE(item != nullptr);
-    pool.put(item);
-    auto* item2 = pool.take();
+    pool.free(item);
+    auto* item2 = pool.allocate();
     REQUIRE(item2 != nullptr);
     REQUIRE(item == item2);
 }

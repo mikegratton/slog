@@ -1,5 +1,6 @@
 #include <iostream>
 #include <ostream>
+#include <string>
 
 #include "doctest.h"
 #include "slog/ConsoleSink.hpp"
@@ -30,7 +31,7 @@ TEST_CASE("JumboMessage")
     slog::start_logger(config);
     int N = 64 * 8;
     std::string biggun;
-    for (int i = 0; i < N; i++) { biggun.push_back(i % 10 ? '0' : '1'); }
+    for (int i = 0; i < N; i++) { biggun += "Part ----------------> " + std::to_string(i) + "\n"; }
     Slog(INFO) << biggun;
 
     slog::stop_logger();

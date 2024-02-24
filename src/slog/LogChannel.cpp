@@ -1,4 +1,5 @@
 #include "LogChannel.hpp"
+
 #include <cassert>
 #include <chrono>
 
@@ -9,56 +10,52 @@ namespace slog {
 // to notice at the console.
 constexpr std::chrono::milliseconds WAIT{50};
 
-LogChannel::LogChannel(std::shared_ptr<LogSink> sink_,
-                       ThresholdMap const& threshold_, 
+LogChannel::LogChannel(std::shared_ptr<LogSink> sink_, ThresholdMap const& threshold_,
                        std::shared_ptr<LogRecordPool> pool_)
-: pool(pool_)
-, thresholdMap(threshold_)
-, sink(sink_)
-, keepalive(false) {    
+    : pool(pool_), thresholdMap(threshold_), sink(sink_), keepalive(false)
+{
 }
 
-LogChannel::~LogChannel() {
+LogChannel::~LogChannel()
+{
     stop();
 }
 
-LogChannel::LogChannel(LogChannel const& i_rhs) 
-: LogChannel(i_rhs.sink, i_rhs.thresholdMap, i_rhs.pool)
-{ 
+LogChannel::LogChannel(LogChannel const& i_rhs) : LogChannel(i_rhs.sink, i_rhs.thresholdMap, i_rhs.pool)
+{
 }
 
-void LogChannel::push(RecordNode* node) {
+void LogChannel::push(RecordNode* node)
+{
     if (node) {
         int level = node->rec.meta.severity;
         queue.push(node);
-        if (level <= FATL) {
-            abort();
-        }
+        if (level <= FATL) { abort(); }
     }
 }
 
-void LogChannel::start() {
+void LogChannel::start()
+{
     stop();
     keepalive = true;
     workThread = std::thread([this]() { this->logging_loop(); });
 }
 
-
-void LogChannel::stop() {
+void LogChannel::stop()
+{
     keepalive = false;
-    if (workThread.joinable()) {
-        workThread.join();
-    }
+    if (workThread.joinable()) { workThread.join(); }
 }
 
-void LogChannel::logging_loop() {
+void LogChannel::logging_loop()
+{
     assert(sink);
     assert(pool);
     while (keepalive) {
         RecordNode* node = queue.pop(WAIT);
         if (node) {
             sink->record(node->rec);
-            pool->put(node);
+            pool->free(node);
         }
     }
     // Shutdown. Drain the queue.
@@ -66,21 +63,21 @@ void LogChannel::logging_loop() {
     while (head) {
         sink->record(head->rec);
         RecordNode* cursor = head->next;
-        pool->put(head);
+        pool->free(head);
         head = cursor;
     }
 }
 
-
-RecordNode* LogChannel::LogQueue::pop_all() {
+RecordNode* LogChannel::LogQueue::pop_all()
+{
     std::unique_lock<std::mutex> guard(lock);
     RecordNode* popped = mhead;
     mhead = mtail = nullptr;
     return popped;
 }
 
-
-void LogChannel::LogQueue::push(RecordNode* node) {
+void LogChannel::LogQueue::push(RecordNode* node)
+{
     assert(node);
     node->next = nullptr;
     std::unique_lock<std::mutex> guard(lock);
@@ -94,20 +91,19 @@ void LogChannel::LogQueue::push(RecordNode* node) {
     pending.notify_one();
 }
 
-RecordNode* LogChannel::LogQueue::pop(std::chrono::milliseconds wait) {
-    auto condition = [this]() -> bool {return mhead != nullptr; };
+RecordNode* LogChannel::LogQueue::pop(std::chrono::milliseconds wait)
+{
+    auto condition = [this]() -> bool { return mhead != nullptr; };
     RecordNode* popped = nullptr;
 
     std::unique_lock<std::mutex> guard(lock);
     if (pending.wait_for(guard, wait, condition)) {
         popped = mhead;
         mhead = mhead->next;
-        if (nullptr == mhead) {
-            mtail = nullptr;
-        }
+        if (nullptr == mhead) { mtail = nullptr; }
         popped->next = nullptr;
     }
     return popped;
 }
 
-}
+}  // namespace slog

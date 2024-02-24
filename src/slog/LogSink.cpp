@@ -21,6 +21,15 @@ int default_format(FILE* sink, LogRecord const& rec)
     return count;
 }
 
+int no_meta_format(FILE* sink, LogRecord const& node)
+{
+    int count = fprintf(sink, "%s", node.message);
+    for (LogRecord const* more = node.more; more != nullptr; more = more->more) {
+        count += fprintf(sink, "%s", more->message);
+    }
+    return count;
+}
+
 void format_severity(char* severity_str, int severity)
 {
     if (severity >= DBUG) {
@@ -44,7 +53,7 @@ void format_severity(char* severity_str, int severity)
     }
 }
 
-void format_time(char* time_str, unsigned long t, int seconds_precision)
+void format_time(char* time_str, unsigned long t, int seconds_precision, bool full_punctuation)
 {
     constexpr unsigned long NANOS_PER_SEC = 1000000000ULL;
     if (seconds_precision < 0) { seconds_precision = 0; }
@@ -56,9 +65,13 @@ void format_time(char* time_str, unsigned long t, int seconds_precision)
 
     tm broken;
     gmtime_r(&seconds_since_epoch, &broken);
-
+    std::size_t offset;
     // Most of the iso timestamp
-    auto offset = strftime(time_str, min_size, "%Y-%m-%d %H:%M:", &broken);
+    if (full_punctuation) {
+        offset = strftime(time_str, min_size, "%Y-%m-%dT%H:%M:", &broken);
+    } else {
+        offset = strftime(time_str, min_size, "%Y-%m-%d %H:%M:", &broken);
+    }
 
     // Seconds and zone
     double secondsPart = static_cast<double>(broken.tm_sec) + 1e-9 * nano_remainder;

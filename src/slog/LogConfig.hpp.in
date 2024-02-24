@@ -7,13 +7,16 @@
 #cmakedefine01 SLOG_LOG_TO_CONSOLE_WHEN_STOPPED
 #cmakedefine01 SLOG_STREAM
 
-namespace slog
-{
-    
+namespace slog {
+
 constexpr int DEFAULT_CHANNEL = 0;
 
 constexpr unsigned long TAG_SIZE = 16;
-    
+
+constexpr unsigned long DEFAULT_RECORD_SIZE = ${SLOG_DEFAULT_RECORD_SIZE};
+
+constexpr unsigned long DEFAULT_POOL_RECORD_COUNT = ${SLOG_DEFAULT_POOL_RECORD_COUNT};
+
 // Syslog compatible severity levels
 enum LogSeverity : int {
     FATL = -100,
@@ -27,4 +30,4 @@ enum LogSeverity : int {
     DBUG = 700
 };
 
-}
+}  // namespace slog

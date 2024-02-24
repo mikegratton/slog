@@ -42,21 +42,21 @@ class LogRecordPool {
     ~LogRecordPool();
 
     /**
-     * Pop a record from the stack. If the stack is currently empty, \
-     * this allocates more memory
+     * Pop a record from the stack. If the stack is currently empty,
+     * the LogRecordPoolPolicy determines what happens.
      */
-    RecordNode* take();
+    RecordNode* allocate();
 
     /**
-     * Push a record back onto the stack.
+     * Return a record to the pool as free.
      */
-    void put(RecordNode* record);
+    void free(RecordNode* record);
 
-    // Count items on the pool. Not thread-safe
+    // Count items in the pool. Not thread-safe
     long count() const;
 
    protected:
-    void allocate();
+    void acquire_blank_records();
 
     mutable std::mutex m_lock;
     std::condition_variable m_nonempty;

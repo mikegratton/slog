@@ -49,7 +49,7 @@ void format_severity(char* severity_str, int severity);
  * The string should be at least 21 characters long for zero fractional seconds.
  * For the default form, 25 characters are required.
  */
-void format_time(char* time_str, unsigned long time, int seconds_decimal_precision = 3);
+void format_time(char* time_str, unsigned long time, int seconds_decimal_precision = 3, bool full_punctuation = false);
 
 /**
  * @brief Makes a code location string.
@@ -62,5 +62,10 @@ void format_location(char* location_str, char const* file_name, int line_number)
  * A Formatter-compatible formatter that is used by ... well, by default
  */
 int default_format(FILE* sink, LogRecord const& node);
+
+/**
+ * A Formatter that just prints the records
+ */
+int no_meta_format(FILE* sink, LogRecord const& node);
 
 }  // namespace slog

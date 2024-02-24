@@ -27,11 +27,9 @@ logging faster than it can keep up.
 
 * Log records are never copied, just moved
 
-* Slog's mutex-guarded sections are very short -- about four instructions maximum 
+* Slog's mutex-guarded sections are very short -- about four instructions 
 
-
-In fact, Slog began life as a lock-free project, but transitioned to mutexes when testing showed
-that the lock-free design no significant worst-case performance boost.  
+* Slog has minimal impact on compile time. 
 
 ## Quickstart
 
@@ -195,7 +193,7 @@ That is, no strings are formatted, no work is done.  Moreover, depending on setu
 pool is empty, these macros may (a) allocate, causing a delay (b) block for a configurable 
 amount of time waiting for a message to become available or (c) simply discard the log message.
 
-Slog uses a custom `std::ostream` class that avoids the inefficiencies of `std::stringstream`.  For 
+Slog uses a custom `std::ostream` class that avoids some of the inefficiencies of `std::stringstream`.  For 
 the Flog family of macros, formatting is performed with `vsnprintf`.
 
 ### Setup
@@ -203,7 +201,7 @@ the Flog family of macros, formatting is performed with `vsnprintf`.
 For your main, `LogSetup.hpp` provides the API for configuring your log.  There are three start 
 calls:
 
-1. `void start_logger(int severity_threshold)` : Start the logger with the default file sink back-end
+1. `void start_logger(int severity_threshold)` : Start the logger with the default console sink back-end
 and the simple severity threshold given for all tags. This only sets up the default channel.
 2. `void start_logger(LogConfig const& config)` : Start the logger using the given configuration for the 
 default channel.  See below for the `LogConfig` object.
@@ -214,9 +212,7 @@ The LogConfig object provides a small API for configuring the logger behavior:
 
 * `LogConfig::set_default_threshold(int thr)` : Sets the default severity threshold for all (or no) tags.
 * `LogConfig::add_tag(const char* tag, int thr)` : Sets the threshold `thr` for tag `tag`.
-* `LogConfig::set_sink(std::unique_ptr<LogSink> sink)` : Takes the log sink instance given to use for the back end.
-* `LogConfig::set_sink(LogSink* sink)` : Takes the log sink instance given to use for the back end. Slog takes 
-ownership of the pointer and will perform cleanup when required.
+* `LogConfig::set_sink(std::shared_ptr<LogSink> sink)` : Sets the sink where records will be written.
 
 In addition, you may call `stop_logger()` to cease logging, but this isn't required before program 
 termination.
@@ -265,19 +261,19 @@ a single record. The metadata for the `more` record is not meaningful.
 
 The `LogRecord` meta contains useful metadata about the record:
 ```cpp
-    char tag[TAG_SIZE];      //! The tag
+    char tag[TAG_SIZE];      //! The tag (null terminated)
     char const* filename;    //! filename containing the function where this message was recorded
     char const* function;    //! name of the function where this message was recorded    
     unsigned long time;      //! ns since Unix epoch
     unsigned long thread_id; //! unique ID of the thread this message was recorded on
-    int line;                //!program line number
+    int line;                //! program line number
     int severity;            //! Message importance. Lower numbers are more important    
 ```
 As you can see, the default formatter doesn't include all of this information, but you can 
 easily customize it.
 
 #### JournaldSink
-The Journald sink uses the structured logging features of Jornald to record the metadata.  These
+The Journald sink uses the structured logging features of Journald to record the metadata.  These
 are logged as
 ```cpp
         sd_journal_send(
@@ -290,7 +286,7 @@ are logged as
             "MESSAGE=%s",   rec.message,
             NULL); 
 ```
-allowing you to use the Jornald features to filter the logs.  For a great introduction to this,
+allowing you to use the Journald features to filter the logs.  For a great introduction to this,
 see http://0pointer.de/blog/projects/journalctl.html.
 
 The sink also provides optional echoing to the console. The echoed logs use the same `Formatter` 
@@ -321,10 +317,12 @@ a convenient way to allow users to customize the format, but you don't have to u
 
 ### Locale Setting
 
-Slog uses a thread-local stream object that is initialized in an order you can't control (the old 
-static initialization fiasco of C++ lore). As such, if you change the global locale after starting
-the logger, the streams will not pick up on this by default.  You can force Slog to update the 
-stream locale via `void set_locale(std::locale locale)` or `void set_locale_to_global()`.
+You may set a custom locale for a stream in Slog via the `set_locale()` method of `LogConfig`.
+
+Slog uses static thread-local stream objects that are initialized in an undefined order (aka the 
+"static initialization fiasco" of C++). As such, if you change the global locale after starting
+the logger, the streams will not pick up on this by default.  You can force Slog to update all of
+the stream locales via `void set_locale(std::locale locale)` or `void set_locale_to_global()`.
 
 ## Building Slog
 
@@ -362,7 +360,7 @@ The setup methods are:
 The default sink is the FileSink.
 
 * `set_pool(std::shared_ptr<LogRecordPool> pool_)`: Set the record pool.  The default pool is an allocating
-record pool that allocates in 1 MB chunks with 1 kB records.
+record pool that allocates memory according to the cmake variables below.
 
 ### LogRecordPool
 
@@ -380,7 +378,7 @@ The other parameters are
 * `i_pool_alloc_size` controls the size of each pool allocation. The default pool uses a 1 MB allocation.
 * `i_message_size` controls the size of a single message. Longer messages are formed using the "jumbo" 
    pointer -- concatenating multiple records from the pool. Choosing this to be a bit longer than your 
-   typical message can give you good performance. The default pool uses 1 kB messages, roughly ten 
+   typical message can give you good performance. The default pool uses 512 B messages, roughly five
    terminal lines of text.
 * `i_max_blocking_time_ms` sets the maximum blocking time in milliseconds when `i_policy` is `BLOCK`. 
    It has no impact for ALLOCATE or DISCARD policies.
@@ -389,18 +387,22 @@ The record pool is fully thread-safe, so sharing one pool `shared_ptr` between m
 works fine.
 
 ## Compile-time Configuration
-Slog has two compile-time cmake configuration options:
-
+Slog has four compile-time cmake configuration options:
 
 | Name                    |    Default                  |    Notes                               |
 |-------------------------|-----------------------------|----------------------------------------|
 | `SLOG_ALWAYS_LOG`       |   OFF                       | When the logger is stopped, dump records to the console |
 | `SLOG_STREAM`           |   ON                        | Turn this off to avoid including <iostream> and Slog() macros |
+| `SLOG_DEFAULT_RECORD_SIZE` | 512 | Default size of records |
+| `SLOG_DEFAULT_POOL_RECORD_COUNT` | 2048 | Default number of records in the pool |
 
-In addition, building with `-DSLOG_LOGGING_ENABLED=0` will suppress all logging in this translation
+Note the total memory allocation will be `SLOG_DEFAULT_POOL_RECORD_COUNT * SLOG_DEFAULT_RECORD_SIZE`.
+
+In addition, building with `-DSLOG_LOGGING_ENABLED=0` will suppress all logging in a translation
 unit.
 
 # Version History
 
 * *1.0.0* Initial release.
 * *1.1.0* Alter main include path to be `slog/slog.hpp`. Fix bug with "jumbo" messages being truncated.
+* *1.2.0* Default sink changed to `ConsoleSink`. Made pool sizes configurable in cmake.

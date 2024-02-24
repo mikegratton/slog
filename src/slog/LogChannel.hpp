@@ -66,7 +66,7 @@ class LogChannel {
      * Will return nullptr if the pool is exhausted.
      * Thread safe.
      */
-    RecordNode* get_fresh_record() { return pool->take(); }
+    RecordNode* get_fresh_record() { return pool->allocate(); }
 
     ///////////////////////////////////////////////////////////////////
     // RUN STATE ONLY
