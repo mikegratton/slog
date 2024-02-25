@@ -39,22 +39,37 @@ using Formatter = std::function<int(FILE* sink, LogRecord const& node)>;
 void format_severity(char* severity_str, int severity);
 
 /**
- * @brief Write an ISO8601 timestamp.
+ * @brief Obtain a pointer to the null-terminated four character severity string
+ */
+char const* severity_string(int severity);
+
+enum TimeFormatMode {
+    FULL_SPACE,  // YYYY-MM-DD hh:mm:ss.fZ
+    COMPACT,     // YYYYMMDDThhmmss.fZ
+    FULL_T       // YYYY-MM-DDThh:mm:ss.fZ
+};
+
+/**
+ * @brief Write an ISO 8601 timestamp to a string
  *
  * Format the time in ISO 8601/RFC 3339 format YYYY-MM-DD hh:mm:ss.fZ
  * where
  *  (1) The timezone is always UTC
  *  (2) The number of fractional second digits f is controlled by
  *      seconds_decimal_precision
- * The string should be at least 21 characters long for zero fractional seconds.
+ * @note The string should be at least 21 characters long for zero fractional seconds.
  * For the default form, 25 characters are required.
+ *
+ * If full_punctuation is true, then the format is YYYY-MM-DDThh:mm:ss.fZ
  */
-void format_time(char* time_str, unsigned long time, int seconds_decimal_precision = 3, bool full_punctuation = false);
+void format_time(char* time_str, unsigned long time, int seconds_decimal_precision = 3,
+                 TimeFormatMode format = FULL_SPACE);
 
 /**
  * @brief Makes a code location string.
  *
- * By default, this removes the path from file_name, then appends the line number: "Foo.cpp@15"
+ * This removes the path from file_name, then appends the line number: "Foo.cpp@15"
+ * @note location_str must be at least size 64. Locations are truncated after 63 characters.
  */
 void format_location(char* location_str, char const* file_name, int line_number);
 

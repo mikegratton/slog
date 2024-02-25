@@ -52,7 +52,7 @@ TEST_CASE("StreamRejectPerformance")
     for (unsigned long i = 0; i < JOB_SIZE; i++) { Slog(NOTE) << "Hello"; }
     auto stop_time = std::chrono::system_clock::now();
     std::chrono::duration<double, std::milli> elapsed = stop_time - start_time;
-    std::cout << "Reject logged " << JOB_SIZE << " records in " << elapsed.count() << " ms \n";
+    std::cout << "Reject stream logged " << JOB_SIZE << " records in " << elapsed.count() << " ms \n";
     std::cout << "Per log: " << (elapsed.count() / JOB_SIZE) << " ms/log\n";
     stop_logger();
 }
@@ -69,7 +69,7 @@ TEST_CASE("StreamRejectTagPerformance")
     for (unsigned long i = 0; i < JOB_SIZE; i++) { Slog(NOTE, "meep") << "Hello"; }
     auto stop_time = std::chrono::system_clock::now();
     std::chrono::duration<double, std::milli> elapsed = stop_time - start_time;
-    std::cout << "Reject logged " << JOB_SIZE << " records in " << elapsed.count() << " ms \n";
+    std::cout << "Reject tag stream logged " << JOB_SIZE << " records in " << elapsed.count() << " ms \n";
     std::cout << "Per log: " << (elapsed.count() / JOB_SIZE) << " ms/log\n";
     stop_logger();
 }

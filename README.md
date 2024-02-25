@@ -17,19 +17,21 @@ logging faster than it can keep up.
 
 * Slog is configurable, but with sensible an unsurprising defaults 
 
-* Write your own backend or formatter, or use one of those provided
+* Slog has minimal impact on compile time. Unlike header-only log libraries, the main header for
+  Slog is very light weight.
+
+* Send log messages to journald, syslog, files, or just the console
+
+* Tag messages with string data. Control the logging threshold per tag.
+
+* Run multiple parallel loggers for logging different types of data (e.g. text logs versus binary logs)
+
+* Write your own backend or message formatter using a simple API
+
+* Fully asynchronous design avoids performing I/O work on the caller's thread. Log records are 
+  never copied.
 
 * Flexible memory pool policies to control allocation in critical code
-
-* Optional journald sink for modern logging as well as a traditional file-based sink
-
-* Slog uses a custom `ostream` that writes directly to a preallocated buffer
-
-* Log records are never copied, just moved
-
-* Slog's mutex-guarded sections are very short -- about four instructions 
-
-* Slog has minimal impact on compile time. 
 
 ## Quickstart
 
@@ -57,9 +59,9 @@ int main()
     config.set_default_threshold(slog::DBUG);      // Log everything DBUG or higher by default
     config.add_tag("net", slog::NOTE);             // Only log net-tagged messages at NOTE level
     auto sink = std::make_shared<slog::FileSink>();
-    sink->set_file("/tmp", "example", "slog");     // Name files "/tmp/example_DATE_SEQUENCE.slog"
-    sink->set_echo(false);                         // Don't echo to the console (default true)
-    sink->set_max_file_size(2 >> 30);              // Roll over big files (default no limit)
+    sink->set_file("/tmp", "example", "slog");     // Name files "/tmp/example_YYYYMMDDTHHMMSS_SEQUENCE.slog"
+    sink->set_echo(false);                         // Don't echo to the console (default is true)
+    sink->set_max_file_size(2 >> 30);              // Roll over big files (default is no rollover)
     config.set_sink(sink);
     slog::start_logger(config);
     
@@ -136,7 +138,7 @@ integers between the severity levels you want.  For instance, to add a COOL leve
 int COOL = (slog::NOTE + slog::WARN)/2;
 ```
 Note that higher numbers are treated as less severe.  In addition, negative severity is considered
-"FATL" by Slog, triggering the draining of all log queues and a call to `abort()` ending the 
+"FATL" by Slog, triggering the draining of all log queues and a call to `abort()` to stop the 
 program. 
 
 Slog filters messages based on a severity threshold per channel and per tag (see below).  For example,
@@ -152,7 +154,7 @@ and cannot be changed while logging is happening. You can check if a message wou
 
 #### Tags
 Each message may have an optional tag associated.  These are size-limited strings (the default 
-limit is 16 characters) that can have custom log thresholds.  Tags that don't have defined
+limit is 15 characters) that can have custom log thresholds.  Tags that don't have defined
 thresholds use the default. For instance, keeping the same default threshold of NOTE as before,
 ```cpp
 int a = 0;
@@ -162,8 +164,8 @@ Slog(INFO) << "Increment a: "<< a++;
 would log at most once, if we set the threshold for tag "noisy" to INFO or lower.
 
 #### Channels
-Slog can be configured to have multiple *channels*. A channel corresponds to an independent back-end.  
-Each channel has its own worker thread, its own sink, and its own set of severity thresholds.  You can 
+Slog can be configured to have multiple *channels*. A channel corresponds to an independent back-end,
+with its own worker thread, its own sink, and its own set of severity thresholds.  You can 
 use this to separate events from data, for instance.  Note that a particular message can be sent to only 
 one channel.  Channels may have independent memory pools with different policies and sizes or they can 
 share pools with other channels. Slog represents a channel by an integer, with the default channel being
@@ -187,11 +189,12 @@ with tag "tag". This uses printf-style formatting.
 * `Flogtc(SEVERITY, "tag", 2, "A good number is %d", 42)` : Log "A good number is 42" to channel 2
 with tag "tag". This uses printf-style formatting.
 
-All of these macros aggressively check if the message will be logged given the current severity threshold
+All of these macros first check if the message will be logged given the current severity threshold
 for the tag and channel.  If the message won't be logged, the code afterwards *will not be executed*.
-That is, no strings are formatted, no work is done.  Moreover, depending on setup, if the message
+That is, no strings are formatted, no work is done.  Moreover, depending on the pool policy, if the message
 pool is empty, these macros may (a) allocate, causing a delay (b) block for a configurable 
-amount of time waiting for a message to become available or (c) simply discard the log message.
+amount of time waiting for a free record to become available or (c) simply discard the log message. The default
+policy is to allocate.
 
 Slog uses a custom `std::ostream` class that avoids some of the inefficiencies of `std::stringstream`.  For 
 the Flog family of macros, formatting is performed with `vsnprintf`.
@@ -206,7 +209,7 @@ and the simple severity threshold given for all tags. This only sets up the defa
 2. `void start_logger(LogConfig const& config)` : Start the logger using the given configuration for the 
 default channel.  See below for the `LogConfig` object.
 3. `void start_logger(std::vector<LogConfig> const& configs)`: Start the logger using the given set 
-of configs for each channel. The default channel `0` uses the front config.
+of configs for each channel. The default channel `0` uses the first config.
 
 The LogConfig object provides a small API for configuring the logger behavior:
 
@@ -241,17 +244,15 @@ happens.
 
 Formatter is an alias for `std::function<int (FILE* sink, LogRecord const& rec)>`.  This takes
 the file to write to and the message to write and records it, returning the number of bytes
-written. The default formatter in `LogSink.cpp` is a good example:
+written. For example,
 ```cpp
-int default_format(FILE* sink, LogRecord const&) {    
-    char severity_str[16];
-    char time_str[32];
-    format_severity(severity_str, rec.meta.severity);
-    format_time(time_str, rec.meta.time, 3);    
-    int count = fprintf(sink, "[%s %s %s] %s", severity_str, rec.meta.tag, time_str, rec.message);
+int my_format(FILE* sink, LogRecord const& rec) {        
+    char time_str[32];    
+    format_time(time_str, rec.meta.time, 3, true);
+    int count = fprintf(sink, "[%s] %s", time_str, rec.message);    
     // Note handling of oversized records
     for (LogRecord const* more = rec.more; more != nullptr; more = more->more) {
-        count += fprintf(sink, "%s", more->message);
+        count += fputs(more->message, sink);
     }
     return count;
 }

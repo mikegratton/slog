@@ -59,7 +59,7 @@ TEST_CASE("RejectTagPerformance")
     for (unsigned long i = 0; i < JOB_SIZE; i++) { Flogt(NOTE, "meep", "Hello"); }
     auto stop_time = std::chrono::system_clock::now();
     std::chrono::duration<double, std::milli> elapsed = stop_time - start_time;
-    std::cout << "Reject logged " << JOB_SIZE << " records in " << elapsed.count() << " ms \n";
+    std::cout << "Reject tag logged " << JOB_SIZE << " records in " << elapsed.count() << " ms \n";
     std::cout << "Per log: " << (elapsed.count() / JOB_SIZE) << " ms/log\n";
     stop_logger();
 }
