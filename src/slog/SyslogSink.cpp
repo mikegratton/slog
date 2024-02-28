@@ -10,13 +10,28 @@
 
 #include <cassert>
 #include <cerrno>
+#include <cstdarg>
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
 
 #include "slog/LogSink.hpp"
 
+#define SLOG_PRINT_SYSLOG_ERROR
+
 namespace slog {
+
+namespace {
+void syslog_error(char const* format_, ...)
+{
+#ifdef SLOG_PRINT_SYSLOG_ERROR
+    va_list vlist;
+    va_start(vlist, format_);
+    vfprintf(stderr, format_, vlist);
+    va_end(vlist);
+#endif
+}
+}  // namespace
 
 SyslogSink::SyslogSink(char const* destination, bool use_tcp)
     : mformat(default_format),
@@ -33,8 +48,7 @@ SyslogSink::SyslogSink(char const* destination, bool use_tcp)
     gethostname(mhostname, sizeof(mhostname) - 1);
 
     // Set up the FILE memory stream
-    mbuffer = new char[kMaxDatagramSize];
-    mbufferStream = fmemopen(mbuffer, kMaxDatagramSize, "w");
+    mbufferStream = open_memstream(&mbuffer, &mbuffer_size);
     connect();
 }
 
@@ -42,7 +56,7 @@ SyslogSink::~SyslogSink()
 {
     if (is_connected()) { disconnect(); }
     fclose(mbufferStream);
-    delete[] mbuffer;
+    free(mbuffer);
     if (munix_socket) {
         unlink(munix_socket);
         delete[] munix_socket;
@@ -71,8 +85,7 @@ bool SyslogSink::connect()
             auto address_size = sizeof(sockaddr_un);
             status = bind(msock_fd, caddress, address_size);
             if (status < 0) {
-                perror("Failed to bind");
-                // fprintf(stderr, "Failed to bind to %s\n", mdestination);
+                syslog_error("Faild to bind to unix socket\n");
                 disconnect();
                 return false;
             }
@@ -86,8 +99,7 @@ bool SyslogSink::connect()
         auto address_size = sizeof(sockaddr_un);
         status = ::connect(msock_fd, caddress, address_size);
         if (status < 0) {
-            perror("Failed to connect");
-            fprintf(stderr, "Failed to connect to %s\n", mdestination);
+            syslog_error("Failed to connecto to %s\n", mdestination);
             disconnect();
             return false;
         }
@@ -109,7 +121,7 @@ bool SyslogSink::connect()
         hints.ai_socktype = protocol;  // socket type
         hints.ai_flags = AI_PASSIVE;   // fill in my IP for me
         if ((status = getaddrinfo(mdestination, port, &hints, &info)) != 0) {
-            fprintf(stderr, "getaddrinfo error: %s\n", gai_strerror(status));
+            syslog_error("getaddrinfo error: %s\n", gai_strerror(status));
             disconnect();
             return false;
         }
@@ -117,8 +129,8 @@ bool SyslogSink::connect()
             memcpy(&address, info->ai_addr, info->ai_addrlen);
             freeaddrinfo(info);
         } else {
+            syslog_error("Could not resolve hostname %s\n", mdestination);
             freeaddrinfo(info);
-            fprintf(stderr, "Could not resolve hostname %s\n", mdestination);
             disconnect();
             return false;
         }
@@ -126,7 +138,7 @@ bool SyslogSink::connect()
         auto address_size = sizeof(sockaddr_in);
         status = ::connect(msock_fd, caddress, address_size);
         if (status == -1) {
-            fprintf(stderr, "Failed to connect to %s\n", mdestination);
+            syslog_error("Failed to connect to %s\n", mdestination);
             disconnect();
             return false;
         }
@@ -208,8 +220,8 @@ void SyslogSink::record(LogRecord const& node)
     bytesWritten += mformat(mbufferStream, node);
     fflush(mbufferStream);
 
-    if (bytesWritten > kMaxDatagramSize) {
-        // Truncate the message
+    // Truncate the message if we're using UDP/IP
+    if (bytesWritten > kMaxDatagramSize && muse_tcp == false && munix_socket == nullptr) {
         bytesWritten = kMaxDatagramSize;
     }
 
@@ -224,7 +236,7 @@ void SyslogSink::record(LogRecord const& node)
         }
         status = send(msock_fd, mbuffer, bytesWritten, 0);
         if (status == -1) {
-            printf("Failed to send with code %d\n", errno);
+            syslog_error("Failed to send with code %d\n", errno);
             disconnect();
         }
     }

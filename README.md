@@ -201,8 +201,8 @@ the Flog family of macros, formatting is performed with `vsnprintf`.
 
 ### Setup
 
-For your main, `LogSetup.hpp` provides the API for configuring your log.  There are three start 
-calls:
+For your main, `LogSetup.hpp` provides the API for configuring your log.  The `start_logger()` call has three
+forms:
 
 1. `void start_logger(int severity_threshold)` : Start the logger with the default console sink back-end
 and the simple severity threshold given for all tags. This only sets up the default channel.
@@ -211,26 +211,28 @@ default channel.  See below for the `LogConfig` object.
 3. `void start_logger(std::vector<LogConfig> const& configs)`: Start the logger using the given set 
 of configs for each channel. The default channel `0` uses the first config.
 
-The LogConfig object provides a small API for configuring the logger behavior:
+The LogConfig object allows for configuring the logger behavior. It has four main methods:
 
-* `LogConfig::set_default_threshold(int thr)` : Sets the default severity threshold for all (or no) tags.
-* `LogConfig::add_tag(const char* tag, int thr)` : Sets the threshold `thr` for tag `tag`.
-* `LogConfig::set_sink(std::shared_ptr<LogSink> sink)` : Sets the sink where records will be written.
+* `set_default_threshold(int thr)` : Sets the default severity threshold for all (or no) tags.
+* `add_tag(const char* tag, int thr)` : Sets the threshold `thr` for tag `tag`.
+* `set_sink(std::shared_ptr<LogSink> sink)` : Sets the sink where records will be written.
+* `set_pool(std::shared_ptr<LogRecordPool> pool_)` : Configures the logger to use a custom log record pool.
 
 In addition, you may call `stop_logger()` to cease logging, but this isn't required before program 
 termination.
 
 ### Log Sinks
-Slog comes with three built-in sinks for recording messages, `ConsoleSink`, `FileSink` and 
-`JournaldSink`.  If none of these work for you, you may also make your own sinks by implementing the very simple API.
+Slog comes with three built-in sinks for recording messages, `ConsoleSink`, `FileSink`,  
+`JournaldSink`, and `SyslogSink`.  If none of these work for you, you may also make your own sinks by 
+implementing the API (one function call).
 
 #### ConsoleSink
 `ConsoleSink` writes messages to `stdout`.  It has only one feature:
 * `set_formatter(Formatter format)`: Adjust the format of log messages. See below about Formatters.
 
 #### FileSink
-`FileSink` writes log messages to a file via the `fprintf()` API. It can also optionally echo
-those messages to `stdout`.  It has a handful of useful features:
+`FileSink` writes log messages to a file. It can also optionally echo those messages to `stdout`.  It has a 
+handful of useful features:
 
 1. `set_echo(bool)` : Echo (or don't) messages to the console. Defaults to true.
 2. `set_max_file_size(int)` : Set the maximum file size before rolling over to a new file. Defaults to unlimited.
@@ -244,7 +246,72 @@ happens.
 
 Formatter is an alias for `std::function<int (FILE* sink, LogRecord const& rec)>`.  This takes
 the file to write to and the message to write and records it, returning the number of bytes
-written. For example,
+written. 
+
+#### JournaldSink
+The Journald sink uses the structured logging features of Journald to record the metadata.  These
+are logged as
+```cpp
+        sd_journal_send(
+            "CODE_FUNC=%s", rec.meta.function,
+            "CODE_FILE=%s", rec.meta.filename,
+            "CODE_LINE=%d", rec.meta.line,
+            "THREAD=%ld",   rec.meta.thread_id,
+            "TIMESTAMP=%s", isoTime,
+            "PRIORITY=%d",  rec.meta.severity/100,
+            "MESSAGE=%s",   rec.message,
+            NULL); 
+```
+allowing you to use the Journald features to filter the logs.  For a great introduction to this,
+see http://0pointer.de/blog/projects/journalctl.html.
+
+The sink also provides optional echoing to the console. The echoed logs use the same `Formatter` 
+function object as `FileSink`.
+
+#### SyslogSink
+The syslog sink logs in a variety of syslog formats to unix or internet sockets. In its default
+form, it use UDP to send messages to `/dev/log`, the traditional syslog unix socket. However,
+if constructed as
+```cpp
+    auto sink = std::make_shared<SyslogSink>("host.someplace.com:514");
+```
+it will send messages in RFC5424 format over the internet. TCP logging using RFC 6587 is also
+supported. Like the other sinks, it uses the `Formatter` function object for formatting messages
+and supports echoing log messages to the console.
+
+Difficulties in connecting to the logging socket are not reported by default. You must compile
+your program with `-DSLOG_PRINT_SYSLOG_ERROR` to enable debugging messages.
+
+The API
+    * `set_formatter(Formatter format)` : Change the formatter
+    * `set_echo(bool doit = true)` : Turn echoing to the console on/off (default is on)
+    * `set_application_name(char const* application_name)` : Change the syslog application name (default is the program name)
+    * `set_facility(int facility)` : Change the syslog facility (default is 1)
+    * `set_rfc3164_protocol(bool doit)` : Use the old syslog format (default is RFC 5424)
+
+### Tweaking the Format
+The built-in sinks all use the `Formatter` functor defined in `LogSink.hpp` to format messages:
+```cpp
+using Formatter = std::function<int (FILE* sink, LogRecord const& node)>;
+```
+This should return the number of bytes written to the `sink`.  You can use a lambda in the setup
+to customize the format to your liking. Functions in `LogSink.hpp` provide date, severity, and code 
+location format helpers that should make creating your own formatter easy.
+
+### Writing Your Own Sink
+Log sinks derive from this abstract class defined in `LogSink.hpp`:
+```cpp
+class LogSink
+{
+public:
+    virtual ~LogSink() = default;
+    virtual void record(LogRecord const& record) = 0;
+};
+```
+As you can see, you can do what you like in `record`.  The `Formatter` functor provides
+a convenient way to allow users to customize the format, but you don't have to use it.
+
+An example formatter is
 ```cpp
 int my_format(FILE* sink, LogRecord const& rec) {        
     char time_str[32];    
@@ -273,48 +340,6 @@ The `LogRecord` meta contains useful metadata about the record:
 As you can see, the default formatter doesn't include all of this information, but you can 
 easily customize it.
 
-#### JournaldSink
-The Journald sink uses the structured logging features of Journald to record the metadata.  These
-are logged as
-```cpp
-        sd_journal_send(
-            "CODE_FUNC=%s", rec.meta.function,
-            "CODE_FILE=%s", rec.meta.filename,
-            "CODE_LINE=%d", rec.meta.line,
-            "THREAD=%ld",   rec.meta.thread_id,
-            "TIMESTAMP=%s", isoTime,
-            "PRIORITY=%d",  rec.meta.severity/100,
-            "MESSAGE=%s",   rec.message,
-            NULL); 
-```
-allowing you to use the Journald features to filter the logs.  For a great introduction to this,
-see http://0pointer.de/blog/projects/journalctl.html.
-
-The sink also provides optional echoing to the console. The echoed logs use the same `Formatter` 
-function object as `FileSink`.
-
-
-### Tweaking the Format
-The built-in sinks all use the `Formatter` functor defined in `LogSink.hpp` to format messages:
-```cpp
-using Formatter = std::function<int (FILE* sink, LogRecord const& node)>;
-```
-This should return the number of bytes written to the `sink`.  You can use a lambda in the setup
-to customize the format to your liking. Functions in `LogSink.hpp` provide date, severity, and code 
-location format helpers that should make creating your own formatter easy.
-
-### Writing Your Own Sink
-Log sinks derive from this abstract class defined in `LogSink.hpp`:
-```cpp
-class LogSink
-{
-public:
-    virtual ~LogSink() = default;
-    virtual void record(LogRecord const& record) = 0;
-};
-```
-As you can see, you can do what you like in `record`.  The `Formatter` functor provides
-a convenient way to allow users to customize the format, but you don't have to use it.
 
 ### Locale Setting
 

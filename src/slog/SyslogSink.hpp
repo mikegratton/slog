@@ -7,14 +7,14 @@ struct sockaddr;
 namespace slog {
 
 /**
- * @brief RFC5424 or RFC3164 syslog log sink. Messages are sent over unix or internet sockets using UDP
- * or TCP.
+ * @brief A log sink compatible with syslog. Messages are sent over unix sockets or internet sockets.
  *
  * By default, this logger sends RFC5424-formatted records over UDP. When sending TCP messages, it uses
  * the RFC 6587 "Octet Counting" scheme, where the syslog message is preceded by the byte count to be
  * sent, e.g. "57 <12> 2000-01-01T00:00:00Z mydomain.com my_app Hello World" for RFC3164 formatting.
  *
- * @note This can only send messages up to 65535 bytes. Longer messages will be silently truncated.
+ * @note This can only send messages up to 65k bytes if the protocol is UDP/IP. Longer messages will be
+ * silently truncated.
  */
 class SyslogSink : public LogSink {
    public:
@@ -53,7 +53,7 @@ class SyslogSink : public LogSink {
     bool is_connected() const;
     char* make_unix_socket();
 
-    static constexpr std::size_t kMaxDatagramSize = 65535;
+    static constexpr std::size_t kMaxDatagramSize = 65507;
 
     Formatter mformat;
     bool mecho;
@@ -64,6 +64,7 @@ class SyslogSink : public LogSink {
     int msock_fd;
 
     char* mbuffer;
+    std::size_t mbuffer_size;
     FILE* mbufferStream;
 
     char mdestination[256];
