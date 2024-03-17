@@ -13,8 +13,8 @@ namespace slog {
  * the RFC 6587 "Octet Counting" scheme, where the syslog message is preceded by the byte count to be
  * sent, e.g. "57 <12> 2000-01-01T00:00:00Z mydomain.com my_app Hello World" for RFC3164 formatting.
  *
- * @note This can only send messages up to 65k bytes if the protocol is UDP/IP. Longer messages will be
- * silently truncated.
+ * @note This can only send messages up to 64kB if the protocol is UDP/IP. Longer messages will be
+ * silently truncated. Messages sent to a unix socket or over TCP/IP do not have this limitation.
  */
 class SyslogSink : public LogSink {
    public:

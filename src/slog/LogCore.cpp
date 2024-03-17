@@ -17,6 +17,12 @@ namespace {
 // The global pool is the default when no pool is specified
 std::shared_ptr<LogRecordPool> s_global_pool;
 
+// Old signal handlers to be called during shutdown
+typedef void (*SignalHandler)(int signum);
+SignalHandler g_oldIntHandler = nullptr;
+SignalHandler g_oldAbrtHandler = nullptr;
+SignalHandler g_oldQuitHandler = nullptr;
+
 ////////////////////////////////////////////////////
 // This is the actual logger singleton, hidden from
 // any other cpp file
@@ -58,7 +64,7 @@ class Logger {
             if (nullptr == sink) { sink = std::make_shared<NullSink>(); }
             backend.emplace_back(sink, config[i].get_threshold_map(), pool);
         }
-        // Give up the global pool if not in use
+        // Release the global pool if not in use
         s_global_pool.reset();
     }
 
@@ -79,9 +85,10 @@ class Logger {
     static void drain_log_queue(int signal_id)
     {
         stop_logger();
-        // Re-raise the signal
-        signal(signal_id, SIG_DFL);
-        raise(signal_id);
+        // Pass signal to old handlers
+        if (g_oldIntHandler && signal_id == SIGINT) { g_oldIntHandler(signal_id); }
+        if (g_oldAbrtHandler && signal_id == SIGABRT) { g_oldAbrtHandler(signal_id); }
+        if (g_oldQuitHandler && signal_id == SIGQUIT) { g_oldQuitHandler(signal_id); }
     }
 
     /**
@@ -91,13 +98,17 @@ class Logger {
     static void start_all_channels()
     {
         for (auto& chan : instance().backend) { chan.start(); }
-        struct sigaction action;
+        struct sigaction action, oldAction;
         sigfillset(&action.sa_mask);
         action.sa_handler = drain_log_queue;
         action.sa_flags = SA_RESTART;
-        sigaction(SIGINT, &action, nullptr);
-        sigaction(SIGABRT, &action, nullptr);
-        sigaction(SIGQUIT, &action, nullptr);
+
+        sigaction(SIGINT, &action, &oldAction);
+        g_oldIntHandler = oldAction.sa_handler;
+        sigaction(SIGABRT, &action, &oldAction);
+        g_oldAbrtHandler = oldAction.sa_handler;
+        sigaction(SIGQUIT, &action, &oldAction);
+        g_oldQuitHandler = oldAction.sa_handler;
     }
 
     /**
@@ -106,9 +117,34 @@ class Logger {
     static void stop_all_channels()
     {
         for (auto& chan : instance().backend) { chan.stop(); }
-        sigaction(SIGINT, nullptr, nullptr);
-        sigaction(SIGABRT, nullptr, nullptr);
-        sigaction(SIGQUIT, nullptr, nullptr);
+        struct sigaction action;
+
+        if (g_oldIntHandler) {
+            sigfillset(&action.sa_mask);
+            action.sa_handler = g_oldIntHandler;
+            action.sa_flags = SA_RESTART;
+            sigaction(SIGINT, &action, nullptr);
+        } else {
+            sigaction(SIGINT, nullptr, nullptr);
+        }
+
+        if (g_oldAbrtHandler) {
+            sigfillset(&action.sa_mask);
+            action.sa_handler = g_oldAbrtHandler;
+            action.sa_flags = SA_RESTART;
+            sigaction(SIGABRT, &action, nullptr);
+        } else {
+            sigaction(SIGABRT, nullptr, nullptr);
+        }
+
+        if (g_oldQuitHandler) {
+            sigfillset(&action.sa_mask);
+            action.sa_handler = g_oldQuitHandler;
+            action.sa_flags = SA_RESTART;
+            sigaction(SIGQUIT, &action, nullptr);
+        } else {
+            sigaction(SIGQUIT, nullptr, nullptr);
+        }
     }
 
     static void setup_stopped_channel() { instance().do_setup_stopped_channel(); }
