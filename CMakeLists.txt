@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.12)
-project(slog VERSION 1.3.0.0)
+project(slog VERSION 1.3.0)
 
 list(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
