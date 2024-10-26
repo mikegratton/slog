@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['operator_5b_5d_73',['operator[]',['../classslog_1_1FlatThresholdMap.html#ad28e8c3c77a568f78daeceaf1d6c521b',1,'slog::FlatThresholdMap']]]
+  ['logchannel_85',['LogChannel',['../classslog_1_1LogChannel.html#a5f4817fe9f4617ac1d8e214ed70a77db',1,'slog::LogChannel']]]
 ];

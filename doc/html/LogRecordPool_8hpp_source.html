@@ -5,7 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=9"/>
 <meta name="generator" content="Doxygen 1.9.1"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>Slog: /home/mike/git/slog/src/LogRecordPool.hpp Source File</title>
+<title>Slog: /home/mike/git/slog/src/slog/LogRecordPool.hpp Source File</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
@@ -124,15 +124,15 @@ $(document).ready(function(){initNavTree('LogRecordPool_8hpp_source.html',''); i
 <div class="line"><a name="l00041"></a><span class="lineno">   41</span>&#160; </div>
 <div class="line"><a name="l00042"></a><span class="lineno">   42</span>&#160;    ~<a class="code" href="classslog_1_1LogRecordPool.html">LogRecordPool</a>();</div>
 <div class="line"><a name="l00043"></a><span class="lineno">   43</span>&#160; </div>
-<div class="line"><a name="l00048"></a><span class="lineno">   48</span>&#160;    <a class="code" href="structslog_1_1RecordNode.html">RecordNode</a>* <a class="code" href="classslog_1_1LogRecordPool.html#afdd249626a0b581acac4cb3ae2adcdea">take</a>();</div>
+<div class="line"><a name="l00048"></a><span class="lineno">   48</span>&#160;    <a class="code" href="structslog_1_1RecordNode.html">RecordNode</a>* <a class="code" href="classslog_1_1LogRecordPool.html#a6d9feccc74fae701ca8c7f6e6fd1a2dd">allocate</a>();</div>
 <div class="line"><a name="l00049"></a><span class="lineno">   49</span>&#160; </div>
-<div class="line"><a name="l00053"></a><span class="lineno">   53</span>&#160;    <span class="keywordtype">void</span> <a class="code" href="classslog_1_1LogRecordPool.html#a3172261480da7067e7b6c8b1c5eaf003">put</a>(<a class="code" href="structslog_1_1RecordNode.html">RecordNode</a>* record);</div>
+<div class="line"><a name="l00053"></a><span class="lineno">   53</span>&#160;    <span class="keywordtype">void</span> <a class="code" href="classslog_1_1LogRecordPool.html#a235da7fbd988112566059bebe9fee9d0">free</a>(<a class="code" href="structslog_1_1RecordNode.html">RecordNode</a>* record);</div>
 <div class="line"><a name="l00054"></a><span class="lineno">   54</span>&#160; </div>
-<div class="line"><a name="l00055"></a><span class="lineno">   55</span>&#160;    <span class="comment">// Count items on the pool. Not thread-safe</span></div>
+<div class="line"><a name="l00055"></a><span class="lineno">   55</span>&#160;    <span class="comment">// Count items in the pool. Not thread-safe</span></div>
 <div class="line"><a name="l00056"></a><span class="lineno">   56</span>&#160;    <span class="keywordtype">long</span> count() <span class="keyword">const</span>;</div>
 <div class="line"><a name="l00057"></a><span class="lineno">   57</span>&#160; </div>
 <div class="line"><a name="l00058"></a><span class="lineno">   58</span>&#160;   <span class="keyword">protected</span>:</div>
-<div class="line"><a name="l00059"></a><span class="lineno">   59</span>&#160;    <span class="keywordtype">void</span> allocate();</div>
+<div class="line"><a name="l00059"></a><span class="lineno">   59</span>&#160;    <span class="keywordtype">void</span> acquire_blank_records();</div>
 <div class="line"><a name="l00060"></a><span class="lineno">   60</span>&#160; </div>
 <div class="line"><a name="l00061"></a><span class="lineno">   61</span>&#160;    <span class="keyword">mutable</span> std::mutex m_lock;</div>
 <div class="line"><a name="l00062"></a><span class="lineno">   62</span>&#160;    std::condition_variable m_nonempty;</div>
@@ -147,9 +147,9 @@ $(document).ready(function(){initNavTree('LogRecordPool_8hpp_source.html',''); i
 <div class="line"><a name="l00071"></a><span class="lineno">   71</span>&#160;};</div>
 <div class="line"><a name="l00072"></a><span class="lineno">   72</span>&#160;}  <span class="comment">// namespace slog</span></div>
 <div class="ttc" id="aclassslog_1_1LogRecordPool_html"><div class="ttname"><a href="classslog_1_1LogRecordPool.html">slog::LogRecordPool</a></div><div class="ttdoc">A memory pool for unused log records.</div><div class="ttdef"><b>Definition:</b> LogRecordPool.hpp:37</div></div>
-<div class="ttc" id="aclassslog_1_1LogRecordPool_html_a3172261480da7067e7b6c8b1c5eaf003"><div class="ttname"><a href="classslog_1_1LogRecordPool.html#a3172261480da7067e7b6c8b1c5eaf003">slog::LogRecordPool::put</a></div><div class="ttdeci">void put(RecordNode *record)</div><div class="ttdef"><b>Definition:</b> LogRecordPool.cpp:128</div></div>
-<div class="ttc" id="aclassslog_1_1LogRecordPool_html_afdd249626a0b581acac4cb3ae2adcdea"><div class="ttname"><a href="classslog_1_1LogRecordPool.html#afdd249626a0b581acac4cb3ae2adcdea">slog::LogRecordPool::take</a></div><div class="ttdeci">RecordNode * take()</div><div class="ttdef"><b>Definition:</b> LogRecordPool.cpp:93</div></div>
-<div class="ttc" id="aclassslog_1_1PoolMemory_html"><div class="ttname"><a href="classslog_1_1PoolMemory.html">slog::PoolMemory</a></div><div class="ttdef"><b>Definition:</b> LogRecordPool.cpp:28</div></div>
+<div class="ttc" id="aclassslog_1_1LogRecordPool_html_a235da7fbd988112566059bebe9fee9d0"><div class="ttname"><a href="classslog_1_1LogRecordPool.html#a235da7fbd988112566059bebe9fee9d0">slog::LogRecordPool::free</a></div><div class="ttdeci">void free(RecordNode *record)</div><div class="ttdef"><b>Definition:</b> LogRecordPool.cpp:126</div></div>
+<div class="ttc" id="aclassslog_1_1LogRecordPool_html_a6d9feccc74fae701ca8c7f6e6fd1a2dd"><div class="ttname"><a href="classslog_1_1LogRecordPool.html#a6d9feccc74fae701ca8c7f6e6fd1a2dd">slog::LogRecordPool::allocate</a></div><div class="ttdeci">RecordNode * allocate()</div><div class="ttdef"><b>Definition:</b> LogRecordPool.cpp:92</div></div>
+<div class="ttc" id="aclassslog_1_1PoolMemory_html"><div class="ttname"><a href="classslog_1_1PoolMemory.html">slog::PoolMemory</a></div><div class="ttdef"><b>Definition:</b> LogRecordPool.cpp:26</div></div>
 <div class="ttc" id="astructslog_1_1LogRecord_html"><div class="ttname"><a href="structslog_1_1LogRecord.html">slog::LogRecord</a></div><div class="ttdoc">A LogRecord is a message string combined with the associated metadata.</div><div class="ttdef"><b>Definition:</b> LogRecord.hpp:51</div></div>
 <div class="ttc" id="astructslog_1_1RecordNode_html"><div class="ttname"><a href="structslog_1_1RecordNode.html">slog::RecordNode</a></div><div class="ttdef"><b>Definition:</b> LogRecordPool.hpp:16</div></div>
 </div><!-- fragment --></div><!-- contents -->
@@ -157,7 +157,7 @@ $(document).ready(function(){initNavTree('LogRecordPool_8hpp_source.html',''); i
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="navelem"><a class="el" href="dir_68267d1309a1af8e8297ef4c3efbcdba.html">src</a></li><li class="navelem"><b>LogRecordPool.hpp</b></li>
+    <li class="navelem"><a class="el" href="dir_68267d1309a1af8e8297ef4c3efbcdba.html">src</a></li><li class="navelem"><a class="el" href="dir_95be75e0f8e573547a5556ed938590f2.html">slog</a></li><li class="navelem"><b>LogRecordPool.hpp</b></li>
     <li class="footer">Generated by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
   </ul>
 </div>

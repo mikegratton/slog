@@ -5,7 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=9"/>
 <meta name="generator" content="Doxygen 1.9.1"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>Slog: /home/mike/git/slog/src/JournaldSink.hpp Source File</title>
+<title>Slog: /home/mike/git/slog/src/slog/JournaldSink.hpp Source File</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
@@ -101,7 +101,7 @@ $(document).ready(function(){initNavTree('JournaldSink_8hpp_source.html',''); in
 <div class="line"><a name="l00027"></a><span class="lineno">   27</span>&#160;    <a class="code" href="classslog_1_1JournaldSink.html">JournaldSink</a>() : mformat(default_format), mecho(<span class="keyword">false</span>) {}</div>
 <div class="line"><a name="l00028"></a><span class="lineno">   28</span>&#160;    ~<a class="code" href="classslog_1_1JournaldSink.html">JournaldSink</a>() = <span class="keywordflow">default</span>;</div>
 <div class="line"><a name="l00029"></a><span class="lineno">   29</span>&#160; </div>
-<div class="line"><a name="l00031"></a><span class="lineno">   31</span>&#160;    <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code" href="classslog_1_1JournaldSink.html#a8adb49457e8618f9d8c2658d115a4f4a">record</a>(<a class="code" href="structslog_1_1LogRecord.html">LogRecord</a> <span class="keyword">const</span>&amp; rec) <span class="keyword">override</span>;</div>
+<div class="line"><a name="l00031"></a><span class="lineno">   31</span>&#160;    <span class="keywordtype">void</span> <a class="code" href="classslog_1_1JournaldSink.html#a8d352927b667a7ce01718646b086df1f">record</a>(<a class="code" href="structslog_1_1LogRecord.html">LogRecord</a> <span class="keyword">const</span>&amp; rec) <span class="keyword">final</span>;</div>
 <div class="line"><a name="l00032"></a><span class="lineno">   32</span>&#160; </div>
 <div class="line"><a name="l00039"></a><span class="lineno"><a class="line" href="classslog_1_1JournaldSink.html#a4ac23c881136cbc57f6743af8cc91276">   39</a></span>&#160;    <span class="keywordtype">void</span> <a class="code" href="classslog_1_1JournaldSink.html#a4ac23c881136cbc57f6743af8cc91276">set_formatter</a>(Formatter format) { mformat = format; }</div>
 <div class="line"><a name="l00040"></a><span class="lineno">   40</span>&#160; </div>
@@ -116,7 +116,7 @@ $(document).ready(function(){initNavTree('JournaldSink_8hpp_source.html',''); in
 <div class="ttc" id="aclassslog_1_1JournaldSink_html"><div class="ttname"><a href="classslog_1_1JournaldSink.html">slog::JournaldSink</a></div><div class="ttdoc">Log using the systemd journal.</div><div class="ttdef"><b>Definition:</b> JournaldSink.hpp:25</div></div>
 <div class="ttc" id="aclassslog_1_1JournaldSink_html_a02eef0bd84db294aeba45efd7d2dfddf"><div class="ttname"><a href="classslog_1_1JournaldSink.html#a02eef0bd84db294aeba45efd7d2dfddf">slog::JournaldSink::set_echo</a></div><div class="ttdeci">void set_echo(bool doit=true)</div><div class="ttdoc">Turn on/off echo to console.</div><div class="ttdef"><b>Definition:</b> JournaldSink.hpp:42</div></div>
 <div class="ttc" id="aclassslog_1_1JournaldSink_html_a4ac23c881136cbc57f6743af8cc91276"><div class="ttname"><a href="classslog_1_1JournaldSink.html#a4ac23c881136cbc57f6743af8cc91276">slog::JournaldSink::set_formatter</a></div><div class="ttdeci">void set_formatter(Formatter format)</div><div class="ttdoc">Change the console echo log format.</div><div class="ttdef"><b>Definition:</b> JournaldSink.hpp:39</div></div>
-<div class="ttc" id="aclassslog_1_1JournaldSink_html_a8adb49457e8618f9d8c2658d115a4f4a"><div class="ttname"><a href="classslog_1_1JournaldSink.html#a8adb49457e8618f9d8c2658d115a4f4a">slog::JournaldSink::record</a></div><div class="ttdeci">virtual void record(LogRecord const &amp;rec) override</div><div class="ttdoc">Write a record to the journal.</div><div class="ttdef"><b>Definition:</b> JournaldSink.cpp:6</div></div>
+<div class="ttc" id="aclassslog_1_1JournaldSink_html_a8d352927b667a7ce01718646b086df1f"><div class="ttname"><a href="classslog_1_1JournaldSink.html#a8d352927b667a7ce01718646b086df1f">slog::JournaldSink::record</a></div><div class="ttdeci">void record(LogRecord const &amp;rec) final</div><div class="ttdoc">Write a record to the journal.</div><div class="ttdef"><b>Definition:</b> JournaldSink.cpp:6</div></div>
 <div class="ttc" id="aclassslog_1_1LogSink_html"><div class="ttname"><a href="classslog_1_1LogSink.html">slog::LogSink</a></div><div class="ttdoc">Base class for all log sinks.</div><div class="ttdef"><b>Definition:</b> LogSink.hpp:15</div></div>
 <div class="ttc" id="astructslog_1_1LogRecord_html"><div class="ttname"><a href="structslog_1_1LogRecord.html">slog::LogRecord</a></div><div class="ttdoc">A LogRecord is a message string combined with the associated metadata.</div><div class="ttdef"><b>Definition:</b> LogRecord.hpp:51</div></div>
 </div><!-- fragment --></div><!-- contents -->
@@ -124,7 +124,7 @@ $(document).ready(function(){initNavTree('JournaldSink_8hpp_source.html',''); in
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="navelem"><a class="el" href="dir_68267d1309a1af8e8297ef4c3efbcdba.html">src</a></li><li class="navelem"><b>JournaldSink.hpp</b></li>
+    <li class="navelem"><a class="el" href="dir_68267d1309a1af8e8297ef4c3efbcdba.html">src</a></li><li class="navelem"><a class="el" href="dir_95be75e0f8e573547a5556ed938590f2.html">slog</a></li><li class="navelem"><b>JournaldSink.hpp</b></li>
     <li class="footer">Generated by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
   </ul>
 </div>

@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['_7elogchannel_90',['~LogChannel',['../classslog_1_1LogChannel.html#a32c4e19ebf1d60ed1a75a8bbb1d85afa',1,'slog::LogChannel']]]
+  ['threshold_105',['threshold',['../classslog_1_1LogChannel.html#ab5e531fb64c2aa3d0ccf1907487b12b9',1,'slog::LogChannel']]]
 ];

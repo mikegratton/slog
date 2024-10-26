@@ -117,8 +117,12 @@ Public Attributes</h2></td></tr>
 <tr class="separator:a35ba5dabefdb637b27e799e992256a28"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:af2dff6718d94a227313f701134c04b7f"><td class="memItemLeft" align="right" valign="top"><a id="af2dff6718d94a227313f701134c04b7f"></a>
 long&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structslog_1_1LogRecord.html#af2dff6718d94a227313f701134c04b7f">message_max_size</a></td></tr>
-<tr class="memdesc:af2dff6718d94a227313f701134c04b7f"><td class="mdescLeft">&#160;</td><td class="mdescRight">maximum size of the message string (including null terminator) <br /></td></tr>
+<tr class="memdesc:af2dff6718d94a227313f701134c04b7f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Total allocated space for message. <br /></td></tr>
 <tr class="separator:af2dff6718d94a227313f701134c04b7f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4b3c4f4cab00b14d0bcf85b4d89227c3"><td class="memItemLeft" align="right" valign="top"><a id="a4b3c4f4cab00b14d0bcf85b4d89227c3"></a>
+long&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structslog_1_1LogRecord.html#a4b3c4f4cab00b14d0bcf85b4d89227c3">message_byte_count</a></td></tr>
+<tr class="memdesc:a4b3c4f4cab00b14d0bcf85b4d89227c3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Size of message, including possible null terminator. <br /></td></tr>
+<tr class="separator:a4b3c4f4cab00b14d0bcf85b4d89227c3"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a6e5eed68ebe4a71e1e9f1b08145b6091"><td class="memItemLeft" align="right" valign="top"><a id="a6e5eed68ebe4a71e1e9f1b08145b6091"></a>
 char *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structslog_1_1LogRecord.html#a6e5eed68ebe4a71e1e9f1b08145b6091">message</a></td></tr>
 <tr class="memdesc:a6e5eed68ebe4a71e1e9f1b08145b6091"><td class="mdescLeft">&#160;</td><td class="mdescRight">Actual log message. <br /></td></tr>
@@ -148,8 +152,8 @@ class&#160;</td><td class="memItemRight" valign="bottom"><b>LogRecordPool</b></t
 <div class="textblock"><p>A <a class="el" href="structslog_1_1LogRecord.html" title="A LogRecord is a message string combined with the associated metadata.">LogRecord</a> is a message string combined with the associated metadata. </p>
 <p>These objects are managed by <a class="el" href="classslog_1_1LogRecordPool.html" title="A memory pool for unused log records.">LogRecordPool</a>. </p>
 </div><hr/>The documentation for this struct was generated from the following files:<ul>
-<li>/home/mike/git/slog/src/<a class="el" href="LogRecord_8hpp_source.html">LogRecord.hpp</a></li>
-<li>/home/mike/git/slog/src/LogRecord.cpp</li>
+<li>/home/mike/git/slog/src/slog/<a class="el" href="LogRecord_8hpp_source.html">LogRecord.hpp</a></li>
+<li>/home/mike/git/slog/src/slog/LogRecord.cpp</li>
 </ul>
 </div><!-- contents -->
 </div><!-- doc-content -->

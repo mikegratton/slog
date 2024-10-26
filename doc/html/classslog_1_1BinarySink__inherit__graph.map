@@ -1,0 +1,4 @@
+<map id="slog::BinarySink" name="slog::BinarySink">
+<area shape="rect" id="node1" title="Basic logging of binary data to files using the C api." alt="" coords="5,80,132,107"/>
+<area shape="rect" id="node2" href="$classslog_1_1LogSink.html" title="Base class for all log sinks." alt="" coords="15,5,123,32"/>
+</map>

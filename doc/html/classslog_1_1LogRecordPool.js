@@ -2,10 +2,10 @@ var classslog_1_1LogRecordPool =
 [
     [ "LogRecordPool", "classslog_1_1LogRecordPool.html#af3b55bee633a2bb3a7f7c8c5df1dfc04", null ],
     [ "~LogRecordPool", "classslog_1_1LogRecordPool.html#ac0039ee6be2b0016302f9756ca26abae", null ],
-    [ "allocate", "classslog_1_1LogRecordPool.html#a8a55bad7f3fb1c33dbaf504265dcc98b", null ],
+    [ "acquire_blank_records", "classslog_1_1LogRecordPool.html#a6be64e4686d87f0858f853e842684506", null ],
+    [ "allocate", "classslog_1_1LogRecordPool.html#a6d9feccc74fae701ca8c7f6e6fd1a2dd", null ],
     [ "count", "classslog_1_1LogRecordPool.html#ac4c3d2c51cdb2182b3fa52a6f5a32d42", null ],
-    [ "put", "classslog_1_1LogRecordPool.html#a3172261480da7067e7b6c8b1c5eaf003", null ],
-    [ "take", "classslog_1_1LogRecordPool.html#afdd249626a0b581acac4cb3ae2adcdea", null ],
+    [ "free", "classslog_1_1LogRecordPool.html#a235da7fbd988112566059bebe9fee9d0", null ],
     [ "m_chunks", "classslog_1_1LogRecordPool.html#a1fda5b95ba4a3d10022106b186dc9ac4", null ],
     [ "m_chunkSize", "classslog_1_1LogRecordPool.html#a6f5ef624c9344e6a3286df589a5166f9", null ],
     [ "m_cursor", "classslog_1_1LogRecordPool.html#a303e5d9eed248ba887f73690edbdca47", null ],

@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['consolesink_51',['ConsoleSink',['../classslog_1_1ConsoleSink.html',1,'slog']]]
+  ['binarysink_59',['BinarySink',['../classslog_1_1BinarySink.html',1,'slog']]]
 ];

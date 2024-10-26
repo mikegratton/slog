@@ -5,7 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=9"/>
 <meta name="generator" content="Doxygen 1.9.1"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>Slog: /home/mike/git/slog/src/FileSink.hpp Source File</title>
+<title>Slog: /home/mike/git/slog/src/slog/FileSink.hpp Source File</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
@@ -99,43 +99,40 @@ $(document).ready(function(){initNavTree('FileSink_8hpp_source.html',''); initRe
 <div class="line"><a name="l00016"></a><span class="lineno"><a class="line" href="classslog_1_1FileSink.html">   16</a></span>&#160;<span class="keyword">class </span><a class="code" href="classslog_1_1FileSink.html">FileSink</a> : <span class="keyword">public</span> <a class="code" href="classslog_1_1LogSink.html">LogSink</a> {</div>
 <div class="line"><a name="l00017"></a><span class="lineno">   17</span>&#160;   <span class="keyword">public</span>:</div>
 <div class="line"><a name="l00018"></a><span class="lineno">   18</span>&#160;    <a class="code" href="classslog_1_1FileSink.html">FileSink</a>();</div>
-<div class="line"><a name="l00019"></a><span class="lineno">   19</span>&#160;    ~<a class="code" href="classslog_1_1FileSink.html">FileSink</a>()</div>
-<div class="line"><a name="l00020"></a><span class="lineno">   20</span>&#160;    {</div>
-<div class="line"><a name="l00021"></a><span class="lineno">   21</span>&#160;        <span class="keywordflow">if</span> (mfile) { fclose(mfile); }</div>
-<div class="line"><a name="l00022"></a><span class="lineno">   22</span>&#160;    }</div>
+<div class="line"><a name="l00019"></a><span class="lineno">   19</span>&#160;    ~<a class="code" href="classslog_1_1FileSink.html">FileSink</a>();</div>
+<div class="line"><a name="l00020"></a><span class="lineno">   20</span>&#160; </div>
+<div class="line"><a name="l00022"></a><span class="lineno">   22</span>&#160;    <span class="keywordtype">void</span> <a class="code" href="classslog_1_1FileSink.html#a3ca4a5eb20e154b54690c3cbc3afee0d">record</a>(<a class="code" href="structslog_1_1LogRecord.html">LogRecord</a> <span class="keyword">const</span>&amp; node) <span class="keyword">final</span>;</div>
 <div class="line"><a name="l00023"></a><span class="lineno">   23</span>&#160; </div>
-<div class="line"><a name="l00025"></a><span class="lineno">   25</span>&#160;    <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code" href="classslog_1_1FileSink.html#a3b2d7814a8051fcc18ebb7a651e79b91">record</a>(<a class="code" href="structslog_1_1LogRecord.html">LogRecord</a> <span class="keyword">const</span>&amp; node) <span class="keyword">override</span>;</div>
+<div class="line"><a name="l00025"></a><span class="lineno"><a class="line" href="classslog_1_1FileSink.html#a4564dac756b845b9e41314528a190b76">   25</a></span>&#160;    <span class="keywordtype">void</span> <a class="code" href="classslog_1_1FileSink.html#a4564dac756b845b9e41314528a190b76">set_formatter</a>(Formatter format) { mformat = format; }</div>
 <div class="line"><a name="l00026"></a><span class="lineno">   26</span>&#160; </div>
-<div class="line"><a name="l00028"></a><span class="lineno"><a class="line" href="classslog_1_1FileSink.html#a4564dac756b845b9e41314528a190b76">   28</a></span>&#160;    <span class="keywordtype">void</span> <a class="code" href="classslog_1_1FileSink.html#a4564dac756b845b9e41314528a190b76">set_formatter</a>(Formatter format) { mformat = format; }</div>
+<div class="line"><a name="l00028"></a><span class="lineno"><a class="line" href="classslog_1_1FileSink.html#af32782d050502f54e464f0d02401bfea">   28</a></span>&#160;    <span class="keywordtype">void</span> <a class="code" href="classslog_1_1FileSink.html#af32782d050502f54e464f0d02401bfea">set_echo</a>(<span class="keywordtype">bool</span> doit = <span class="keyword">true</span>) { mecho = doit; }</div>
 <div class="line"><a name="l00029"></a><span class="lineno">   29</span>&#160; </div>
-<div class="line"><a name="l00031"></a><span class="lineno"><a class="line" href="classslog_1_1FileSink.html#af32782d050502f54e464f0d02401bfea">   31</a></span>&#160;    <span class="keywordtype">void</span> <a class="code" href="classslog_1_1FileSink.html#af32782d050502f54e464f0d02401bfea">set_echo</a>(<span class="keywordtype">bool</span> doit = <span class="keyword">true</span>) { mecho = doit; }</div>
+<div class="line"><a name="l00031"></a><span class="lineno">   31</span>&#160;    <span class="keywordtype">void</span> <a class="code" href="classslog_1_1FileSink.html#ae289bb0b312dc7638371caa809b44f02">set_max_file_size</a>(<span class="keywordtype">long</span> isize);</div>
 <div class="line"><a name="l00032"></a><span class="lineno">   32</span>&#160; </div>
-<div class="line"><a name="l00034"></a><span class="lineno">   34</span>&#160;    <span class="keywordtype">void</span> <a class="code" href="classslog_1_1FileSink.html#afa7f0ef81b2c43fdbc5aef836467879a">set_max_file_size</a>(<span class="keywordtype">int</span> isize);</div>
-<div class="line"><a name="l00035"></a><span class="lineno">   35</span>&#160; </div>
-<div class="line"><a name="l00046"></a><span class="lineno">   46</span>&#160;    <span class="keywordtype">void</span> <a class="code" href="classslog_1_1FileSink.html#aa67629468c296a9b930360dbec19cfce">set_file</a>(<span class="keywordtype">char</span> <span class="keyword">const</span>* location, <span class="keywordtype">char</span> <span class="keyword">const</span>* name, <span class="keywordtype">char</span> <span class="keyword">const</span>* end = <span class="stringliteral">&quot;log&quot;</span>);</div>
+<div class="line"><a name="l00043"></a><span class="lineno">   43</span>&#160;    <span class="keywordtype">void</span> <a class="code" href="classslog_1_1FileSink.html#aa67629468c296a9b930360dbec19cfce">set_file</a>(<span class="keywordtype">char</span> <span class="keyword">const</span>* location, <span class="keywordtype">char</span> <span class="keyword">const</span>* name, <span class="keywordtype">char</span> <span class="keyword">const</span>* end = <span class="stringliteral">&quot;log&quot;</span>);</div>
+<div class="line"><a name="l00044"></a><span class="lineno">   44</span>&#160; </div>
+<div class="line"><a name="l00045"></a><span class="lineno">   45</span>&#160;   <span class="keyword">protected</span>:</div>
+<div class="line"><a name="l00046"></a><span class="lineno">   46</span>&#160;    <span class="keywordtype">void</span> open_or_rotate();</div>
 <div class="line"><a name="l00047"></a><span class="lineno">   47</span>&#160; </div>
-<div class="line"><a name="l00048"></a><span class="lineno">   48</span>&#160;   <span class="keyword">protected</span>:</div>
-<div class="line"><a name="l00049"></a><span class="lineno">   49</span>&#160;    <span class="keywordtype">void</span> open_or_rotate();</div>
-<div class="line"><a name="l00050"></a><span class="lineno">   50</span>&#160; </div>
-<div class="line"><a name="l00051"></a><span class="lineno">   51</span>&#160;    FILE* mfile;</div>
-<div class="line"><a name="l00052"></a><span class="lineno">   52</span>&#160;    Formatter mformat;</div>
-<div class="line"><a name="l00053"></a><span class="lineno">   53</span>&#160;    <span class="keywordtype">char</span> mfileLocation[256];</div>
-<div class="line"><a name="l00054"></a><span class="lineno">   54</span>&#160;    <span class="keywordtype">char</span> mfileName[128];</div>
-<div class="line"><a name="l00055"></a><span class="lineno">   55</span>&#160;    <span class="keywordtype">char</span> mfileEnd[128];</div>
-<div class="line"><a name="l00056"></a><span class="lineno">   56</span>&#160;    <span class="keywordtype">char</span> msessionStartTime[20];</div>
-<div class="line"><a name="l00057"></a><span class="lineno">   57</span>&#160;    <span class="keywordtype">int</span> msequence;</div>
-<div class="line"><a name="l00058"></a><span class="lineno">   58</span>&#160;    <span class="keywordtype">int</span> mbytesWritten;</div>
-<div class="line"><a name="l00059"></a><span class="lineno">   59</span>&#160;    <span class="keywordtype">int</span> mmaxBytes;</div>
-<div class="line"><a name="l00060"></a><span class="lineno">   60</span>&#160;    <span class="keywordtype">bool</span> mecho;</div>
-<div class="line"><a name="l00061"></a><span class="lineno">   61</span>&#160;};</div>
-<div class="line"><a name="l00062"></a><span class="lineno">   62</span>&#160; </div>
-<div class="line"><a name="l00063"></a><span class="lineno">   63</span>&#160;}  <span class="comment">// namespace slog</span></div>
+<div class="line"><a name="l00048"></a><span class="lineno">   48</span>&#160;    FILE* mfile;</div>
+<div class="line"><a name="l00049"></a><span class="lineno">   49</span>&#160;    Formatter mformat;</div>
+<div class="line"><a name="l00050"></a><span class="lineno">   50</span>&#160;    <span class="keywordtype">char</span> mfileLocation[256];</div>
+<div class="line"><a name="l00051"></a><span class="lineno">   51</span>&#160;    <span class="keywordtype">char</span> mfileName[128];</div>
+<div class="line"><a name="l00052"></a><span class="lineno">   52</span>&#160;    <span class="keywordtype">char</span> mfileEnd[128];</div>
+<div class="line"><a name="l00053"></a><span class="lineno">   53</span>&#160;    <span class="keywordtype">char</span> msessionStartTime[20];</div>
+<div class="line"><a name="l00054"></a><span class="lineno">   54</span>&#160;    <span class="keywordtype">int</span> msequence;</div>
+<div class="line"><a name="l00055"></a><span class="lineno">   55</span>&#160;    <span class="keywordtype">long</span> mbytesWritten;</div>
+<div class="line"><a name="l00056"></a><span class="lineno">   56</span>&#160;    <span class="keywordtype">long</span> mmaxBytes;</div>
+<div class="line"><a name="l00057"></a><span class="lineno">   57</span>&#160;    <span class="keywordtype">bool</span> mecho;</div>
+<div class="line"><a name="l00058"></a><span class="lineno">   58</span>&#160;};</div>
+<div class="line"><a name="l00059"></a><span class="lineno">   59</span>&#160; </div>
+<div class="line"><a name="l00060"></a><span class="lineno">   60</span>&#160;}  <span class="comment">// namespace slog</span></div>
 <div class="ttc" id="aclassslog_1_1FileSink_html"><div class="ttname"><a href="classslog_1_1FileSink.html">slog::FileSink</a></div><div class="ttdoc">Simple file storage for log records FileSink writes records to conventional files....</div><div class="ttdef"><b>Definition:</b> FileSink.hpp:16</div></div>
-<div class="ttc" id="aclassslog_1_1FileSink_html_a3b2d7814a8051fcc18ebb7a651e79b91"><div class="ttname"><a href="classslog_1_1FileSink.html#a3b2d7814a8051fcc18ebb7a651e79b91">slog::FileSink::record</a></div><div class="ttdeci">virtual void record(LogRecord const &amp;node) override</div><div class="ttdoc">Write the record to the file.</div><div class="ttdef"><b>Definition:</b> FileSink.cpp:60</div></div>
-<div class="ttc" id="aclassslog_1_1FileSink_html_a4564dac756b845b9e41314528a190b76"><div class="ttname"><a href="classslog_1_1FileSink.html#a4564dac756b845b9e41314528a190b76">slog::FileSink::set_formatter</a></div><div class="ttdeci">void set_formatter(Formatter format)</div><div class="ttdoc">Change the formatting for each record.</div><div class="ttdef"><b>Definition:</b> FileSink.hpp:28</div></div>
-<div class="ttc" id="aclassslog_1_1FileSink_html_aa67629468c296a9b930360dbec19cfce"><div class="ttname"><a href="classslog_1_1FileSink.html#aa67629468c296a9b930360dbec19cfce">slog::FileSink::set_file</a></div><div class="ttdeci">void set_file(char const *location, char const *name, char const *end=&quot;log&quot;)</div><div class="ttdoc">Change the filename.</div><div class="ttdef"><b>Definition:</b> FileSink.cpp:31</div></div>
-<div class="ttc" id="aclassslog_1_1FileSink_html_af32782d050502f54e464f0d02401bfea"><div class="ttname"><a href="classslog_1_1FileSink.html#af32782d050502f54e464f0d02401bfea">slog::FileSink::set_echo</a></div><div class="ttdeci">void set_echo(bool doit=true)</div><div class="ttdoc">Set echo to console on/off.</div><div class="ttdef"><b>Definition:</b> FileSink.hpp:31</div></div>
-<div class="ttc" id="aclassslog_1_1FileSink_html_afa7f0ef81b2c43fdbc5aef836467879a"><div class="ttname"><a href="classslog_1_1FileSink.html#afa7f0ef81b2c43fdbc5aef836467879a">slog::FileSink::set_max_file_size</a></div><div class="ttdeci">void set_max_file_size(int isize)</div><div class="ttdoc">Change the maximum filesize before rotation.</div><div class="ttdef"><b>Definition:</b> FileSink.cpp:24</div></div>
+<div class="ttc" id="aclassslog_1_1FileSink_html_a3ca4a5eb20e154b54690c3cbc3afee0d"><div class="ttname"><a href="classslog_1_1FileSink.html#a3ca4a5eb20e154b54690c3cbc3afee0d">slog::FileSink::record</a></div><div class="ttdeci">void record(LogRecord const &amp;node) final</div><div class="ttdoc">Write the record to the file.</div><div class="ttdef"><b>Definition:</b> FileSink.cpp:61</div></div>
+<div class="ttc" id="aclassslog_1_1FileSink_html_a4564dac756b845b9e41314528a190b76"><div class="ttname"><a href="classslog_1_1FileSink.html#a4564dac756b845b9e41314528a190b76">slog::FileSink::set_formatter</a></div><div class="ttdeci">void set_formatter(Formatter format)</div><div class="ttdoc">Change the formatting for each record.</div><div class="ttdef"><b>Definition:</b> FileSink.hpp:25</div></div>
+<div class="ttc" id="aclassslog_1_1FileSink_html_aa67629468c296a9b930360dbec19cfce"><div class="ttname"><a href="classslog_1_1FileSink.html#aa67629468c296a9b930360dbec19cfce">slog::FileSink::set_file</a></div><div class="ttdeci">void set_file(char const *location, char const *name, char const *end=&quot;log&quot;)</div><div class="ttdoc">Change the filename.</div><div class="ttdef"><b>Definition:</b> FileSink.cpp:35</div></div>
+<div class="ttc" id="aclassslog_1_1FileSink_html_ae289bb0b312dc7638371caa809b44f02"><div class="ttname"><a href="classslog_1_1FileSink.html#ae289bb0b312dc7638371caa809b44f02">slog::FileSink::set_max_file_size</a></div><div class="ttdeci">void set_max_file_size(long isize)</div><div class="ttdoc">Change the maximum filesize before rotation.</div><div class="ttdef"><b>Definition:</b> FileSink.cpp:28</div></div>
+<div class="ttc" id="aclassslog_1_1FileSink_html_af32782d050502f54e464f0d02401bfea"><div class="ttname"><a href="classslog_1_1FileSink.html#af32782d050502f54e464f0d02401bfea">slog::FileSink::set_echo</a></div><div class="ttdeci">void set_echo(bool doit=true)</div><div class="ttdoc">Set echo to console on/off.</div><div class="ttdef"><b>Definition:</b> FileSink.hpp:28</div></div>
 <div class="ttc" id="aclassslog_1_1LogSink_html"><div class="ttname"><a href="classslog_1_1LogSink.html">slog::LogSink</a></div><div class="ttdoc">Base class for all log sinks.</div><div class="ttdef"><b>Definition:</b> LogSink.hpp:15</div></div>
 <div class="ttc" id="astructslog_1_1LogRecord_html"><div class="ttname"><a href="structslog_1_1LogRecord.html">slog::LogRecord</a></div><div class="ttdoc">A LogRecord is a message string combined with the associated metadata.</div><div class="ttdef"><b>Definition:</b> LogRecord.hpp:51</div></div>
 </div><!-- fragment --></div><!-- contents -->
@@ -143,7 +140,7 @@ $(document).ready(function(){initNavTree('FileSink_8hpp_source.html',''); initRe
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="navelem"><a class="el" href="dir_68267d1309a1af8e8297ef4c3efbcdba.html">src</a></li><li class="navelem"><b>FileSink.hpp</b></li>
+    <li class="navelem"><a class="el" href="dir_68267d1309a1af8e8297ef4c3efbcdba.html">src</a></li><li class="navelem"><a class="el" href="dir_95be75e0f8e573547a5556ed938590f2.html">slog</a></li><li class="navelem"><b>FileSink.hpp</b></li>
     <li class="footer">Generated by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
   </ul>
 </div>

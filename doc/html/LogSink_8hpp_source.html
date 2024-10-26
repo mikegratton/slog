@@ -5,7 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=9"/>
 <meta name="generator" content="Doxygen 1.9.1"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>Slog: /home/mike/git/slog/src/LogSink.hpp Source File</title>
+<title>Slog: /home/mike/git/slog/src/slog/LogSink.hpp Source File</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
@@ -114,13 +114,24 @@ $(document).ready(function(){initNavTree('LogSink_8hpp_source.html',''); initRes
 <div class="line"><a name="l00035"></a><span class="lineno">   35</span>&#160; </div>
 <div class="line"><a name="l00039"></a><span class="lineno">   39</span>&#160;<span class="keywordtype">void</span> format_severity(<span class="keywordtype">char</span>* severity_str, <span class="keywordtype">int</span> severity);</div>
 <div class="line"><a name="l00040"></a><span class="lineno">   40</span>&#160; </div>
-<div class="line"><a name="l00052"></a><span class="lineno">   52</span>&#160;<span class="keywordtype">void</span> format_time(<span class="keywordtype">char</span>* time_str, <span class="keywordtype">unsigned</span> <span class="keywordtype">long</span> time, <span class="keywordtype">int</span> seconds_decimal_precision = 3);</div>
-<div class="line"><a name="l00053"></a><span class="lineno">   53</span>&#160; </div>
-<div class="line"><a name="l00059"></a><span class="lineno">   59</span>&#160;<span class="keywordtype">void</span> format_location(<span class="keywordtype">char</span>* location_str, <span class="keywordtype">char</span> <span class="keyword">const</span>* file_name, <span class="keywordtype">int</span> line_number);</div>
-<div class="line"><a name="l00060"></a><span class="lineno">   60</span>&#160; </div>
-<div class="line"><a name="l00064"></a><span class="lineno">   64</span>&#160;<span class="keywordtype">int</span> default_format(FILE* sink, LogRecord <span class="keyword">const</span>&amp; node);</div>
-<div class="line"><a name="l00065"></a><span class="lineno">   65</span>&#160; </div>
-<div class="line"><a name="l00066"></a><span class="lineno">   66</span>&#160;}  <span class="comment">// namespace slog</span></div>
+<div class="line"><a name="l00044"></a><span class="lineno">   44</span>&#160;<span class="keywordtype">char</span> <span class="keyword">const</span>* severity_string(<span class="keywordtype">int</span> severity);</div>
+<div class="line"><a name="l00045"></a><span class="lineno">   45</span>&#160; </div>
+<div class="line"><a name="l00046"></a><span class="lineno">   46</span>&#160;<span class="keyword">enum</span> TimeFormatMode {</div>
+<div class="line"><a name="l00047"></a><span class="lineno">   47</span>&#160;    FULL_SPACE,  <span class="comment">// YYYY-MM-DD hh:mm:ss.fZ</span></div>
+<div class="line"><a name="l00048"></a><span class="lineno">   48</span>&#160;    COMPACT,     <span class="comment">// YYYYMMDDThhmmss.fZ</span></div>
+<div class="line"><a name="l00049"></a><span class="lineno">   49</span>&#160;    FULL_T       <span class="comment">// YYYY-MM-DDThh:mm:ss.fZ</span></div>
+<div class="line"><a name="l00050"></a><span class="lineno">   50</span>&#160;};</div>
+<div class="line"><a name="l00051"></a><span class="lineno">   51</span>&#160; </div>
+<div class="line"><a name="l00065"></a><span class="lineno">   65</span>&#160;<span class="keywordtype">void</span> format_time(<span class="keywordtype">char</span>* time_str, <span class="keywordtype">unsigned</span> <span class="keywordtype">long</span> time, <span class="keywordtype">int</span> seconds_decimal_precision = 3,</div>
+<div class="line"><a name="l00066"></a><span class="lineno">   66</span>&#160;                 TimeFormatMode format = FULL_SPACE);</div>
+<div class="line"><a name="l00067"></a><span class="lineno">   67</span>&#160; </div>
+<div class="line"><a name="l00074"></a><span class="lineno">   74</span>&#160;<span class="keywordtype">void</span> format_location(<span class="keywordtype">char</span>* location_str, <span class="keywordtype">char</span> <span class="keyword">const</span>* file_name, <span class="keywordtype">int</span> line_number);</div>
+<div class="line"><a name="l00075"></a><span class="lineno">   75</span>&#160; </div>
+<div class="line"><a name="l00079"></a><span class="lineno">   79</span>&#160;<span class="keywordtype">int</span> default_format(FILE* sink, LogRecord <span class="keyword">const</span>&amp; node);</div>
+<div class="line"><a name="l00080"></a><span class="lineno">   80</span>&#160; </div>
+<div class="line"><a name="l00084"></a><span class="lineno">   84</span>&#160;<span class="keywordtype">int</span> no_meta_format(FILE* sink, LogRecord <span class="keyword">const</span>&amp; node);</div>
+<div class="line"><a name="l00085"></a><span class="lineno">   85</span>&#160; </div>
+<div class="line"><a name="l00086"></a><span class="lineno">   86</span>&#160;}  <span class="comment">// namespace slog</span></div>
 <div class="ttc" id="aclassslog_1_1LogSink_html"><div class="ttname"><a href="classslog_1_1LogSink.html">slog::LogSink</a></div><div class="ttdoc">Base class for all log sinks.</div><div class="ttdef"><b>Definition:</b> LogSink.hpp:15</div></div>
 <div class="ttc" id="aclassslog_1_1LogSink_html_a1801fe16cd221cf4f79bf204a41e40b6"><div class="ttname"><a href="classslog_1_1LogSink.html#a1801fe16cd221cf4f79bf204a41e40b6">slog::LogSink::record</a></div><div class="ttdeci">virtual void record(LogRecord const &amp;node)=0</div><div class="ttdoc">Save a record to a device.</div></div>
 <div class="ttc" id="aclassslog_1_1NullSink_html"><div class="ttname"><a href="classslog_1_1NullSink.html">slog::NullSink</a></div><div class="ttdoc">Simple sink that ignores messages.</div><div class="ttdef"><b>Definition:</b> LogSink.hpp:24</div></div>
@@ -131,7 +142,7 @@ $(document).ready(function(){initNavTree('LogSink_8hpp_source.html',''); initRes
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="navelem"><a class="el" href="dir_68267d1309a1af8e8297ef4c3efbcdba.html">src</a></li><li class="navelem"><b>LogSink.hpp</b></li>
+    <li class="navelem"><a class="el" href="dir_68267d1309a1af8e8297ef4c3efbcdba.html">src</a></li><li class="navelem"><a class="el" href="dir_95be75e0f8e573547a5556ed938590f2.html">slog</a></li><li class="navelem"><b>LogSink.hpp</b></li>
     <li class="footer">Generated by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
   </ul>
 </div>

@@ -120,10 +120,10 @@ Collaboration diagram for slog::FileSink:</div>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
-<tr class="memitem:a3b2d7814a8051fcc18ebb7a651e79b91"><td class="memItemLeft" align="right" valign="top"><a id="a3b2d7814a8051fcc18ebb7a651e79b91"></a>
-virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classslog_1_1FileSink.html#a3b2d7814a8051fcc18ebb7a651e79b91">record</a> (<a class="el" href="structslog_1_1LogRecord.html">LogRecord</a> const &amp;node) override</td></tr>
-<tr class="memdesc:a3b2d7814a8051fcc18ebb7a651e79b91"><td class="mdescLeft">&#160;</td><td class="mdescRight">Write the record to the file. <br /></td></tr>
-<tr class="separator:a3b2d7814a8051fcc18ebb7a651e79b91"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3ca4a5eb20e154b54690c3cbc3afee0d"><td class="memItemLeft" align="right" valign="top"><a id="a3ca4a5eb20e154b54690c3cbc3afee0d"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classslog_1_1FileSink.html#a3ca4a5eb20e154b54690c3cbc3afee0d">record</a> (<a class="el" href="structslog_1_1LogRecord.html">LogRecord</a> const &amp;node) final</td></tr>
+<tr class="memdesc:a3ca4a5eb20e154b54690c3cbc3afee0d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Write the record to the file. <br /></td></tr>
+<tr class="separator:a3ca4a5eb20e154b54690c3cbc3afee0d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a4564dac756b845b9e41314528a190b76"><td class="memItemLeft" align="right" valign="top"><a id="a4564dac756b845b9e41314528a190b76"></a>
 void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classslog_1_1FileSink.html#a4564dac756b845b9e41314528a190b76">set_formatter</a> (Formatter format)</td></tr>
 <tr class="memdesc:a4564dac756b845b9e41314528a190b76"><td class="mdescLeft">&#160;</td><td class="mdescRight">Change the formatting for each record. <br /></td></tr>
@@ -132,10 +132,10 @@ void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="clas
 void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classslog_1_1FileSink.html#af32782d050502f54e464f0d02401bfea">set_echo</a> (bool doit=true)</td></tr>
 <tr class="memdesc:af32782d050502f54e464f0d02401bfea"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set echo to console on/off. <br /></td></tr>
 <tr class="separator:af32782d050502f54e464f0d02401bfea"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:afa7f0ef81b2c43fdbc5aef836467879a"><td class="memItemLeft" align="right" valign="top"><a id="afa7f0ef81b2c43fdbc5aef836467879a"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classslog_1_1FileSink.html#afa7f0ef81b2c43fdbc5aef836467879a">set_max_file_size</a> (int isize)</td></tr>
-<tr class="memdesc:afa7f0ef81b2c43fdbc5aef836467879a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Change the maximum filesize before rotation. <br /></td></tr>
-<tr class="separator:afa7f0ef81b2c43fdbc5aef836467879a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae289bb0b312dc7638371caa809b44f02"><td class="memItemLeft" align="right" valign="top"><a id="ae289bb0b312dc7638371caa809b44f02"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classslog_1_1FileSink.html#ae289bb0b312dc7638371caa809b44f02">set_max_file_size</a> (long isize)</td></tr>
+<tr class="memdesc:ae289bb0b312dc7638371caa809b44f02"><td class="mdescLeft">&#160;</td><td class="mdescRight">Change the maximum filesize before rotation. <br /></td></tr>
+<tr class="separator:ae289bb0b312dc7638371caa809b44f02"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aa67629468c296a9b930360dbec19cfce"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classslog_1_1FileSink.html#aa67629468c296a9b930360dbec19cfce">set_file</a> (char const *location, char const *name, char const *end=&quot;log&quot;)</td></tr>
 <tr class="memdesc:aa67629468c296a9b930360dbec19cfce"><td class="mdescLeft">&#160;</td><td class="mdescRight">Change the filename.  <a href="classslog_1_1FileSink.html#aa67629468c296a9b930360dbec19cfce">More...</a><br /></td></tr>
 <tr class="separator:aa67629468c296a9b930360dbec19cfce"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -169,12 +169,12 @@ char&#160;</td><td class="memItemRight" valign="bottom"><b>msessionStartTime</b>
 <tr class="memitem:ad07a3c72106026144667dee41d10c244"><td class="memItemLeft" align="right" valign="top"><a id="ad07a3c72106026144667dee41d10c244"></a>
 int&#160;</td><td class="memItemRight" valign="bottom"><b>msequence</b></td></tr>
 <tr class="separator:ad07a3c72106026144667dee41d10c244"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aca76535529d9384454d110e3883b28ea"><td class="memItemLeft" align="right" valign="top"><a id="aca76535529d9384454d110e3883b28ea"></a>
-int&#160;</td><td class="memItemRight" valign="bottom"><b>mbytesWritten</b></td></tr>
-<tr class="separator:aca76535529d9384454d110e3883b28ea"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a9c75d50682abe8cad8b8d606c0d18d17"><td class="memItemLeft" align="right" valign="top"><a id="a9c75d50682abe8cad8b8d606c0d18d17"></a>
-int&#160;</td><td class="memItemRight" valign="bottom"><b>mmaxBytes</b></td></tr>
-<tr class="separator:a9c75d50682abe8cad8b8d606c0d18d17"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad168f29722bc81f29a32dfe1471c7ced"><td class="memItemLeft" align="right" valign="top"><a id="ad168f29722bc81f29a32dfe1471c7ced"></a>
+long&#160;</td><td class="memItemRight" valign="bottom"><b>mbytesWritten</b></td></tr>
+<tr class="separator:ad168f29722bc81f29a32dfe1471c7ced"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aaed1e6765434c0953dafacb0352f7f88"><td class="memItemLeft" align="right" valign="top"><a id="aaed1e6765434c0953dafacb0352f7f88"></a>
+long&#160;</td><td class="memItemRight" valign="bottom"><b>mmaxBytes</b></td></tr>
+<tr class="separator:aaed1e6765434c0953dafacb0352f7f88"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a096ace90bfdb3fe2d3d2dc325351732f"><td class="memItemLeft" align="right" valign="top"><a id="a096ace90bfdb3fe2d3d2dc325351732f"></a>
 bool&#160;</td><td class="memItemRight" valign="bottom"><b>mecho</b></td></tr>
 <tr class="separator:a096ace90bfdb3fe2d3d2dc325351732f"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -234,8 +234,8 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><b>mecho</b></td></tr>
 </div>
 </div>
 <hr/>The documentation for this class was generated from the following files:<ul>
-<li>/home/mike/git/slog/src/<a class="el" href="FileSink_8hpp_source.html">FileSink.hpp</a></li>
-<li>/home/mike/git/slog/src/FileSink.cpp</li>
+<li>/home/mike/git/slog/src/slog/<a class="el" href="FileSink_8hpp_source.html">FileSink.hpp</a></li>
+<li>/home/mike/git/slog/src/slog/FileSink.cpp</li>
 </ul>
 </div><!-- contents -->
 </div><!-- doc-content -->

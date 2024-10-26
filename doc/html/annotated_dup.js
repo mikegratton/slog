@@ -1,6 +1,7 @@
 var annotated_dup =
 [
     [ "slog", null, [
+      [ "BinarySink", "classslog_1_1BinarySink.html", "classslog_1_1BinarySink" ],
       [ "ConsoleSink", "classslog_1_1ConsoleSink.html", "classslog_1_1ConsoleSink" ],
       [ "FileSink", "classslog_1_1FileSink.html", "classslog_1_1FileSink" ],
       [ "JournaldSink", "classslog_1_1JournaldSink.html", "classslog_1_1JournaldSink" ],
@@ -13,6 +14,8 @@ var annotated_dup =
       [ "LogConfig", "classslog_1_1LogConfig.html", "classslog_1_1LogConfig" ],
       [ "LogSink", "classslog_1_1LogSink.html", "classslog_1_1LogSink" ],
       [ "NullSink", "classslog_1_1NullSink.html", "classslog_1_1NullSink" ],
+      [ "CaptureBinary", "classslog_1_1CaptureBinary.html", "classslog_1_1CaptureBinary" ],
+      [ "SyslogSink", "classslog_1_1SyslogSink.html", "classslog_1_1SyslogSink" ],
       [ "FlatThresholdMap", "classslog_1_1FlatThresholdMap.html", "classslog_1_1FlatThresholdMap" ]
     ] ]
 ];

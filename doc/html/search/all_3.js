@@ -1,7 +1,8 @@
 var searchData=
 [
-  ['get_5ffresh_5frecord_7',['get_fresh_record',['../classslog_1_1LogChannel.html#aca94bf727efaf078038ef8258e4a03b7',1,'slog::LogChannel']]],
-  ['get_5fpool_8',['get_pool',['../classslog_1_1LogConfig.html#a715d3053770ba6ddff7fde7ea48468ed',1,'slog::LogConfig']]],
-  ['get_5fsink_9',['get_sink',['../classslog_1_1LogConfig.html#a85c251cf259c09894a1ed5bb54ebee4f',1,'slog::LogConfig']]],
-  ['get_5fthreshold_5fmap_10',['get_threshold_map',['../classslog_1_1LogConfig.html#aa146731585177a31108a50b3a69333a9',1,'slog::LogConfig']]]
+  ['filename_6',['filename',['../structslog_1_1LogRecordMetadata.html#a92b5f45bacd4aeb670b00547a90cbfc7',1,'slog::LogRecordMetadata']]],
+  ['filesink_7',['FileSink',['../classslog_1_1FileSink.html',1,'slog']]],
+  ['flatthresholdmap_8',['FlatThresholdMap',['../classslog_1_1FlatThresholdMap.html',1,'slog']]],
+  ['free_9',['free',['../classslog_1_1LogRecordPool.html#a235da7fbd988112566059bebe9fee9d0',1,'slog::LogRecordPool']]],
+  ['function_10',['function',['../structslog_1_1LogRecordMetadata.html#a6a26b7051e845a4388640bad5896c7c0',1,'slog::LogRecordMetadata']]]
 ];

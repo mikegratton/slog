@@ -41,17 +41,20 @@ var NAVTREE =
         [ "Log Sinks", "index.html#autotoc_md11", [
           [ "ConsoleSink", "index.html#autotoc_md12", null ],
           [ "FileSink", "index.html#autotoc_md13", null ],
-          [ "JournaldSink", "index.html#autotoc_md14", null ]
+          [ "JournaldSink", "index.html#autotoc_md14", null ],
+          [ "SyslogSink", "index.html#autotoc_md15", null ],
+          [ "BinarySink", "index.html#autotoc_md16", null ]
         ] ],
-        [ "Tweaking the Format", "index.html#autotoc_md15", null ],
-        [ "Writing Your Own Sink", "index.html#autotoc_md16", null ],
-        [ "Locale Setting", "index.html#autotoc_md17", null ]
+        [ "Tweaking the Format", "index.html#autotoc_md17", null ],
+        [ "Writing Your Own Sink", "index.html#autotoc_md18", null ],
+        [ "Locale Setting", "index.html#autotoc_md19", null ]
       ] ],
-      [ "Building Slog", "index.html#autotoc_md18", null ],
-      [ "LogConfig", "index.html#autotoc_md19", [
-        [ "LogRecordPool", "index.html#autotoc_md20", null ]
+      [ "Building Slog", "index.html#autotoc_md20", null ],
+      [ "LogConfig", "index.html#autotoc_md21", [
+        [ "LogRecordPool", "index.html#autotoc_md22", null ]
       ] ],
-      [ "Compile-time Configuration", "index.html#autotoc_md21", null ]
+      [ "Compile-time Configuration", "index.html#autotoc_md23", null ],
+      [ "Version History", "index.html#autotoc_md24", null ]
     ] ],
     [ "Classes", "annotated.html", [
       [ "Class List", "annotated.html", "annotated_dup" ],
@@ -71,7 +74,7 @@ var NAVTREE =
 
 var NAVTREEINDEX =
 [
-"ConsoleSink_8hpp_source.html"
+"BinarySink_8hpp_source.html"
 ];
 
 var SYNCONMSG = 'click to disable panel synchronisation';

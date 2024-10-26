@@ -1,7 +1,11 @@
 var searchData=
 [
-  ['message_20',['message',['../structslog_1_1LogRecord.html#a6e5eed68ebe4a71e1e9f1b08145b6091',1,'slog::LogRecord']]],
-  ['message_5fmax_5fsize_21',['message_max_size',['../structslog_1_1LogRecord.html#af2dff6718d94a227313f701134c04b7f',1,'slog::LogRecord']]],
-  ['meta_22',['meta',['../structslog_1_1LogRecord.html#a35ba5dabefdb637b27e799e992256a28',1,'slog::LogRecord']]],
-  ['more_23',['more',['../structslog_1_1LogRecord.html#a66295262235041dad5014775df67c34c',1,'slog::LogRecord']]]
+  ['line_16',['line',['../structslog_1_1LogRecordMetadata.html#ae671d4aadbd01b94d788e2a452cfe358',1,'slog::LogRecordMetadata']]],
+  ['logchannel_17',['LogChannel',['../classslog_1_1LogChannel.html#a5f4817fe9f4617ac1d8e214ed70a77db',1,'slog::LogChannel::LogChannel()'],['../classslog_1_1LogChannel.html',1,'slog::LogChannel']]],
+  ['logconfig_18',['LogConfig',['../classslog_1_1LogConfig.html',1,'slog']]],
+  ['logqueue_19',['LogQueue',['../classslog_1_1LogChannel_1_1LogQueue.html',1,'slog::LogChannel']]],
+  ['logrecord_20',['LogRecord',['../structslog_1_1LogRecord.html',1,'slog']]],
+  ['logrecordmetadata_21',['LogRecordMetadata',['../structslog_1_1LogRecordMetadata.html',1,'slog']]],
+  ['logrecordpool_22',['LogRecordPool',['../classslog_1_1LogRecordPool.html',1,'slog']]],
+  ['logsink_23',['LogSink',['../classslog_1_1LogSink.html',1,'slog']]]
 ];

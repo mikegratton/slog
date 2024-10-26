@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['poolmemory_63',['PoolMemory',['../classslog_1_1PoolMemory.html',1,'slog']]]
+  ['nullsink_72',['NullSink',['../classslog_1_1NullSink.html',1,'slog']]]
 ];

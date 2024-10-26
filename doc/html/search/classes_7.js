@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['threshold_65',['Threshold',['../structslog_1_1FlatThresholdMap_1_1Threshold.html',1,'slog::FlatThresholdMap']]]
+  ['recordnode_74',['RecordNode',['../structslog_1_1RecordNode.html',1,'slog']]]
 ];

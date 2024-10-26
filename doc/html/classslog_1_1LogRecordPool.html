@@ -117,19 +117,19 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:af3b55bee633a2bb3a7f7c8c5df1dfc04"><td class="memItemLeft" align="right" valign="top"><a id="af3b55bee633a2bb3a7f7c8c5df1dfc04"></a>
 &#160;</td><td class="memItemRight" valign="bottom"><b>LogRecordPool</b> (LogRecordPoolPolicy i_policy, long i_pool_alloc_size, long i_message_size, long i_max_blocking_time_ms=50)</td></tr>
 <tr class="separator:af3b55bee633a2bb3a7f7c8c5df1dfc04"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:afdd249626a0b581acac4cb3ae2adcdea"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structslog_1_1RecordNode.html">RecordNode</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classslog_1_1LogRecordPool.html#afdd249626a0b581acac4cb3ae2adcdea">take</a> ()</td></tr>
-<tr class="separator:afdd249626a0b581acac4cb3ae2adcdea"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a3172261480da7067e7b6c8b1c5eaf003"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classslog_1_1LogRecordPool.html#a3172261480da7067e7b6c8b1c5eaf003">put</a> (<a class="el" href="structslog_1_1RecordNode.html">RecordNode</a> *record)</td></tr>
-<tr class="separator:a3172261480da7067e7b6c8b1c5eaf003"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6d9feccc74fae701ca8c7f6e6fd1a2dd"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structslog_1_1RecordNode.html">RecordNode</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classslog_1_1LogRecordPool.html#a6d9feccc74fae701ca8c7f6e6fd1a2dd">allocate</a> ()</td></tr>
+<tr class="separator:a6d9feccc74fae701ca8c7f6e6fd1a2dd"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a235da7fbd988112566059bebe9fee9d0"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classslog_1_1LogRecordPool.html#a235da7fbd988112566059bebe9fee9d0">free</a> (<a class="el" href="structslog_1_1RecordNode.html">RecordNode</a> *record)</td></tr>
+<tr class="separator:a235da7fbd988112566059bebe9fee9d0"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ac4c3d2c51cdb2182b3fa52a6f5a32d42"><td class="memItemLeft" align="right" valign="top"><a id="ac4c3d2c51cdb2182b3fa52a6f5a32d42"></a>
 long&#160;</td><td class="memItemRight" valign="bottom"><b>count</b> () const</td></tr>
 <tr class="separator:ac4c3d2c51cdb2182b3fa52a6f5a32d42"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pro-methods"></a>
 Protected Member Functions</h2></td></tr>
-<tr class="memitem:a8a55bad7f3fb1c33dbaf504265dcc98b"><td class="memItemLeft" align="right" valign="top"><a id="a8a55bad7f3fb1c33dbaf504265dcc98b"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>allocate</b> ()</td></tr>
-<tr class="separator:a8a55bad7f3fb1c33dbaf504265dcc98b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6be64e4686d87f0858f853e842684506"><td class="memItemLeft" align="right" valign="top"><a id="a6be64e4686d87f0858f853e842684506"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><b>acquire_blank_records</b> ()</td></tr>
+<tr class="separator:a6be64e4686d87f0858f853e842684506"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pro-attribs"></a>
 Protected Attributes</h2></td></tr>
@@ -162,14 +162,32 @@ long&#160;</td><td class="memItemRight" valign="bottom"><b>m_chunks</b></td></tr
 <div class="textblock"><p>A memory pool for unused log records. </p>
 <p>This is a stack of records &ndash; a pool for a single type of object, a <a class="el" href="structslog_1_1LogRecord.html" title="A LogRecord is a message string combined with the associated metadata.">LogRecord</a>. </p>
 </div><h2 class="groupheader">Member Function Documentation</h2>
-<a id="a3172261480da7067e7b6c8b1c5eaf003"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a3172261480da7067e7b6c8b1c5eaf003">&#9670;&nbsp;</a></span>put()</h2>
+<a id="a6d9feccc74fae701ca8c7f6e6fd1a2dd"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a6d9feccc74fae701ca8c7f6e6fd1a2dd">&#9670;&nbsp;</a></span>allocate()</h2>
 
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">void slog::LogRecordPool::put </td>
+          <td class="memname"><a class="el" href="structslog_1_1RecordNode.html">RecordNode</a> * slog::LogRecordPool::allocate </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Pop a record from the stack. If the stack is currently empty, the LogRecordPoolPolicy determines what happens. </p>
+
+</div>
+</div>
+<a id="a235da7fbd988112566059bebe9fee9d0"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a235da7fbd988112566059bebe9fee9d0">&#9670;&nbsp;</a></span>free()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void slog::LogRecordPool::free </td>
           <td>(</td>
           <td class="paramtype"><a class="el" href="structslog_1_1RecordNode.html">RecordNode</a> *&#160;</td>
           <td class="paramname"><em>record</em></td><td>)</td>
@@ -177,31 +195,13 @@ long&#160;</td><td class="memItemRight" valign="bottom"><b>m_chunks</b></td></tr
         </tr>
       </table>
 </div><div class="memdoc">
-<p>Push a record back onto the stack. </p>
-
-</div>
-</div>
-<a id="afdd249626a0b581acac4cb3ae2adcdea"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#afdd249626a0b581acac4cb3ae2adcdea">&#9670;&nbsp;</a></span>take()</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname"><a class="el" href="structslog_1_1RecordNode.html">RecordNode</a> * slog::LogRecordPool::take </td>
-          <td>(</td>
-          <td class="paramname"></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-<p>Pop a record from the stack. If the stack is currently empty, \ this allocates more memory </p>
+<p>Return a record to the pool as free. </p>
 
 </div>
 </div>
 <hr/>The documentation for this class was generated from the following files:<ul>
-<li>/home/mike/git/slog/src/<a class="el" href="LogRecordPool_8hpp_source.html">LogRecordPool.hpp</a></li>
-<li>/home/mike/git/slog/src/LogRecordPool.cpp</li>
+<li>/home/mike/git/slog/src/slog/<a class="el" href="LogRecordPool_8hpp_source.html">LogRecordPool.hpp</a></li>
+<li>/home/mike/git/slog/src/slog/LogRecordPool.cpp</li>
 </ul>
 </div><!-- contents -->
 </div><!-- doc-content -->

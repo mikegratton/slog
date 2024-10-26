@@ -5,7 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=9"/>
 <meta name="generator" content="Doxygen 1.9.1"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>Slog: /home/mike/git/slog/src/LogChannel.hpp Source File</title>
+<title>Slog: /home/mike/git/slog/src/slog/LogChannel.hpp Source File</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
@@ -117,7 +117,7 @@ $(document).ready(function(){initNavTree('LogChannel_8hpp_source.html',''); init
 <div class="line"><a name="l00057"></a><span class="lineno">   57</span>&#160; </div>
 <div class="line"><a name="l00062"></a><span class="lineno"><a class="line" href="classslog_1_1LogChannel.html#ab5e531fb64c2aa3d0ccf1907487b12b9">   62</a></span>&#160;    <span class="keywordtype">int</span> <a class="code" href="classslog_1_1LogChannel.html#ab5e531fb64c2aa3d0ccf1907487b12b9">threshold</a>(<span class="keywordtype">char</span> <span class="keyword">const</span>* tag) { <span class="keywordflow">return</span> thresholdMap[tag]; }</div>
 <div class="line"><a name="l00063"></a><span class="lineno">   63</span>&#160; </div>
-<div class="line"><a name="l00069"></a><span class="lineno"><a class="line" href="classslog_1_1LogChannel.html#aca94bf727efaf078038ef8258e4a03b7">   69</a></span>&#160;    <a class="code" href="structslog_1_1RecordNode.html">RecordNode</a>* <a class="code" href="classslog_1_1LogChannel.html#aca94bf727efaf078038ef8258e4a03b7">get_fresh_record</a>() { <span class="keywordflow">return</span> pool-&gt;take(); }</div>
+<div class="line"><a name="l00069"></a><span class="lineno"><a class="line" href="classslog_1_1LogChannel.html#aca94bf727efaf078038ef8258e4a03b7">   69</a></span>&#160;    <a class="code" href="structslog_1_1RecordNode.html">RecordNode</a>* <a class="code" href="classslog_1_1LogChannel.html#aca94bf727efaf078038ef8258e4a03b7">get_fresh_record</a>() { <span class="keywordflow">return</span> pool-&gt;allocate(); }</div>
 <div class="line"><a name="l00070"></a><span class="lineno">   70</span>&#160; </div>
 <div class="line"><a name="l00072"></a><span class="lineno">   72</span>&#160;    <span class="comment">// RUN STATE ONLY</span></div>
 <div class="line"><a name="l00077"></a><span class="lineno">   77</span>&#160;<span class="comment"></span>    <span class="keywordtype">void</span> <a class="code" href="classslog_1_1LogChannel.html#a79fb1db6844e58379782f33d9ffed979">push</a>(<a class="code" href="structslog_1_1RecordNode.html">RecordNode</a>* rec);</div>
@@ -172,11 +172,11 @@ $(document).ready(function(){initNavTree('LogChannel_8hpp_source.html',''); init
 <div class="ttc" id="aclassslog_1_1FlatThresholdMap_html"><div class="ttname"><a href="classslog_1_1FlatThresholdMap.html">slog::FlatThresholdMap</a></div><div class="ttdoc">A char const* to int map with a default value for missing/empty/null keys.</div><div class="ttdef"><b>Definition:</b> ThresholdMap.hpp:13</div></div>
 <div class="ttc" id="aclassslog_1_1LogChannel_1_1LogQueue_html"><div class="ttname"><a href="classslog_1_1LogChannel_1_1LogQueue.html">slog::LogChannel::LogQueue</a></div><div class="ttdef"><b>Definition:</b> LogChannel.hpp:99</div></div>
 <div class="ttc" id="aclassslog_1_1LogChannel_html"><div class="ttname"><a href="classslog_1_1LogChannel.html">slog::LogChannel</a></div><div class="ttdoc">Principle worker of the slog system.</div><div class="ttdef"><b>Definition:</b> LogChannel.hpp:31</div></div>
-<div class="ttc" id="aclassslog_1_1LogChannel_html_a32c4e19ebf1d60ed1a75a8bbb1d85afa"><div class="ttname"><a href="classslog_1_1LogChannel.html#a32c4e19ebf1d60ed1a75a8bbb1d85afa">slog::LogChannel::~LogChannel</a></div><div class="ttdeci">~LogChannel()</div><div class="ttdef"><b>Definition:</b> LogChannel.cpp:21</div></div>
-<div class="ttc" id="aclassslog_1_1LogChannel_html_a5f4817fe9f4617ac1d8e214ed70a77db"><div class="ttname"><a href="classslog_1_1LogChannel.html#a5f4817fe9f4617ac1d8e214ed70a77db">slog::LogChannel::LogChannel</a></div><div class="ttdeci">LogChannel(std::shared_ptr&lt; LogSink &gt; sink_, ThresholdMap const &amp;threshold_, std::shared_ptr&lt; LogRecordPool &gt; pool_)</div><div class="ttdef"><b>Definition:</b> LogChannel.cpp:12</div></div>
-<div class="ttc" id="aclassslog_1_1LogChannel_html_a79fb1db6844e58379782f33d9ffed979"><div class="ttname"><a href="classslog_1_1LogChannel.html#a79fb1db6844e58379782f33d9ffed979">slog::LogChannel::push</a></div><div class="ttdeci">void push(RecordNode *rec)</div><div class="ttdef"><b>Definition:</b> LogChannel.cpp:30</div></div>
-<div class="ttc" id="aclassslog_1_1LogChannel_html_a7d5db2021aeb6598bae3c87160cf20a0"><div class="ttname"><a href="classslog_1_1LogChannel.html#a7d5db2021aeb6598bae3c87160cf20a0">slog::LogChannel::stop</a></div><div class="ttdeci">void stop()</div><div class="ttdef"><b>Definition:</b> LogChannel.cpp:47</div></div>
-<div class="ttc" id="aclassslog_1_1LogChannel_html_aacd4bbb7a05f526e5fed007bd1cd228a"><div class="ttname"><a href="classslog_1_1LogChannel.html#aacd4bbb7a05f526e5fed007bd1cd228a">slog::LogChannel::start</a></div><div class="ttdeci">void start()</div><div class="ttdef"><b>Definition:</b> LogChannel.cpp:40</div></div>
+<div class="ttc" id="aclassslog_1_1LogChannel_html_a32c4e19ebf1d60ed1a75a8bbb1d85afa"><div class="ttname"><a href="classslog_1_1LogChannel.html#a32c4e19ebf1d60ed1a75a8bbb1d85afa">slog::LogChannel::~LogChannel</a></div><div class="ttdeci">~LogChannel()</div><div class="ttdef"><b>Definition:</b> LogChannel.cpp:19</div></div>
+<div class="ttc" id="aclassslog_1_1LogChannel_html_a5f4817fe9f4617ac1d8e214ed70a77db"><div class="ttname"><a href="classslog_1_1LogChannel.html#a5f4817fe9f4617ac1d8e214ed70a77db">slog::LogChannel::LogChannel</a></div><div class="ttdeci">LogChannel(std::shared_ptr&lt; LogSink &gt; sink_, ThresholdMap const &amp;threshold_, std::shared_ptr&lt; LogRecordPool &gt; pool_)</div><div class="ttdef"><b>Definition:</b> LogChannel.cpp:13</div></div>
+<div class="ttc" id="aclassslog_1_1LogChannel_html_a79fb1db6844e58379782f33d9ffed979"><div class="ttname"><a href="classslog_1_1LogChannel.html#a79fb1db6844e58379782f33d9ffed979">slog::LogChannel::push</a></div><div class="ttdeci">void push(RecordNode *rec)</div><div class="ttdef"><b>Definition:</b> LogChannel.cpp:28</div></div>
+<div class="ttc" id="aclassslog_1_1LogChannel_html_a7d5db2021aeb6598bae3c87160cf20a0"><div class="ttname"><a href="classslog_1_1LogChannel.html#a7d5db2021aeb6598bae3c87160cf20a0">slog::LogChannel::stop</a></div><div class="ttdeci">void stop()</div><div class="ttdef"><b>Definition:</b> LogChannel.cpp:44</div></div>
+<div class="ttc" id="aclassslog_1_1LogChannel_html_aacd4bbb7a05f526e5fed007bd1cd228a"><div class="ttname"><a href="classslog_1_1LogChannel.html#aacd4bbb7a05f526e5fed007bd1cd228a">slog::LogChannel::start</a></div><div class="ttdeci">void start()</div><div class="ttdef"><b>Definition:</b> LogChannel.cpp:37</div></div>
 <div class="ttc" id="aclassslog_1_1LogChannel_html_ab5e531fb64c2aa3d0ccf1907487b12b9"><div class="ttname"><a href="classslog_1_1LogChannel.html#ab5e531fb64c2aa3d0ccf1907487b12b9">slog::LogChannel::threshold</a></div><div class="ttdeci">int threshold(char const *tag)</div><div class="ttdef"><b>Definition:</b> LogChannel.hpp:62</div></div>
 <div class="ttc" id="aclassslog_1_1LogChannel_html_aca94bf727efaf078038ef8258e4a03b7"><div class="ttname"><a href="classslog_1_1LogChannel.html#aca94bf727efaf078038ef8258e4a03b7">slog::LogChannel::get_fresh_record</a></div><div class="ttdeci">RecordNode * get_fresh_record()</div><div class="ttdef"><b>Definition:</b> LogChannel.hpp:69</div></div>
 <div class="ttc" id="astructslog_1_1RecordNode_html"><div class="ttname"><a href="structslog_1_1RecordNode.html">slog::RecordNode</a></div><div class="ttdef"><b>Definition:</b> LogRecordPool.hpp:16</div></div>
@@ -185,7 +185,7 @@ $(document).ready(function(){initNavTree('LogChannel_8hpp_source.html',''); init
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="navelem"><a class="el" href="dir_68267d1309a1af8e8297ef4c3efbcdba.html">src</a></li><li class="navelem"><b>LogChannel.hpp</b></li>
+    <li class="navelem"><a class="el" href="dir_68267d1309a1af8e8297ef4c3efbcdba.html">src</a></li><li class="navelem"><a class="el" href="dir_95be75e0f8e573547a5556ed938590f2.html">slog</a></li><li class="navelem"><b>LogChannel.hpp</b></li>
     <li class="footer">Generated by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
   </ul>
 </div>

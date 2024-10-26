@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['recordnode_64',['RecordNode',['../structslog_1_1RecordNode.html',1,'slog']]]
+  ['poolmemory_73',['PoolMemory',['../classslog_1_1PoolMemory.html',1,'slog']]]
 ];

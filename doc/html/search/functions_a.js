@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['will_5flog_79',['will_log',['../namespaceslog.html#af701af67e2f3f0b53a2472c863a0dac5',1,'slog']]]
+  ['_7elogchannel_106',['~LogChannel',['../classslog_1_1LogChannel.html#a32c4e19ebf1d60ed1a75a8bbb1d85afa',1,'slog::LogChannel']]]
 ];
