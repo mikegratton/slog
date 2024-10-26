@@ -28,7 +28,7 @@ class JournaldSink : public LogSink {
     ~JournaldSink() = default;
 
     /// Write a record to the journal
-    virtual void record(LogRecord const& rec) override;
+    void record(LogRecord const& rec) final;
 
     /**
      * @brief Change the console echo log format

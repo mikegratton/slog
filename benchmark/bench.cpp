@@ -4,32 +4,33 @@
 //
 // Modified for slog by M.B. Gratton
 
-#include "slog.hpp"
-#include "LogSetup.hpp"
-#include "FileSink.hpp"
-#include "JournaldSink.hpp"
-
 #include <atomic>
-#include <cstdlib> // EXIT_FAILURE
+#include <cstdlib>  // EXIT_FAILURE
+#include <iostream>
 #include <memory>
 #include <string>
 #include <thread>
-#include <iostream>
+
+#include "slog/FileSink.hpp"
+#include "slog/JournaldSink.hpp"
+#include "slog/LogSetup.hpp"
+#include "slog/slog.hpp"
 
 void bench_mt(int howmany, slog::LogConfig& config, size_t thread_count);
 
 using namespace std::chrono;
 
-void bench_threaded_logging(size_t threads, int iters) {
+void bench_threaded_logging(size_t threads, int iters)
+{
     std::cout << "**************************************************************\n";
     std::cout << "Threads: " << threads << ", messages: " << iters << "\n";
     std::cout << "**************************************************************\n";
 
     const long messageSize = 256;
-    const long poolSize = (messageSize+sizeof(slog::RecordNode))*iters*threads;
+    const long poolSize = (messageSize + sizeof(slog::RecordNode)) * iters * threads;
     auto start = high_resolution_clock::now();
     auto pool = std::make_shared<slog::LogRecordPool>(slog::DISCARD, poolSize, messageSize);
-                                                      
+
     auto delta = high_resolution_clock::now() - start;
     auto delta_d = duration_cast<duration<double>>(delta).count();
     std::cout << "Allocated  " << pool->count() << " record nodes in " << delta_d << " secs\n";
@@ -54,7 +55,6 @@ void bench_threaded_logging(size_t threads, int iters) {
         config.set_sink(sink);
         bench_mt(iters, config, threads);
         std::cout << "Pool count: " << pool->count() << "\n";
-
     }
 
     {
@@ -65,8 +65,8 @@ void bench_threaded_logging(size_t threads, int iters) {
     }
 }
 
-
-void bench_mt(int howmany, slog::LogConfig& config, size_t thread_count) {
+void bench_mt(int howmany, slog::LogConfig& config, size_t thread_count)
+{
     using std::chrono::duration;
     using std::chrono::duration_cast;
     using std::chrono::high_resolution_clock;
@@ -83,32 +83,24 @@ void bench_mt(int howmany, slog::LogConfig& config, size_t thread_count) {
         });
     }
 
-    for (auto& t : threads) {
-        t.join();
-    };
+    for (auto& t : threads) { t.join(); };
     auto delta_pre = high_resolution_clock::now() - start;
     auto delta_pre_d = duration_cast<duration<double>>(delta_pre).count();
-    slog::stop_logger(); // Force backend to drain queue
+    slog::stop_logger();  // Force backend to drain queue
     auto delta = high_resolution_clock::now() - start;
     auto delta_d = duration_cast<duration<double>>(delta).count();
-    howmany *= thread_count; // Actual number logged
-    std::cout << "Elapsed: " << delta_d << " secs " << int(howmany / delta_d)
-              << " msg/sec, business: " << delta_pre_d << " sec, " << int(howmany / delta_pre_d)
-              << " msg/sec\n";
+    howmany *= thread_count;  // Actual number logged
+    std::cout << "Elapsed: " << delta_d << " secs " << int(howmany / delta_d) << " msg/sec, business: " << delta_pre_d
+              << " sec, " << int(howmany / delta_pre_d) << " msg/sec\n";
 }
 
-
-int main(int argc, char* argv[]) {
+int main(int argc, char* argv[])
+{
     int iters = 250000;
     size_t threads = 4;
 
-    if (argc > 1) {
-        iters = std::stoi(argv[1]);
-    }
-    if (argc > 2) {
-        threads = std::stoul(argv[2]);
-    }
-
+    if (argc > 1) { iters = std::stoi(argv[1]); }
+    if (argc > 2) { threads = std::stoul(argv[2]); }
 
     bench_threaded_logging(1, iters);
     bench_threaded_logging(threads, iters);

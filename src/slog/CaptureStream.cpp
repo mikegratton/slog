@@ -18,11 +18,14 @@ class IntrusiveBuf : public std::streambuf {
         m_node = node;
         m_channel = channel;
         m_cursor = node->rec.message;
+        m_currentByteCount = &node->rec.message_byte_count;
+        *m_currentByteCount = 0L;
         m_end = m_cursor + node->rec.message_max_size - 1;
     }
 
    protected:
     RecordNode* m_node;
+    long* m_currentByteCount;
     long m_channel;
     char* m_cursor;
     char* m_end;
@@ -31,6 +34,7 @@ class IntrusiveBuf : public std::streambuf {
     {
         count = std::min(count, m_end - m_cursor);
         memcpy(m_cursor, s, count);
+        *m_currentByteCount += count;
         m_cursor += count;
         *m_cursor = '\0';
         return count;

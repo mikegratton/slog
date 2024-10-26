@@ -53,8 +53,11 @@ struct LogRecord {
     //! Metadata
     LogRecordMetadata meta;
 
-    //! maximum size of the message string (including null terminator)
+    //! Total allocated space for message
     long message_max_size;
+
+    //! Size of message, including possible null terminator
+    long message_byte_count;
 
     //! Actual log message.
     char* message;

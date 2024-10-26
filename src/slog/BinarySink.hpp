@@ -1,31 +1,33 @@
 #pragma once
-#include <cstdio>
-
 #include "LogSink.hpp"
 
 namespace slog {
 
 /**
- * @brief Simple file storage for log records
- * FileSink writes records to conventional files. It supports
- * - optional echo to the console
- * - File rotation
- * - Custom file naming
- * - Custom record formatting
+ * @brief Basic logging of binary data to files using the C api.
+ *
+ * This writes data in a byte delimited format. Each record becomes
+ * an entry of the form
+ *    <size><severity><time><tag><record...>
+ * where
+ *    <size> is a four byte unsigned int
+ *    <severity> is a four byte signed int giving the size of the record (this does
+ *               not include the size of the record leader)
+ *    <time> is an eight byte signed nanosecond count since the unix epoch
+ *    <tag> is 16 one-byte characters. The final character is always '\0'
+ *    <record> is the logged data
+ * Each record has a 32 byte "leader" with the record metadata in compact form.
+ *
+ * LIMITATIONS: This sink records severity and size as four byte ints, limiting
+ * the maximum record size to 4GB and the maximum severity to 2^31 - 1
  */
-class FileSink : public LogSink {
+class BinarySink : public LogSink {
    public:
-    FileSink();
-    ~FileSink();
+    BinarySink();
+    ~BinarySink();
 
     /// Write the record to the file
     void record(LogRecord const& node) final;
-
-    /// Change the formatting for each record
-    void set_formatter(Formatter format) { mformat = format; }
-
-    /// Set echo to console on/off
-    void set_echo(bool doit = true) { mecho = doit; }
 
     /// Change the maximum filesize before rotation
     void set_max_file_size(long isize);
@@ -42,11 +44,10 @@ class FileSink : public LogSink {
      */
     void set_file(char const* location, char const* name, char const* end = "log");
 
-   protected:
+   private:
     void open_or_rotate();
 
     FILE* mfile;
-    Formatter mformat;
     char mfileLocation[256];
     char mfileName[128];
     char mfileEnd[128];
@@ -54,7 +55,5 @@ class FileSink : public LogSink {
     int msequence;
     long mbytesWritten;
     long mmaxBytes;
-    bool mecho;
 };
-
 }  // namespace slog

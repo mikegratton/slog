@@ -29,7 +29,7 @@ class SyslogSink : public LogSink {
     ~SyslogSink();
 
     /// Write the record to the socket
-    virtual void record(LogRecord const& node) override;
+    void record(LogRecord const& node) final;
 
     /// Change the formatting for each record (default is default_format)
     void set_formatter(Formatter format) { mformat = format; }

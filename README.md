@@ -188,6 +188,8 @@ with no tag. This uses printf-style formatting.
 with tag "tag". This uses printf-style formatting.
 * `Flogtc(SEVERITY, "tag", 2, "A good number is %d", 42)` : Log "A good number is 42" to channel 2
 with tag "tag". This uses printf-style formatting.
+* `Blog(SEVERITY, "tag", 2).record(my_bytes, my_byte_count).record(more_bytes, count2)` : Capture a binary
+log message in two parts with tag "tag" to channel 2.
 
 All of these macros first check if the message will be logged given the current severity threshold
 for the tag and channel.  If the message won't be logged, the code afterwards *will not be executed*.
@@ -288,6 +290,23 @@ The API
     * `set_application_name(char const* application_name)` : Change the syslog application name (default is the program name)
     * `set_facility(int facility)` : Change the syslog facility (default is 1)
     * `set_rfc3164_protocol(bool doit)` : Use the old syslog format (default is RFC 5424)
+
+#### BinarySink
+If using Slog to log binary data, the `BinarySink` provides a simple binary output file format. If you 
+are logging text, `FileSink` provides a better log file. This sink writes log messages in the form
+```
+<leader> <record>
+```
+where the leader is 32 bytes of metadata and the record is the binary data passed with `Blog()`. The leader
+format is 
+```
+4B    4B         8B         16B
+size  severity   timestamp  tag
+```
+where "size" is a four byte unsigned int giving the size of the record (this does not inlcude the size of the leader),
+"severity" is the four byte signed severity code, "timestamp" is an 8 byte nanosecond count since 1970-01-01T00:00:00Z, 
+and "tag" is a fifteen byte text string followed by one null byte (for 16 total bytes).
+
 
 ### Tweaking the Format
 The built-in sinks all use the `Formatter` functor defined in `LogSink.hpp` to format messages:
@@ -421,6 +440,9 @@ Slog has four compile-time cmake configuration options:
 | `SLOG_STREAM`           |   ON                        | Turn this off to avoid including <iostream> and Slog() macros |
 | `SLOG_DEFAULT_RECORD_SIZE` | 512 | Default size of records |
 | `SLOG_DEFAULT_POOL_RECORD_COUNT` | 2048 | Default number of records in the pool |
+| `SLOG_BUILD_TEST` | OFF | Build unit tests |
+| `SLOG_BUILD_EXAMPLE` | OFF | Build example programs |
+| `SLOG_BUILD_BENCHMARK` | OFF | Build benchmark program |
 
 Note the total memory allocation will be `SLOG_DEFAULT_POOL_RECORD_COUNT * SLOG_DEFAULT_RECORD_SIZE`.
 
@@ -431,4 +453,12 @@ unit.
 
 * *1.0.0* Initial release.
 * *1.1.0* Alter main include path to be `slog/slog.hpp`. Fix bug with "jumbo" messages being truncated.
-* *1.2.0* Default sink changed to `ConsoleSink`. Made pool sizes configurable in cmake.
+* *1.2.0* 
+    * Default sink changed to `ConsoleSink`. 
+    * Made pool sizes configurable in cmake
+    * Added a syslog sink that can use unix, UDP/IP, or TCP/IP sockets
+    * Fixed signal handling bug when handlers installed before slog's handlers
+* *1.3.0*
+    * Add `BinarySink` and `Blog()` macro for binary logging
+    * Moved details out of `slog.hpp` so that this header summarizes the basics
+    * Tests, examples, and benchmark programs are now not built by default

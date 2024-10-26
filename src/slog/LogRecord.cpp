@@ -38,6 +38,7 @@ void LogRecordMetadata::capture(char const* filename_, char const* function_, in
 LogRecord::LogRecord(char* message_, long max_message_size_)
 {
     message_max_size = max_message_size_;
+    message_byte_count = 0L;
     message = message_;
     reset();
 }
@@ -47,6 +48,7 @@ void LogRecord::reset()
     meta.reset();
     more = nullptr;
     message[0] = '\0';
+    message_byte_count = 0L;
 }
 
 }  // namespace slog
