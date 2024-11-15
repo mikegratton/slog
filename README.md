@@ -462,3 +462,5 @@ unit.
     * Add `BinarySink` and `Blog()` macro for binary logging
     * Moved details out of `slog.hpp` so that this header summarizes the basics
     * Tests, examples, and benchmark programs are now not built by default
+* *1.3.1*
+    * Fix issues when building Slog without journald support
