@@ -2,18 +2,23 @@ file(GLOB source CONFIGURE_DEPENDS *.cpp)
 
 configure_file(LogConfig.hpp.in LogConfig.hpp)
 find_package(Threads REQUIRED)
-find_package(Journald)
 
-if(NOT JOURNALD_FOUND)
-    message(STATUS "libsystemd-dev not found, journal log sink disabled")
-    list(REMOVE source JournaldSink.cpp)
+if (SLOG_JOURNALD)
+    find_package(Journald)
+    if(NOT JOURNALD_FOUND)
+        set(SLOG_JOURNALD OFF CACHE BOOL "Provide journald sink (requires systemd-dev to be installed)" FORCE)
+        message(STATUS "libsystemd-dev not found, journal log sink disabled")
+    endif()
+endif()
+if (NOT SLOG_JOURNALD)
+    list(FILTER source EXCLUDE REGEX ".*JournaldSink.cpp")
 endif()
 
 add_library(slog ${source})
 set_target_properties(slog PROPERTIES CXX_STANDARD 11)
 target_link_libraries(slog PUBLIC Threads::Threads)
 
-if(JOURNALD_FOUND)
+if(SLOG_JOURNALD AND JOURNALD_FOUND)
     target_link_libraries(slog PUBLIC Journald::Journald)
 endif()
 
