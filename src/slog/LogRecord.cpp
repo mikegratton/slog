@@ -20,7 +20,7 @@ void LogRecordMetadata::reset()
     function = "";
     line = NO_LINE;
     severity = 2 >> 31;
-    tag[0] = '\0';
+    memset(tag, 0, sizeof(tag));
 }
 
 void LogRecordMetadata::capture(char const* filename_, char const* function_, int line_, int severity_,

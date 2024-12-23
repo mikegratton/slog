@@ -18,6 +18,16 @@ class FileSink : public LogSink {
     FileSink();
     ~FileSink();
 
+    /**
+     * @brief The header is inserted into each log file before any records.
+     */
+    void set_file_header_format(LogFileFurniture headerFormat);
+
+    /**
+     * @brief The footer is written to the log file after all records.
+     */
+    void set_file_footer_format(LogFileFurniture footerFormat);
+
     /// Write the record to the file
     void record(LogRecord const& node) final;
 
@@ -47,6 +57,8 @@ class FileSink : public LogSink {
 
     FILE* mfile;
     Formatter mformat;
+    LogFileFurniture mheader;
+    LogFileFurniture mfooter;
     char mfileLocation[256];
     char mfileName[128];
     char mfileEnd[128];

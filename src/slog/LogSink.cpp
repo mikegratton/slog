@@ -1,14 +1,16 @@
 #include "LogSink.hpp"
 
+#include <cstdint>
 #include <cstdio>
 #include <cstring>
 #include <ctime>
 
 #include "ConsoleSink.hpp"
+#include "slog/slog.hpp"
 
 namespace slog {
 
-int default_format(FILE* sink, LogRecord const& rec)
+uint32_t default_format(FILE* sink, LogRecord const& rec)
 {
     char time_str[32];
     format_time(time_str, rec.meta.time, 3, FULL_T);
@@ -28,7 +30,7 @@ int default_format(FILE* sink, LogRecord const& rec)
     return writeCount;
 }
 
-int no_meta_format(FILE* sink, LogRecord const& rec)
+uint32_t no_meta_format(FILE* sink, LogRecord const& rec)
 {
     int count = 0;
     count += fwrite(rec.message, sizeof(char), strnlen(rec.message, rec.message_max_size), sink);
@@ -131,6 +133,62 @@ void ConsoleSink::record(LogRecord const& rec)
     mformat(stdout, rec);
     fputc('\n', stdout);
     fflush(stdout);
+}
+
+uint32_t default_binary_format(FILE* sink, LogRecord const& rec)
+{
+    // write leader here
+    uint32_t totalBytes = 0;
+    uint32_t recordiSize = total_record_size(rec);
+    int32_t reducedSev = static_cast<int32_t>(rec.meta.severity);
+    totalBytes += fwrite(&recordiSize, sizeof(uint32_t), 1, sink);
+    totalBytes += fwrite(&reducedSev, sizeof(int32_t), 1, sink);
+    totalBytes += fwrite(&rec.meta.time, sizeof(unsigned long), 1, sink);
+    totalBytes += fwrite(rec.meta.tag, sizeof(char), TAG_SIZE, sink);
+
+    LogRecord const* r = &rec;
+    do {
+        totalBytes += fwrite(r->message, 1, r->message_byte_count, sink);
+        r = r->more;
+    } while (r);
+    return totalBytes;
+}
+
+uint32_t short_binary_format(FILE* sink, LogRecord const& rec)
+{
+    uint32_t totalBytes = 0;
+    uint32_t recordiSize = total_record_size(rec);
+    totalBytes += fwrite(&recordiSize, sizeof(uint32_t), 1, sink);
+    totalBytes += fwrite(rec.meta.tag, sizeof(char), 4, sink);
+    LogRecord const* r = &rec;
+    do {
+        totalBytes += fwrite(r->message, 1, r->message_byte_count, sink);
+        r = r->more;
+    } while (r);
+    return totalBytes;
+}
+
+uint32_t total_record_size(LogRecord const& rec)
+{
+    uint32_t totalSize = 0;
+    LogRecord const* r = &rec;
+    do {
+        totalSize += static_cast<uint32_t>(rec.message_byte_count);
+        r = r->more;
+    } while (r);
+    return totalSize;
+}
+
+uint32_t default_binary_header_furniture(FILE* sink, int sequence, unsigned long /*time*/)
+{
+    char const* magic = "SLOG";
+    const uint16_t kBOM = 0xfeff;
+    const uint16_t shortSequence = static_cast<uint16_t>(sequence);
+    uint32_t count = 0;
+    count += fwrite(magic, sizeof(char), 4, sink);
+    count += fwrite(&kBOM, sizeof(uint16_t), 1, sink);
+    count += fwrite(&shortSequence, sizeof(uint16_t), 1, sink);
+    return count;
 }
 
 }  // namespace slog
