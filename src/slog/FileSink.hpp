@@ -29,7 +29,7 @@ class FileSink : public LogSink {
     void set_file_footer_format(LogFileFurniture footerFormat);
 
     /// Write the record to the file
-    void record(LogRecord const& node) final;
+    virtual void record(LogRecord const& node) override;
 
     /// Change the formatting for each record
     void set_formatter(Formatter format) { mformat = format; }

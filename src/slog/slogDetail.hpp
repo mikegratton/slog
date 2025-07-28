@@ -14,11 +14,15 @@
 
 #endif
 
-#define SLOG_FlogBase(severity, tag, channel, format, ...)                                                        \
-    if (SLOG_LOGGING_ENABLED && slog::will_log((severity), (tag), (channel))) {                                   \
-        RecordNode* rec = slog::get_fresh_record((channel), __FILE__, __FUNCTION__, __LINE__, (severity), (tag)); \
-        if (rec) { slog::push_to_sink(slog::capture_message(rec, format, ##__VA_ARGS__), channel); }              \
-    }
+#define SLOG_FlogBase(severity, tag, channel, format, ...)                     \
+  if (SLOG_LOGGING_ENABLED && slog::will_log((severity), (tag), (channel))) {  \
+    slog::RecordNode *rec = slog::get_fresh_record(                            \
+        (channel), __FILE__, __FUNCTION__, __LINE__, (severity), (tag));       \
+    if (rec) {                                                                 \
+      slog::push_to_sink(slog::capture_message(rec, format, ##__VA_ARGS__),    \
+                         channel);                                             \
+    }                                                                          \
+  }
 
 #define SLOG_BlogBase(severity, tag, channel)                                                                       \
     if (!(SLOG_LOGGING_ENABLED && slog::will_log((severity), (tag), (channel)))) {                                  \

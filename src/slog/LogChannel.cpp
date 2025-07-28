@@ -1,5 +1,5 @@
 #include "LogChannel.hpp"
-
+#include <cstdlib>
 #include <cassert>
 #include <chrono>
 

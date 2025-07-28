@@ -11,13 +11,18 @@
 namespace slog {
 
 FileSink::FileSink()
-{
-    mfile = nullptr;
+: mfile(nullptr)
+, mformat(default_format)
+, mheader(no_op_furniture)
+, mfooter(no_op_furniture)
+, msequence(0)
+, mbytesWritten(0)
+, mmaxBytes(std::numeric_limits<long>::max() - 2048)
+, mecho(true)    
+{    
     format_time(msessionStartTime, std::chrono::system_clock::now().time_since_epoch().count(), 0, COMPACT);
-    set_max_file_size(std::numeric_limits<long>::max() - 2048);
-    set_echo(true);
-    set_file(".", program_invocation_short_name);
-    set_formatter(default_format);
+    set_max_file_size(std::numeric_limits<long>::max() - 2048);    
+    set_file(".", program_invocation_short_name);    
 }
 
 FileSink::~FileSink()

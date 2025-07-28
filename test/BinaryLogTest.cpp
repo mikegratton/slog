@@ -3,6 +3,8 @@
 #include "slog/LogSetup.hpp"
 #include "slog/slog.hpp"
 
+#if SLOG_BINARY_LOG
+
 TEST_CASE("BinaryishLog")
 {
     slog::start_logger();
@@ -36,3 +38,5 @@ TEST_CASE("BinaryLog")
     CHECK(bits > 0);
     slog::stop_logger();
 }
+
+#endif

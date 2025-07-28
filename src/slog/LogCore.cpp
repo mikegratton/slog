@@ -1,7 +1,8 @@
+#include <csignal>
 #include <signal.h>
 
-#include <algorithm>
 #include <cassert>
+#include <string.h>
 #include <vector>
 
 #include "ConsoleSink.hpp"
@@ -18,10 +19,11 @@ namespace {
 std::shared_ptr<LogRecordPool> s_global_pool;
 
 // Old signal handlers to be called during shutdown
+struct sigaction g_oldTermHandler;
+struct sigaction g_oldIntHandler;
+struct sigaction g_oldQuitHandler;
+struct sigaction g_oldHupHandler;
 typedef void (*SignalHandler)(int signum);
-SignalHandler g_oldIntHandler = nullptr;
-SignalHandler g_oldAbrtHandler = nullptr;
-SignalHandler g_oldQuitHandler = nullptr;
 
 ////////////////////////////////////////////////////
 // This is the actual logger singleton, hidden from
@@ -82,13 +84,52 @@ class Logger {
      * Signal handler to ensure that log messages are all
      * captured when we get stopped.
      */
-    static void drain_log_queue(int signal_id)
+    static void drain_log_queue(int signal_id, siginfo_t* info, void* data)
     {
         stop_logger();
         // Pass signal to old handlers
-        if (g_oldIntHandler && signal_id == SIGINT) { g_oldIntHandler(signal_id); }
-        if (g_oldAbrtHandler && signal_id == SIGABRT) { g_oldAbrtHandler(signal_id); }
-        if (g_oldQuitHandler && signal_id == SIGQUIT) { g_oldQuitHandler(signal_id); }
+        switch (signal_id) {
+        case SIGTERM:
+            call_action(g_oldTermHandler, signal_id, info, data);
+            break;
+        case SIGINT:
+            call_action(g_oldIntHandler, signal_id, info, data);
+            break;
+        case SIGQUIT:
+            call_action(g_oldQuitHandler, signal_id, info, data);
+            break;
+        case SIGHUP:
+            call_action(g_oldHupHandler, signal_id, info, data);
+            break;
+        default:
+            break;
+        }
+    }
+
+    static void call_action(struct sigaction const& handler, int signal,
+                            siginfo_t* info, void* data)
+    {
+        if (handler.sa_flags & SA_SIGINFO && handler.sa_sigaction) {
+            handler.sa_sigaction(signal, info, data);
+        } else if (handler.sa_handler) {
+            handler.sa_handler(signal);
+        }
+    }
+
+    static void install_handler_if_not_ignored(int signal,
+                                               struct sigaction* old_handler)
+    {
+        struct sigaction action;
+        memset(&action, 0, sizeof(action));
+        sigfillset(&action.sa_mask);
+        action.sa_sigaction = drain_log_queue;
+        action.sa_flags = SA_SIGINFO | SA_RESTART;
+        int status = sigaction(signal, nullptr, old_handler);
+        assert(status == 0);
+        if (old_handler->sa_handler != SIG_IGN) {
+            int status = sigaction(signal, &action, nullptr);
+            assert(status == 0);
+        }
     }
 
     /**
@@ -98,17 +139,10 @@ class Logger {
     static void start_all_channels()
     {
         for (auto& chan : instance().backend) { chan.start(); }
-        struct sigaction action, oldAction;
-        sigfillset(&action.sa_mask);
-        action.sa_handler = drain_log_queue;
-        action.sa_flags = SA_RESTART;
-
-        sigaction(SIGINT, &action, &oldAction);
-        g_oldIntHandler = oldAction.sa_handler;
-        sigaction(SIGABRT, &action, &oldAction);
-        g_oldAbrtHandler = oldAction.sa_handler;
-        sigaction(SIGQUIT, &action, &oldAction);
-        g_oldQuitHandler = oldAction.sa_handler;
+        install_handler_if_not_ignored(SIGTERM, &g_oldTermHandler);
+        install_handler_if_not_ignored(SIGINT, &g_oldIntHandler);
+        install_handler_if_not_ignored(SIGQUIT, &g_oldQuitHandler);
+        install_handler_if_not_ignored(SIGHUP, &g_oldHupHandler);
     }
 
     /**
@@ -117,34 +151,10 @@ class Logger {
     static void stop_all_channels()
     {
         for (auto& chan : instance().backend) { chan.stop(); }
-        struct sigaction action;
-
-        if (g_oldIntHandler) {
-            sigfillset(&action.sa_mask);
-            action.sa_handler = g_oldIntHandler;
-            action.sa_flags = SA_RESTART;
-            sigaction(SIGINT, &action, nullptr);
-        } else {
-            sigaction(SIGINT, nullptr, nullptr);
-        }
-
-        if (g_oldAbrtHandler) {
-            sigfillset(&action.sa_mask);
-            action.sa_handler = g_oldAbrtHandler;
-            action.sa_flags = SA_RESTART;
-            sigaction(SIGABRT, &action, nullptr);
-        } else {
-            sigaction(SIGABRT, nullptr, nullptr);
-        }
-
-        if (g_oldQuitHandler) {
-            sigfillset(&action.sa_mask);
-            action.sa_handler = g_oldQuitHandler;
-            action.sa_flags = SA_RESTART;
-            sigaction(SIGQUIT, &action, nullptr);
-        } else {
-            sigaction(SIGQUIT, nullptr, nullptr);
-        }
+        sigaction(SIGTERM, &g_oldTermHandler, nullptr);
+        sigaction(SIGQUIT, &g_oldQuitHandler, nullptr);
+        sigaction(SIGINT, &g_oldIntHandler, nullptr);
+        sigaction(SIGHUP, &g_oldHupHandler, nullptr);
     }
 
     static void setup_stopped_channel() { instance().do_setup_stopped_channel(); }
