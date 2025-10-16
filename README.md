@@ -108,19 +108,17 @@ logic could result in loss of life or grievous harm.
 
 ## Asynchronous Logging
 
-Slog is an *asynchronous* logger, meaning log records are written to sinks (files, sockets, etc.)
-on dedicated worker threads.  "Logging" on a business thread captures the message to an internal 
-buffer.  This is then pushed into a thread-safe queue where a worker thread pops the message and
-performs the (blocking) IO call.  This design minimizes blocking calls that 
-are made on the business thread. The risk with asynchronous logging is that the program may terminate
-before this queue is written to disk.  Slog ties into the signal system to ensure that the queue
-is processed before at exit in most cases.  These cases include normal end of program 
-(`return` from main) and the signals SIGINT, SIGABRT, and SIGQUIT. 
-Thus Slog will drain its queue on all trappable signals (ctrl-C -- SIG_INT -- included), as well 
-as when `abort()` is called. Note that calling `exit()` from `stdlib.h` is not one of these cases -- 
-this exits the program via a means that can evade the destructor of Slog's singleton.  If you 
-are slogging in a context where you need to call exit (i.e. you have forked), you must call
-`slog::stop_logger()` first to ensure a proper shutdown.
+Slog is an *asynchronous* logger, meaning log records are written to sinks
+(files, sockets, etc.) on dedicated worker threads.  "Logging" on a business
+thread captures the message to an internal buffer.  This is then pushed into a
+thread-safe queue where a worker thread pops the message and performs the
+(blocking) IO call.  This design minimizes blocking calls that are made on the
+business thread. The risk with asynchronous logging is that the program may
+terminate before this queue is written to disk.  Slog ties into the signal and
+exit systems to ensure that the queue is processed before at exit in most cases.
+These cases include normal end of program (`return` from main), calls to
+`exit()` and the signals SIGINT, SIGABRT, and SIGTERM. Exiting using
+`quick_exit()` can still result in lost messages, however.
 
 ## API
 
@@ -245,10 +243,21 @@ filename takes the form `[location]/[name]_[ISO Date]_[sequence].[end]`, where `
 ISO 8601 timestamp when the program started and `sequence` is a three digit counter that increases as rollover
 happens.
 4. `set_formatter(Formatter format)`: Adjust the format of log messages. See below.
+5. `set_file_header_format(LogFileFurniture formatter)`: Register a function to
+   add contents to the begining of each log file. See below.
+6. `set_file_footer_format(LogFileFurniture formatter)`: Register a fuction to
+   be called when a log file is closed.
 
 Formatter is an alias for `std::function<int (FILE* sink, LogRecord const& rec)>`.  This takes
 the file to write to and the message to write and records it, returning the number of bytes
 written. 
+
+The `LogFileFurniture` type is 
+```cpp
+using LogFileFurniture = std::function<int(FILE* sink, int sequence, unsigned long time)>;
+```
+Each time a file is opened or closed, `formatter` is called with the file, the
+sequence number, and the time (in nanoseconds since the Unix epoch).
 
 #### JournaldSink
 The Journald sink uses the structured logging features of Journald to record the metadata.  These
@@ -292,20 +301,46 @@ The API
     * `set_rfc3164_protocol(bool doit)` : Use the old syslog format (default is RFC 5424)
 
 #### BinarySink
-If using Slog to log binary data, the `BinarySink` provides a simple binary output file format. If you 
-are logging text, `FileSink` provides a better log file. This sink writes log messages in the form
+If using Slog to log binary data, the `BinarySink`, derived from `FileSink`
+simple binary output file format. This sink writes log messages in the form
 ```
 <leader> <record>
 ```
-where the leader is 32 bytes of metadata and the record is the binary data passed with `Blog()`. The leader
-format is 
+where the leader is produced by the record formatter for the `FileSink`. The
+default `BinarySink` formatter makes a 32 bytes metadata leader of  
 ```
 4B    4B         8B         16B
 size  severity   timestamp  tag
 ```
-where "size" is a four byte unsigned int giving the size of the record (this does not inlcude the size of the leader),
-"severity" is the four byte signed severity code, "timestamp" is an 8 byte nanosecond count since 1970-01-01T00:00:00Z, 
-and "tag" is a fifteen byte text string followed by one null byte (for 16 total bytes).
+where "size" is a four byte unsigned int giving the size of the record (this
+does not inlcude the size of the leader), "severity" is the four byte signed
+severity code, "timestamp" is an 8 byte nanosecond count since
+1970-01-01T00:00:00Z, and "tag" is a fifteen byte text string followed by one
+null byte (for 16 total bytes). 
+
+Slog also provides the `short_binary_format()` which records the metadata
+```
+4B    4B  
+size  tag
+```
+for a total of 8 bytes of overhead per record. The tag here is the first four
+characters of the tag, and will not be null terminated in general. (If the tag
+is shorter than four bytes, this will be padded with zeros.)
+
+The "record" is simply the bytes passed to
+`Blog()`. Use the header and footer formatters to add identifying information
+for the file.
+
+Slog provides a default binary file header furniture function. This adds header
+information to the start of each binary file to aid in identification and parsing.
+The format is
+```
+4B    2B   2B      
+SLOG  BOM  sequence
+```
+where "SLOG" is literally these four characters. The BOM is a byte order mark,
+0xfeff. The sequence number identifies which file in the rotating file sequence
+this is (counting up from zero).
 
 
 ### Tweaking the Format
@@ -464,3 +499,10 @@ unit.
     * Tests, examples, and benchmark programs are now not built by default
 * *1.3.1*
     * Fix issues when building Slog without journald support
+* *1.4.0*
+    * Add header/footer options for `FileSink` and `BinarySink` to add fixed
+      file contents when a file is opened or closed.
+    * Improved signal handling. Slog will now detect if you have installed a
+      handler and forward signals to your handler after it has flushed its
+      queue.
+    * `exit()` now causes Slog to flush its queue.

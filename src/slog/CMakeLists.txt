@@ -1,4 +1,21 @@
-file(GLOB source CONFIGURE_DEPENDS *.cpp)
+
+set(source
+    BinarySink.cpp
+    CaptureBinary.cpp
+    CapturePrintf.cpp
+    CaptureStream.cpp
+    FileSink.cpp
+    LogChannel.cpp
+    LoggerSingleton.cpp
+    LogRecord.cpp
+    LogRecordPool.cpp
+    LogSetup.cpp
+    LogSink.cpp
+    Signals.cpp
+    slog.cpp
+    SyslogSink.cpp
+    ThresholdMap.cpp
+)
 
 configure_file(LogConfig.hpp.in LogConfig.hpp)
 find_package(Threads REQUIRED)
@@ -10,8 +27,8 @@ if (SLOG_JOURNALD)
         message(STATUS "libsystemd-dev not found, journal log sink disabled")
     endif()
 endif()
-if (NOT SLOG_JOURNALD)
-    list(FILTER source EXCLUDE REGEX ".*JournaldSink.cpp")
+if (SLOG_JOURNALD)
+    list(APPEND source JournaldSinl.cpp)
 endif()
 
 add_library(slog ${source})
