@@ -2,8 +2,8 @@
 
 #include <chrono>
 #include <cstring>
-#include <iostream>
 #include <thread>
+#include <limits>
 
 namespace slog {
 
@@ -19,7 +19,7 @@ void LogRecordMetadata::reset()
     filename = "";
     function = "";
     line = NO_LINE;
-    severity = 2 >> 31;
+    severity = std::numeric_limits<int>::max();
     memset(tag, 0, sizeof(tag));
 }
 

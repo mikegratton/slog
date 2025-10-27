@@ -1,5 +1,6 @@
 #pragma once
 #include "LogConfig.hpp"
+#include <cstdint>
 
 namespace slog {
 
@@ -31,7 +32,7 @@ struct LogRecordMetadata {
     char const* function;
 
     //! ns since Unix epoch
-    unsigned long time;
+    uint64_t time;
 
     //! unique ID of the thread this message was recorded on
     unsigned long thread_id;

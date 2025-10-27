@@ -2,6 +2,8 @@
 #include "LogConfig.hpp"
 #include "slogDetail.hpp"
 
+#if SLOG_STREAM
+
 /**
  * This defines a set of macros that work like
  *
@@ -19,9 +21,6 @@
  * size internal buffer.
  *
  */
-
-#if SLOG_STREAM
-
 // Overloads for Slog() used below
 #define SLOG_Logs(severity) SLOG_LogStreamBase(slog::severity, "", slog::DEFAULT_CHANNEL)
 #define SLOG_Logst(severity, tag) SLOG_LogStreamBase(slog::severity, (tag), slog::DEFAULT_CHANNEL)
@@ -70,6 +69,13 @@ namespace slog {
  * @brief Basic startup function.  For configuration options, see LogSetup.hpp
  */
 void start_logger(int severity = INFO);
+
+/**
+ * @brief Stop all channels, draining the queue into the sinks.
+ *
+ * Note: this prevents further messages from being logged.
+ */
+void stop_logger();
 
 /**
  * @brief Check if the current setup will log at the given severity (and optional tag and channel).

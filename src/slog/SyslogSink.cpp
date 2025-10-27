@@ -3,6 +3,7 @@
 #include <arpa/inet.h>
 #include <netdb.h>
 #include <netinet/in.h>
+#include <random>
 #include <sys/socket.h>
 #include <sys/types.h>
 #include <sys/un.h>
@@ -15,23 +16,12 @@
 #include <cstdlib>
 #include <cstring>
 
-#include "slog/LogSink.hpp"
+#include "LogSink.hpp"
+#include "PlatformUtilities.hpp"
+#include "SlogError.hpp"
 
-#define SLOG_PRINT_SYSLOG_ERROR
-
-namespace slog {
-
-namespace {
-void syslog_error(char const* format_, ...)
+namespace slog
 {
-#ifdef SLOG_PRINT_SYSLOG_ERROR
-    va_list vlist;
-    va_start(vlist, format_);
-    vfprintf(stderr, format_, vlist);
-    va_end(vlist);
-#endif
-}
-}  // namespace
 
 SyslogSink::SyslogSink(char const* destination, bool use_tcp)
     : mformat(default_format),
@@ -44,7 +34,7 @@ SyslogSink::SyslogSink(char const* destination, bool use_tcp)
 {
     int status;
     strncpy(mdestination, destination, sizeof(mdestination) - 1);
-    set_application_name(program_invocation_short_name);
+    set_application_name(::slog::program_short_name());
     gethostname(mhostname, sizeof(mhostname) - 1);
 
     // Set up the FILE memory stream
@@ -54,18 +44,18 @@ SyslogSink::SyslogSink(char const* destination, bool use_tcp)
 
 SyslogSink::~SyslogSink()
 {
-    if (is_connected()) { disconnect(); }
+    if (is_connected()) {
+        disconnect();
+    }
     fclose(mbufferStream);
     free(mbuffer);
-    if (munix_socket) {
-        unlink(munix_socket);
-        delete[] munix_socket;
-    }
 }
 
 bool SyslogSink::connect()
 {
-    if (is_connected()) { disconnect(); }
+    if (is_connected()) {
+        disconnect();
+    }
 
     int protocol = (muse_tcp ? SOCK_STREAM : SOCK_DGRAM);
     int status;
@@ -85,7 +75,7 @@ bool SyslogSink::connect()
             auto address_size = sizeof(sockaddr_un);
             status = bind(msock_fd, caddress, address_size);
             if (status < 0) {
-                syslog_error("Faild to bind to unix socket\n");
+                slog_error("Faild to bind to unix socket\n");
                 disconnect();
                 return false;
             }
@@ -99,7 +89,7 @@ bool SyslogSink::connect()
         auto address_size = sizeof(sockaddr_un);
         status = ::connect(msock_fd, caddress, address_size);
         if (status < 0) {
-            syslog_error("Failed to connecto to %s\n", mdestination);
+            slog_error("Failed to connect to %s\n", mdestination);
             disconnect();
             return false;
         }
@@ -117,11 +107,11 @@ bool SyslogSink::connect()
                 break;
             }
         }
-        hints.ai_family = AF_UNSPEC;   // don't care IPv4 or IPv6
-        hints.ai_socktype = protocol;  // socket type
-        hints.ai_flags = AI_PASSIVE;   // fill in my IP for me
+        hints.ai_family = AF_UNSPEC;  // don't care IPv4 or IPv6
+        hints.ai_socktype = protocol; // socket type
+        hints.ai_flags = AI_PASSIVE;  // fill in my IP for me // should be 0?
         if ((status = getaddrinfo(mdestination, port, &hints, &info)) != 0) {
-            syslog_error("getaddrinfo error: %s\n", gai_strerror(status));
+            slog_error("getaddrinfo error: %s\n", gai_strerror(status));
             disconnect();
             return false;
         }
@@ -129,7 +119,7 @@ bool SyslogSink::connect()
             memcpy(&address, info->ai_addr, info->ai_addrlen);
             freeaddrinfo(info);
         } else {
-            syslog_error("Could not resolve hostname %s\n", mdestination);
+            slog_error("Could not resolve hostname %s\n", mdestination);
             freeaddrinfo(info);
             disconnect();
             return false;
@@ -138,7 +128,7 @@ bool SyslogSink::connect()
         auto address_size = sizeof(sockaddr_in);
         status = ::connect(msock_fd, caddress, address_size);
         if (status == -1) {
-            syslog_error("Failed to connect to %s\n", mdestination);
+            slog_error("Failed to connect to %s\n", mdestination);
             disconnect();
             return false;
         }
@@ -148,38 +138,55 @@ bool SyslogSink::connect()
 
 char* SyslogSink::make_unix_socket()
 {
-    constexpr int socket_size = 128;
-    constexpr int tmp_size = 16;
-    constexpr int app_name_size = socket_size - (5 + tmp_size + 8);
-    char const* alphabet = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_-";
-    assert(strlen(alphabet) == 64);
+    int constexpr socket_size = 108;
+    int constexpr tmp_size = 6;
+    char tmp_text[tmp_size + 1];
+    int constexpr stem_size = 5;
+    char const* stem = ".sock";
+
+    char const* directory = getenv("XDG_RUNTIME_DIR");
+    if (nullptr == directory) {
+        directory = "/tmp";
+    }
+    auto dir_size = strnlen(directory, socket_size);
+
+    std::default_random_engine generator(std::random_device{}());
+    std::uniform_int_distribution<char> charDist('0', 'z');
+    for (int i = 0; i < tmp_size; i++) {
+        tmp_text[i] = charDist(generator);
+    }
+    tmp_text[tmp_size] = '\0';
 
     munix_socket = new char[socket_size];
-    auto offset = sprintf(munix_socket, "/tmp/%.*s", app_name_size, program_invocation_short_name);
-    FILE* rand = fopen("/dev/urandom", "r");
-    char* cursor = munix_socket + offset;
-    for (int i = 0; i < tmp_size; i++) {
-        char c = fgetc(rand) >> 2;
-        assert(c >= 0 && c <= 63);
-        c = alphabet[c];
-        *cursor++ = c;
+
+    auto app_size = strnlen(mapplication_name, sizeof(mapplication_name));
+    if (dir_size + app_size + stem_size + tmp_size + 1 >= socket_size) {
+        slog_error("Unix socket path too long for syslog\n");
+        snprintf(munix_socket, socket_size - 1, "/tmp/slog%s%s", tmp_text, stem);
+        return munix_socket;
     }
-    fclose(rand);
-    offset += tmp_size;
-    sprintf(cursor, ".socket");
+
+    snprintf(munix_socket, socket_size - 1, "%s/%s%s%s", directory, mapplication_name, tmp_text, stem);
     return munix_socket;
 }
 
-bool SyslogSink::is_connected() const
-{
-    return msock_fd != -1;
-}
+bool SyslogSink::is_connected() const { return msock_fd != -1; }
 
 void SyslogSink::disconnect()
 {
-    if (is_connected()) { shutdown(msock_fd, 0); }
+    if (is_connected()) {
+        shutdown(msock_fd, SHUT_WR);
+        close(msock_fd);
+        if (munix_socket) {
+            std::remove(munix_socket);
+            delete[] munix_socket;
+            munix_socket = nullptr;
+        }
+    }
     msock_fd = -1;
 }
+
+void SyslogSink::finalize() { disconnect(); }
 
 int SyslogSink::syslog_priority(int slog_severity) const
 {
@@ -196,29 +203,26 @@ int SyslogSink::syslog_priority(int slog_severity) const
 void SyslogSink::record(LogRecord const& node)
 {
     // TODO loop to connect?
-    if (!is_connected()) { connect(); }
+    if (!is_connected()) {
+        connect();
+    }
 
     rewind(mbufferStream);
     int bytesWritten = 0;
 
     // write the header
-    int headerOffset = 0;
-    int priority = syslog_priority(node.meta.severity);
-    if (munix_socket) {
-        headerOffset = fprintf(mbufferStream, "<%d> %s: ", priority, mapplication_name);
-    } else if (muse_rfc3164) {
-        format_time(mtimestamp, node.meta.time, 3, FULL_T);
-        headerOffset = fprintf(mbufferStream, "<%d> %s %s %s: ", priority, mtimestamp, mhostname, mapplication_name);
-    } else {
-        format_time(mtimestamp, node.meta.time, 3, FULL_T);
-        headerOffset = fprintf(mbufferStream, "<%d>1 %s %s %s - %s - ", priority, mtimestamp, mhostname,
-                               mapplication_name, (node.meta.tag[0] ? node.meta.tag : "-"));
-    }
+    int headerOffset = format_header(node);
     bytesWritten += headerOffset;
 
     // Format the message into the buffer
     bytesWritten += mformat(mbufferStream, node);
     fflush(mbufferStream);
+
+    if (mecho) {
+        fwrite(mbuffer + headerOffset, sizeof(char), bytesWritten - headerOffset, stdout);
+        fputc('\n', stdout);
+        fflush(stdout);
+    }
 
     // Truncate the message if we're using UDP/IP
     if (bytesWritten > kMaxDatagramSize && muse_tcp == false && munix_socket == nullptr) {
@@ -236,15 +240,27 @@ void SyslogSink::record(LogRecord const& node)
         }
         status = send(msock_fd, mbuffer, bytesWritten, 0);
         if (status == -1) {
-            syslog_error("Failed to send with code %d\n", errno);
+            slog_error("Failed to send with code %d\n", errno);
             disconnect();
         }
     }
-    if (mecho) {
-        fwrite(mbuffer + headerOffset, sizeof(char), bytesWritten - headerOffset, stdout);
-        fputc('\n', stdout);
-        fflush(stdout);
+}
+
+int SyslogSink::format_header(LogRecord const& node)
+{
+    int headerOffset = 0;
+    int priority = syslog_priority(node.meta.severity);
+    if (munix_socket) {
+        headerOffset = fprintf(mbufferStream, "<%d> %s: ", priority, mapplication_name);
+    } else if (muse_rfc3164) {
+        format_time(mtimestamp, node.meta.time, 3, FULL_T);
+        headerOffset = fprintf(mbufferStream, "<%d> %s %s %s: ", priority, mtimestamp, mhostname, mapplication_name);
+    } else {
+        format_time(mtimestamp, node.meta.time, 3, FULL_T);
+        headerOffset = fprintf(mbufferStream, "<%d>1 %s %s %s - %s - ", priority, mtimestamp, mhostname,
+                               mapplication_name, (node.meta.tag[0] ? node.meta.tag : "-"));
     }
+    return headerOffset;
 }
 
 void SyslogSink::set_application_name(char const* application_name)
@@ -263,9 +279,6 @@ void SyslogSink::set_facility(int facility)
     }
 }
 
-void SyslogSink::set_rfc3164_protocol(bool doit)
-{
-    muse_rfc3164 = doit;
-}
+void SyslogSink::set_rfc3164_protocol(bool doit) { muse_rfc3164 = doit; }
 
-}  // namespace slog
+} // namespace slog

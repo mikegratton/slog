@@ -6,7 +6,8 @@
 #include <ctime>
 #include <limits>
 
-#include "slog/LogSink.hpp"
+#include "LogSink.hpp"
+#include "PlatformUtilities.hpp"
 
 namespace slog {
 
@@ -15,21 +16,35 @@ FileSink::FileSink()
 , mformat(default_format)
 , mheader(no_op_furniture)
 , mfooter(no_op_furniture)
+, msessionStartTime(std::chrono::system_clock::now().time_since_epoch().count())
 , msequence(0)
 , mbytesWritten(0)
-, mmaxBytes(std::numeric_limits<long>::max() - 2048)
-, mecho(true)    
-{    
-    format_time(msessionStartTime, std::chrono::system_clock::now().time_since_epoch().count(), 0, COMPACT);
+, mmaxBytes(std::numeric_limits<long>::max())
+, mecho(true) 
+, mfullLogName{""}   
+{        
+    format_time(msessionStartTimeStr, msessionStartTime, 0, COMPACT);
     set_max_file_size(std::numeric_limits<long>::max() - 2048);    
-    set_file(".", program_invocation_short_name);    
+    set_file(".", ::slog::program_short_name());    
 }
 
 FileSink::~FileSink()
 {
+    close_file();
+}
+
+void FileSink::finalize()
+{
+    close_file();
+}
+
+void FileSink::close_file()
+{
     if (mfile) {
         mfooter(mfile, msequence, std::chrono::system_clock::now().time_since_epoch().count());
         fclose(mfile);
+        mfile = nullptr;
+        mbytesWritten = 0;
     }
 }
 
@@ -42,39 +57,49 @@ void FileSink::set_max_file_size(long isize)
 
 void FileSink::set_file(char const* location, char const* name, char const* end)
 {
-    strncpy(mfileLocation, location, sizeof(mfileLocation));
-    strncpy(mfileName, name, sizeof(mfileName));
-    strncpy(mfileEnd, end, sizeof(mfileEnd));
+    strncpy(mlogDirectory, location, sizeof(mlogDirectory));
+    strncpy(mlogBaseName, name, sizeof(mlogBaseName));
+    strncpy(mlogExtension, end, sizeof(mlogExtension));
+    make_file_name();
+
+    // Try to open the file
+    if (!make_directory(mlogDirectory, 0777)) {
+        fprintf(stderr, "Slog FileSink cannot continue\n");           
+    } 
+
     if (mfile) { fclose(mfile); }
     mfile = nullptr;
 }
 
 void FileSink::open_or_rotate()
-{
+{    
     if (mbytesWritten > mmaxBytes) {
-        if (mfile) {
-            mfooter(mfile, msequence, std::chrono::system_clock::now().time_since_epoch().count());
-            fclose(mfile);
+        close_file();
+    }
+    if (!mfile) {
+        make_file_name();
+        mfile = fopen(mfullLogName, "w");
+        if (mfile == nullptr) {
+            fprintf(stderr, "Slog: could not open log file %s\n", mfullLogName);            
+            return;
         }
-        mfile = nullptr;
-        mbytesWritten = 0;
+        mheader(mfile, msequence,
+                std::chrono::system_clock::now().time_since_epoch().count());
+        msequence++;
     }
+}
 
-    char fname[sizeof(mfileLocation) + sizeof(mfileName) + sizeof(mfileEnd) + sizeof(msessionStartTime) + 8];
-    snprintf(fname, sizeof(fname), "%s/%s_%s_%03d.%s", mfileLocation, mfileName, msessionStartTime, msequence,
-             mfileEnd);
-    mfile = fopen(fname, "w");
-
-    if (mfile == nullptr) {
-        fprintf(stderr, "Could not open log file %s\n", fname);
-        return;
+void FileSink::make_file_name()
+{
+    if (!make_directory(mlogDirectory)) {
+        fprintf(stderr, "Slog: Could not create log directory %s\n", mlogDirectory);
     }
-    mheader(mfile, msequence, std::chrono::system_clock::now().time_since_epoch().count());
-    msequence++;
+    snprintf(mfullLogName, sizeof(mfullLogName), "%s/%s_%s_%03d.%s", mlogDirectory, mlogBaseName, msessionStartTimeStr, msequence,
+             mlogExtension);
 }
 
 void FileSink::record(LogRecord const& rec)
-{
+{    
     open_or_rotate();
     if (nullptr == mfile) { return; }
     mbytesWritten += mformat(mfile, rec);

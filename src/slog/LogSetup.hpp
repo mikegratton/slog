@@ -1,15 +1,16 @@
 #pragma once
 #include <memory>
 #include <vector>
+#if SLOG_STREAM
+#include <ostream>
+#endif
 
+#include "slog.hpp"
 #include "LogRecord.hpp"
 #include "LogRecordPool.hpp"
 #include "LogSink.hpp"
 #include "ThresholdMap.hpp"
-#include "slog.hpp"
-#ifndef SLOG_NO_STREAM
-#include <ostream>
-#endif
+
 
 namespace slog {
 
@@ -49,20 +50,15 @@ void start_logger(LogConfig const& config);
  * @brief Start loggers on channels [0, configs.size()) with the
  * given configs.
  */
-void start_logger(std::vector<LogConfig> const& configs);
+void start_logger(std::vector<LogConfig> configs);
 
-/**
- * @brief Stop all channels, draining the queue into the sinks.
- *
- * Note: this prevents further messages from being logged.
- */
-void stop_logger();
-
+#if SLOG_STREAM
 /**
  * @brief Set the log stream locale
  */
 void set_locale(std::locale locale);
 void set_locale_to_global();
+#endif
 
 /**
  * Configuration class for a logger channel. Set your logging threshold,
@@ -73,6 +69,8 @@ void set_locale_to_global();
 class LogConfig {
    public:
     LogConfig();
+
+    LogConfig(int default_threshold, std::shared_ptr<LogSink> sink_);
 
     /// Set the default threshold at which to accept records
     void set_default_threshold(int thr) { threshold.set_default(thr); }
@@ -101,20 +99,20 @@ class LogConfig {
     void set_pool(std::shared_ptr<LogRecordPool> pool_) { pool = pool_; }
 
     /// Get the current sink
-    std::shared_ptr<LogSink> get_sink() const { return sink; }
+    std::shared_ptr<LogSink> const& get_sink() { return sink; }
 
     /// Inspect the tag to threshold map
     ThresholdMap const& get_threshold_map() const { return threshold; }
 
     /// Get a shared_ptr to the log record pool
-    std::shared_ptr<LogRecordPool> get_pool() const { return pool; }
+    std::shared_ptr<LogRecordPool> const& get_pool() { return pool; }
 
    protected:
     std::shared_ptr<LogRecordPool> pool;
     std::shared_ptr<LogSink> sink;
     ThresholdMap threshold;
 
-#ifndef SLOG_NO_STREAM
+#if SLOG_STREAM
    public:
     /// Set the locale for the stream
     void set_locale(std::locale locale_)
@@ -131,8 +129,5 @@ class LogConfig {
     std::locale locale;
 #endif
 };
-
-/// (For debugging the logger) Check that all pool records are either free or in a queue
-long get_pool_missing_count();
 
 }  // namespace slog

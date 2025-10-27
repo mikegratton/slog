@@ -19,6 +19,7 @@ void JournaldSink::record(LogRecord const& rec) {
         "THREAD=%ld",   rec.meta.thread_id,
         "TIMESTAMP=%s", isoTime,
         "PRIORITY=%d",  rec.meta.severity/100,
+        "TAG=%s",       rec.meta.tag,  
         "MESSAGE=%s",   rec.message,
         NULL);
     for(LogRecord const* more = rec.more; more != nullptr; more = more->more) {
@@ -29,6 +30,7 @@ void JournaldSink::record(LogRecord const& rec) {
             "THREAD=%ld",   rec.meta.thread_id,
             "TIMESTAMP=%s", isoTime,
             "PRIORITY=%d",  rec.meta.severity/100,
+            "TAG=%s",       rec.meta.tag,
             "MESSAGE=%s",   more->message,
             NULL);
     }

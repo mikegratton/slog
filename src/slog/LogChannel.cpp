@@ -44,7 +44,7 @@ void LogChannel::start()
 void LogChannel::stop()
 {
     keepalive = false;
-    if (workThread.joinable()) { workThread.join(); }
+    if (workThread.joinable()) { workThread.join(); }    
 }
 
 void LogChannel::logging_loop()
@@ -54,18 +54,22 @@ void LogChannel::logging_loop()
     while (keepalive) {
         RecordNode* node = queue.pop(WAIT);
         if (node) {
+            printf("Log record of size %ld\n", node->rec.message_byte_count);
             sink->record(node->rec);
             pool->free(node);
         }
     }
+    printf("Draining the queue\n");
     // Shutdown. Drain the queue.
     RecordNode* head = queue.pop_all();
     while (head) {
+        printf("Log record of size %ld\n", head->rec.message_byte_count);
         sink->record(head->rec);
         RecordNode* cursor = head->next;
         pool->free(head);
         head = cursor;
     }
+    sink->finalize();
 }
 
 RecordNode* LogChannel::LogQueue::pop_all()

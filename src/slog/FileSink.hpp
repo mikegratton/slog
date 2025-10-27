@@ -1,4 +1,5 @@
 #pragma once
+#include <cstdint>
 #include <cstdio>
 
 #include "LogSink.hpp"
@@ -17,6 +18,11 @@ class FileSink : public LogSink {
    public:
     FileSink();
     ~FileSink();
+
+    /**
+     * @brief Close the open file.
+     */
+    void finalize() override;
 
     /**
      * @brief The header is inserted into each log file before any records.
@@ -52,21 +58,36 @@ class FileSink : public LogSink {
      */
     void set_file(char const* location, char const* name, char const* end = "log");
 
+    /// Get the name of the last log file opened
+    char const* get_file_name() const { return mfullLogName; }
+
+    /// Get the timestamp string applied to each file. This is the nanosecond
+    /// count from the unix epoch.
+    uint64_t get_start_timestamp() const { return msessionStartTime; }
+
    protected:
+
     void open_or_rotate();
+
+    void close_file();
+
+    void make_file_name();
 
     FILE* mfile;
     Formatter mformat;
     LogFileFurniture mheader;
     LogFileFurniture mfooter;
-    char mfileLocation[256];
-    char mfileName[128];
-    char mfileEnd[128];
-    char msessionStartTime[20];
+    char mlogDirectory[1024];
+    char mlogBaseName[256];
+    char mlogExtension[128];
+    char msessionStartTimeStr[20];
+    uint64_t msessionStartTime;
     int msequence;
     long mbytesWritten;
     long mmaxBytes;
     bool mecho;
+
+    char mfullLogName[sizeof(mlogDirectory) + sizeof(mlogBaseName) + sizeof(mlogExtension) + sizeof(msessionStartTimeStr) + 8];
 };
 
 }  // namespace slog

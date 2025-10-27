@@ -2,7 +2,7 @@
 #include <iostream>
 
 #include "StatsSink.hpp"
-#include "doctest.h"
+#include "../doctest.h"
 #include "slog/LogSetup.hpp"
 #include "slog/slog.hpp"
 

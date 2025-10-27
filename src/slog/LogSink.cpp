@@ -6,7 +6,7 @@
 #include <ctime>
 
 #include "ConsoleSink.hpp"
-#include "slog/slog.hpp"
+#include "PlatformUtilities.hpp"
 
 namespace slog {
 
@@ -16,13 +16,14 @@ uint32_t default_format(FILE* sink, LogRecord const& rec)
     format_time(time_str, rec.meta.time, 3, FULL_T);
     int writeCount = 0;
     fputc('[', sink);
+    writeCount++;
     writeCount += fwrite(severity_string(rec.meta.severity), sizeof(char), 4, sink);
     fputc(' ', sink);
-    writeCount += 2;
+    writeCount++;    
     if (rec.meta.tag[0]) {
         writeCount += fwrite(rec.meta.tag, sizeof(char), strnlen(rec.meta.tag, sizeof(rec.meta.tag)), sink);
         fputc(' ', sink);
-        writeCount += 1;
+        writeCount++;
     }
     writeCount += fwrite(time_str, sizeof(char), strnlen(time_str, sizeof(time_str)), sink);
     writeCount += fwrite("] ", sizeof(char), 2, sink);
@@ -90,9 +91,9 @@ static char* put_int(char* cursor, long value, long scale, int digits)
     return cursor;
 }
 
-void format_time(char* time_str, unsigned long nanoseconds, int seconds_precision, TimeFormatMode format)
+void format_time(char* time_str, uint64_t nanoseconds, int seconds_precision, TimeFormatMode format)
 {
-    constexpr unsigned long NANOS_PER_SEC = 1000000000ULL;
+    constexpr uint64_t NANOS_PER_SEC = 1000000000ULL;
     if (seconds_precision < 0) {
         seconds_precision = 0;
     } else if (seconds_precision > 9) {
@@ -100,10 +101,10 @@ void format_time(char* time_str, unsigned long nanoseconds, int seconds_precisio
     }
 
     time_t seconds_since_epoch = nanoseconds / NANOS_PER_SEC;
-    unsigned long nano_remainder = nanoseconds - seconds_since_epoch * NANOS_PER_SEC;
+    uint64_t nano_remainder = nanoseconds - seconds_since_epoch * NANOS_PER_SEC;
 
     tm time_count;
-    gmtime_r(&seconds_since_epoch, &time_count);
+    ::slog::zulu_time_r(&time_count, &seconds_since_epoch);    
     char* cursor = time_str;
 
     cursor = put_int(cursor, 1900 + time_count.tm_year, 1000, 4);
@@ -139,11 +140,11 @@ uint32_t default_binary_format(FILE* sink, LogRecord const& rec)
 {
     // write leader here
     uint32_t totalBytes = 0;
-    uint32_t recordiSize = total_record_size(rec);
-    int32_t reducedSev = static_cast<int32_t>(rec.meta.severity);
-    totalBytes += fwrite(&recordiSize, sizeof(uint32_t), 1, sink);
-    totalBytes += fwrite(&reducedSev, sizeof(int32_t), 1, sink);
-    totalBytes += fwrite(&rec.meta.time, sizeof(unsigned long), 1, sink);
+    uint32_t recordSize = static_cast<uint32_t>(total_record_size(rec));
+    int32_t reducedSeverity = static_cast<int32_t>(rec.meta.severity);
+    totalBytes += fwrite(&recordSize, sizeof(uint32_t), 1, sink);
+    totalBytes += fwrite(&reducedSeverity, sizeof(int32_t), 1, sink);
+    totalBytes += fwrite(&rec.meta.time, sizeof(uint64_t), 1, sink);
     totalBytes += fwrite(rec.meta.tag, sizeof(char), TAG_SIZE, sink);
 
     LogRecord const* r = &rec;
@@ -179,11 +180,11 @@ uint32_t total_record_size(LogRecord const& rec)
     return totalSize;
 }
 
-uint32_t default_binary_header_furniture(FILE* sink, int sequence, unsigned long /*time*/)
+uint32_t default_binary_header_furniture(FILE* sink, int sequence, uint64_t /*time*/)
 {
     char const* magic = "SLOG";
-    const uint16_t kBOM = 0xfeff;
-    const uint16_t shortSequence = static_cast<uint16_t>(sequence);
+    uint16_t const kBOM = 0xfeff;
+    uint16_t const shortSequence = static_cast<uint16_t>(sequence);
     uint32_t count = 0;
     count += fwrite(magic, sizeof(char), 4, sink);
     count += fwrite(&kBOM, sizeof(uint16_t), 1, sink);

@@ -3,7 +3,6 @@
 #include <cstdio>
 #include <functional>
 
-#include "LogConfig.hpp"
 #include "LogRecord.hpp"
 
 namespace slog {
@@ -19,6 +18,9 @@ class LogSink {
 
     /// Save a record to a device.
     virtual void record(LogRecord const& node) = 0;
+
+    /// Notification that logging is done (i.e. close up any files)
+    virtual void finalize() { }
 };
 
 /// Simple sink that ignores messages
@@ -37,7 +39,7 @@ using Formatter = std::function<uint32_t(FILE* sink, LogRecord const& node)>;
 /**
  * @brief Write data to a log file before/after records are added
  */
-using LogFileFurniture = std::function<int(FILE* sink, int sequence, unsigned long time)>;
+using LogFileFurniture = std::function<int(FILE* sink, int sequence, uint64_t time)>;
 
 /**
  * @brief Writes the severity level as a four character string to severity_str
@@ -65,10 +67,8 @@ enum TimeFormatMode {
  *      seconds_decimal_precision
  * @note The string should be at least 21 characters long for zero fractional seconds.
  * For the default form, 25 characters are required.
- *
- * If full_punctuation is true, then the format is YYYY-MM-DDThh:mm:ss.fZ
  */
-void format_time(char* time_str, unsigned long time, int seconds_decimal_precision = 3,
+void format_time(char* time_str, uint64_t time, int seconds_decimal_precision = 3,
                  TimeFormatMode format = FULL_SPACE);
 
 /**
@@ -130,12 +130,12 @@ uint32_t total_record_size(LogRecord const& node);
  * ascii characters "SLOG" start the file, followed by the two byte byte-order-mark
  * 0xFEFF, followed by the two byte sequence number. The time is not included.
  */
-uint32_t default_binary_header_furniture(FILE* sink, int sequence, unsigned long time);
+uint32_t default_binary_header_furniture(FILE* sink, int sequence, uint64_t time);
 
 /**
  * @brief A furniture function that writes nothing
  */
-inline uint32_t no_op_furniture(FILE* sink, int sequence, unsigned long time)
+inline uint32_t no_op_furniture(FILE* sink, int sequence, uint64_t time)
 {
     return 0;
 }

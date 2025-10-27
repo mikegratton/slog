@@ -1,12 +1,4 @@
 #include "BinarySink.hpp"
-
-#include <cerrno>
-#include <chrono>
-#include <cstdint>
-#include <cstring>
-#include <limits>
-
-#include "slog/FileSink.hpp"
 #include "slog/LogRecord.hpp"
 #include "slog/LogSink.hpp"
 

@@ -1,8 +1,7 @@
 #include <cstring>
-
-#include "LogConfig.hpp"
+#include <algorithm>
+#include "slogDetail.hpp"
 #include "LogRecordPool.hpp"  // For RecordNode
-#include "slog.hpp"
 
 namespace slog {
 

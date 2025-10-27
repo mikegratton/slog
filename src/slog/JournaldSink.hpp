@@ -20,6 +20,7 @@ namespace slog {
  * - THREAD    The thread id for the thread where the record originated
  * - TIMESTAMP ISO8601 formatted time of record
  * - PRIORITY  Syslog-compatible log severity
+ * - TAG       The tag supplied with the record
  *
  */
 class JournaldSink : public LogSink {

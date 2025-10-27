@@ -1,7 +1,7 @@
 #include <chrono>
 #include <iostream>
 
-#include "doctest.h"
+#include "../doctest.h"
 #include "slog/LogSetup.hpp"
 #include "slog/slog.hpp"
 

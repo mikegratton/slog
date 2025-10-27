@@ -1,10 +1,18 @@
 #include "LoggerSingleton.hpp"
-#include "slog/Signals.hpp"
+#include "PlatformUtilities.hpp"
+#include "ConsoleSink.hpp"
+#include "slog/SlogError.hpp"
 
 namespace slog
 {
 namespace detail
 {
+
+Logger& Logger::instance()
+{
+    static Logger s_logger;
+    return s_logger;
+}
 
 Logger::Logger()    
 {
@@ -13,6 +21,16 @@ Logger::Logger()
 
 Logger::~Logger() { stop_all_channels(); }
 
+void Logger::change_run_state(int signal_id)
+{
+    instance().signal_state = signal_id;
+}
+
+int Logger::get_run_state()
+{
+    return instance().signal_state;
+}
+
 std::shared_ptr<LogRecordPool> Logger::make_default_pool()
 {
     return std::make_shared<LogRecordPool>(
@@ -20,7 +38,7 @@ std::shared_ptr<LogRecordPool> Logger::make_default_pool()
         DEFAULT_RECORD_SIZE);
 }
 
-void Logger::setup_channels(std::vector<LogConfig> const& config)
+void Logger::setup_channels(std::vector<LogConfig>& config)
 {
     instance().stop_all_channels();
     auto& backend = instance().backend;
@@ -40,18 +58,6 @@ void Logger::setup_channels(std::vector<LogConfig> const& config)
 }
 
 /**
- * Signal handler to ensure that log messages are all
- * captured when we get stopped.
- */
-void Logger::slog_signal_handler(int signal_id)
-{
-    printf("draining log queue\n");
-    fflush(stdout);
-    stop_logger();
-    forward_signal(signal_id);
-}
-
-/**
  * Internal log start function. Also installs stop_all_channels
  * signal handler.
  */
@@ -63,14 +69,14 @@ void Logger::start_all_channels()
 
     static std::atomic<bool> s_installedHandlers{false};
     if (!s_installedHandlers) {
-        install_handlers(slog_handle_signal);
+        install_signal_handlers(slog_handle_signal);
         s_installedHandlers = true;
     }
     
     static std::atomic<bool> s_installedAtExit{false};
     if (!s_installedAtExit) {
         if( 0 != std::atexit(slog_handle_exit) ) {
-            fprintf(stderr, "Failed to install slog exit handler\n");
+            slog_error("Failed to install exit handler\n");            
         }
         s_installedAtExit = true;
     }
@@ -90,6 +96,7 @@ void Logger::setup_stopped_channel() { instance().do_setup_stopped_channel(); }
 
 void Logger::do_setup_stopped_channel()
 {
+    restore_old_signal_handlers();
     backend.clear();
     ThresholdMap threshold;
 #if SLOG_LOG_TO_CONSOLE_WHEN_STOPPED
@@ -103,14 +110,26 @@ void Logger::do_setup_stopped_channel()
 #endif
     backend.front().start();
 }
+
+long get_pool_missing_count()
+{
+    long count = 0;
+    for (unsigned long i = 0; i < Logger::channel_count(); i++) {
+        auto& chan = Logger::get_channel(i);
+        count += chan.allocator_count();
+    }
+    return count;
+}
+
+
+
 } // namespace detail
 } // namespace slog
 
 extern "C" void slog_handle_signal(int signal)
 {
     slog::detail::Logger::stop_all_channels();
-    slog::detail::forward_signal(signal);
-    // slog::detail::reinstall_old_handlers();    
+    slog::forward_signal(signal);
 }
 
 extern "C" void slog_handle_exit()

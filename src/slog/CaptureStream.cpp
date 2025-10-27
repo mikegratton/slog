@@ -3,8 +3,8 @@
 #include <ostream>
 #include <streambuf>
 
+#include "slogDetail.hpp"
 #include "LogRecordPool.hpp"  // For RecordNode
-#include "slog.hpp"
 
 namespace slog {
 
@@ -90,12 +90,17 @@ std::locale s_locale;
 
 /// Tracking of the current locale
 int s_locale_version = 0;
-}  // namespace
+} // namespace
 
-/// A locale manaing stream
-class StreamHolder {
-   public:
-    StreamHolder() : m_locale_version(s_locale_version) {}
+/// A locale managing stream
+class StreamHolder
+{
+  public:
+    StreamHolder()
+        : m_locale_version(s_locale_version)
+    {
+        m_stream.imbue(s_locale);
+    }
 
     IntrusiveStream& stream()
     {
@@ -108,7 +113,7 @@ class StreamHolder {
 
     IntrusiveStream& stream_direct() { return m_stream; }
 
-   protected:
+  protected:
     IntrusiveStream m_stream;
     int m_locale_version;
 };
