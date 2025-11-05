@@ -12,12 +12,27 @@ set(source
     LogRecord.cpp
     LogRecordPool.cpp
     LogSetup.cpp
-    LogSink.cpp    
+    LogSink.cpp
+    Signal.cpp
     slog.cpp
     SlogError.cpp
     SyslogSink.cpp
     ThresholdMap.cpp
 )
+
+set(public_headers
+    slog.hpp
+    slogDetail.hpp
+    BinarySink.hpp
+    ConsoleSink.hpp
+    FileSink.hpp
+    LogSetup.hpp
+    LogRecord.hpp
+    LogRecordPool.hpp
+    ThresholdMap.hpp
+    LogSink.hpp
+)
+
 
 
 #########################################################################################
@@ -34,7 +49,7 @@ mark_as_advanced(SLOG_POSIX)
 
 if (SLOG_POSIX)
     message(STATUS "POSIX PlatformUtilties selected")
-    list(APPEND source PlatformUtilitiesPosix.cpp)
+    list(APPEND source PlatformUtilitiesPosix.cpp)    
 else()
     message(FATAL_ERROR "No viable PlatformUtilties are available for this platform")
 endif()
@@ -42,21 +57,26 @@ endif()
 
 #########################################################################################
 # Extra sinks
+
+# Journald
 find_package(Journald)
 if (JOURNALD_FOUND AND SLOG_JOURNALD)
     list(APPEND source JournaldSink.cpp)
+    list(APPEND public_headers JournaldSink.hpp)
     message(STATUS "Systemd journal log sink enabled")
 else()    
     set(SLOG_JOURNALD OFF CACHE BOOL "Provide journald sink (requires systemd-dev to be installed)" FORCE)
     message(STATUS "Systemd journal log sink disabled.")    
 endif()
 
+# Syslog
 check_symbol_exists(gethostname unistd.h SLOG_HAVE_GETHOSTNAME)
 check_symbol_exists(socket sys/socket.h SLOG_HAVE_SOCKET)
 check_symbol_exists(getaddrinfo netdb.h SLOG_HAVE_GETADDRINFO)
 if (SLOG_HAVE_GETHOSTNAME AND SLOG_HAVE_SOCKET AND SLOG_HAVE_GETADDRINFO)
     list(APPEND source SyslogSink.cpp)
     message(STATUS "Syslog log sink enabled")
+    list(APPEND public_headers SyslogSinkSink.hpp)
     set(SLOG_SYSLOG ON CACHE BOOL "Provide a syslog sink" FORCE)
 else()
     message(STATUS "Syslog log sink disabled")
@@ -87,20 +107,10 @@ include(GNUInstallDirs)
 # Public headers
 install(FILES
     ${CMAKE_CURRENT_BINARY_DIR}/LogConfig.hpp
-    slog.hpp
-    LogRecord.hpp
-    LogRecordPool.hpp
-    LogSetup.hpp
-    LogSink.hpp
-    FileSink.hpp
-    ConsoleSink.hpp
-    SyslogSink.hpp
-    $<$<BOOL:SLOG_SYSLOG>:${CMAKE_CURRENT_SOURCE_DIR}/SyslogSink.hpp>
-    $<$<BOOL:SLOG_JOURNALD>:${CMAKE_CURRENT_SOURCE_DIR}/JournaldSink.hpp>
+    ${public_headers}
     DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/slog
 )
 
-# export(TARGETS slog NAMESPACE slog:: FILE SlogConfig.cmake)
 install(TARGETS slog
     EXPORT SlogConfig
     ARCHIVE DESTINATION lib

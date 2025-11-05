@@ -135,9 +135,9 @@ integers between the severity levels you want.  For instance, to add a COOL leve
 ```cpp
 int COOL = (slog::NOTE + slog::WARN)/2;
 ```
-Note that higher numbers are treated as less severe.  In addition, negative severity is considered
-"FATL" by Slog, triggering the draining of all log queues and a call to `abort()` to stop the 
-program. 
+Note that higher numbers are treated as less severe.  In addition, negative
+severity is considered "FATL" by Slog. FATL messages trigger calling `abort()`
+and the abort signal handler draining of all log queues.
 
 Slog filters messages based on a severity threshold per channel and per tag (see below).  For example,
 if the threshold is set to NOTE, the code
@@ -386,7 +386,7 @@ The `LogRecord` meta contains useful metadata about the record:
     char tag[TAG_SIZE];      //! The tag (null terminated)
     char const* filename;    //! filename containing the function where this message was recorded
     char const* function;    //! name of the function where this message was recorded    
-    unsigned long time;      //! ns since Unix epoch
+    uint64_t time;           //! ns since Unix epoch
     unsigned long thread_id; //! unique ID of the thread this message was recorded on
     int line;                //! program line number
     int severity;            //! Message importance. Lower numbers are more important    
@@ -502,7 +502,5 @@ unit.
 * *1.4.0*
     * Add header/footer options for `FileSink` and `BinarySink` to add fixed
       file contents when a file is opened or closed.
-    * Improved signal handling. Slog will now detect if you have installed a
-      handler and forward signals to your handler after it has flushed its
-      queue.
+    * Improved signal handlers to be async signal safe. 
     * `exit()` now causes Slog to flush its queue.

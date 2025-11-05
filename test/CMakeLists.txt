@@ -16,3 +16,4 @@ add_subdirectory(exitTest)
 add_subdirectory(performanceTest)
 
 add_subdirectory(udpTest)
+add_subdirectory(tcpTest)

@@ -1,13 +1,11 @@
 #include "PlatformUtilities.hpp"
 #include "SlogError.hpp"
-#include <array>
-#include <atomic>
+#include "Signal.hpp"
 #include <cerrno>
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
 #include <linux/limits.h>
-#include <map>
 #include <signal.h>
 #include <sys/stat.h>
 
@@ -47,7 +45,7 @@ bool make_directory(char const* directory, int mode)
             } else {
                 // Okay, try to make this part
                 if (0 != mkdir(working_path, mode)) {
-                    slog_error("Slog: Could not make directory %s\n", working_path);
+                    slog_error("Slog: Could not make directory %s -- %s\n", working_path, strerror(errno));
                     return false;
                 }
             }
@@ -55,7 +53,7 @@ bool make_directory(char const* directory, int mode)
         }
     }
     if (0 != mkdir(working_path, mode)) {
-        slog_error("Could not make directory %s\n", working_path);
+        slog_error("Could not make directory %s -- %s\n", working_path, strerror(errno));
         return false;
     }
     return true;
@@ -66,38 +64,7 @@ bool make_directory(char const* directory, int mode)
 namespace
 {
 
-/// All signals handled by Slog
-std::array<int, 4> static const HANDLED_SIGNALS = {SIGINT, SIGTERM, SIGHUP, SIGABRT};
-
 using SigAction = struct sigaction;
-
-/**
- * Singleton for storing old signal handlers
- */
-class SignalStore
-{
-  public:
-    static SignalStore& instance()
-    {
-        static SignalStore s_instance;
-        return s_instance;
-    }
-
-    static SigAction* get_old_handler(int signal_id)
-    {
-        auto it = instance().old_handler.find(signal_id);
-        if (it == instance().old_handler.end()) {
-            return nullptr;
-        }
-        return &it->second;
-    }
-
-    static void store_handler(int signal_id, SigAction const& handler) { instance().old_handler[signal_id] = handler; }
-
-  private:
-    SignalStore() = default;
-    std::map<int, SigAction> old_handler;
-};
 
 template <class T> sigset_t make_signal_mask(T const& handled_signals)
 {
@@ -111,16 +78,7 @@ template <class T> sigset_t make_signal_mask(T const& handled_signals)
 
 void restore_old_signal_handler(int signal_id)
 {
-    auto* old_handler = SignalStore::get_old_handler(signal_id);
-    if (old_handler) {
-        if (old_handler->sa_handler == SIG_DFL) {
-            printf("Slog: restoring default handler for %d\n", signal_id);
-            signal(signal_id, SIG_DFL);
-        } else {
-            printf("Slog: restoring custom handler for %d\n", signal_id);
-            sigaction(signal_id, old_handler, nullptr);
-        }
-    }
+    signal(signal_id, SIG_DFL);
 }
 
 bool install_signal_handler_if_not_ignored(int signal_id, signal_handler handler)
@@ -132,17 +90,16 @@ bool install_signal_handler_if_not_ignored(int signal_id, signal_handler handler
     SigAction current_handler{};
     int status = sigaction(signal_id, nullptr, &current_handler);
     if (status != 0) {
-        slog_error("Failed to retrieve handler for signal %d\n", signal_id);
+        slog_error("Failed to retrieve handler for signal %d -- %s\n", signal_id, strerror(errno));
         return false;
     }
     if (current_handler.sa_handler == SIG_IGN || current_handler.sa_handler == handler) {
         // Nothing to do. Either the signal is ignored or our handler is already in place
         return true;
     }
-    SignalStore::store_handler(signal_id, current_handler);
     status = sigaction(signal_id, &action, nullptr);
     if (status != 0) {
-        slog_error("Slog: Failed to install handler for signal %d\n", signal_id);
+        slog_error("Slog: Failed to install handler for signal %d -- %s\n", signal_id, strerror(errno));
         restore_old_signal_handler(signal_id);
         return false;
     }
@@ -153,13 +110,8 @@ bool install_signal_handler_if_not_ignored(int signal_id, signal_handler handler
 
 void forward_signal(int signal_id)
 {
-    static std::atomic<bool> s_handleSignal{true};
-    if (s_handleSignal) {
-        s_handleSignal = false;
-        restore_old_signal_handler(signal_id);
-        raise(signal_id);
-        printf("forward_signal ends\n");
-    }
+    restore_old_signal_handler(signal_id);
+    raise(signal_id);
 }
 
 void install_signal_handlers(signal_handler handler)

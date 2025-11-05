@@ -8,7 +8,7 @@ namespace slog
 /// nonzero value.
 void slog_error(char const* format_, ...);
 
-/// Print errors to stderr
+/// Actually print errors to stderr
 void slog_print_error(char const* format_, va_list args);
 
 ///////////////////////////////////////////////////////////////////////

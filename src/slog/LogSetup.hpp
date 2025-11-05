@@ -6,7 +6,6 @@
 #endif
 
 #include "slog.hpp"
-#include "LogRecord.hpp"
 #include "LogRecordPool.hpp"
 #include "LogSink.hpp"
 #include "ThresholdMap.hpp"

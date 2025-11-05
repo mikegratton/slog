@@ -1,12 +1,14 @@
 #include "SyslogSink.hpp"
 
 #include <arpa/inet.h>
+#include <chrono>
 #include <netdb.h>
 #include <netinet/in.h>
 #include <random>
 #include <sys/socket.h>
 #include <sys/types.h>
 #include <sys/un.h>
+#include <thread>
 #include <unistd.h>
 
 #include <cassert>
@@ -57,81 +59,112 @@ bool SyslogSink::connect()
         disconnect();
     }
 
+    bool connected = false;
+    for (int try_count = 0; try_count < kMaxConnectionAttempts && !connected;
+         ++try_count, std::this_thread::sleep_for(std::chrono::milliseconds(kConnectionAttemptWait))) {
+        if (mdestination[0] == '/') {
+            connected = connect_unix();
+        } else {
+            connected = connect_ip();
+        }
+    }
+    if (!connected) { disconnect(); }
+    return connected;
+}
+
+bool SyslogSink::connect_ip()
+{
     int protocol = (muse_tcp ? SOCK_STREAM : SOCK_DGRAM);
     int status;
-    // Check which kind of socket we're using
-    if (mdestination[0] == '/') {
-        muse_tcp = false;
-        // Get the socket
-        msock_fd = socket(AF_UNIX, protocol, 0);
 
-        // Bind to a temp address
-        if (protocol == SOCK_DGRAM) {
-            sockaddr_un address{0};
-            make_unix_socket();
-            strncpy(address.sun_path, munix_socket, sizeof(address.sun_path) - 1);
-            address.sun_family = AF_UNIX;
-            auto* caddress = reinterpret_cast<sockaddr*>(&address);
-            auto address_size = sizeof(sockaddr_un);
-            status = bind(msock_fd, caddress, address_size);
-            if (status < 0) {
-                slog_error("Faild to bind to unix socket\n");
-                disconnect();
-                return false;
-            }
-        }
+    // Get the socket
+    msock_fd = socket(AF_INET, protocol, 0);
+    if (msock_fd <= 0) {
+        slog_error("Could not create IP socket -- %s\n", strerror(errno));
+        return false;
+    }
 
-        // Connect to server's socket
-        sockaddr_un address{0};
-        strncpy(address.sun_path, mdestination, sizeof(address.sun_path) - 1);
-        address.sun_family = AF_UNIX;
-        auto* caddress = reinterpret_cast<sockaddr*>(&address);
-        auto address_size = sizeof(sockaddr_un);
-        status = ::connect(msock_fd, caddress, address_size);
-        if (status < 0) {
-            slog_error("Failed to connect to %s\n", mdestination);
-            disconnect();
-            return false;
+    // Fill out the address
+    sockaddr_in address{0};
+    addrinfo hints{0};
+    addrinfo* info;
+    char* port;
+    for (port = mdestination; *port != '\0'; port++) {
+        if (*port == ':') {
+            *port = 0;
+            port = port + 1;
+            break;
         }
+    }
+    hints.ai_family = AF_UNSPEC;  // don't care IPv4 or IPv6
+    hints.ai_socktype = protocol; // socket type
+    hints.ai_flags = AI_PASSIVE;  // fill in my IP for me
+    if ((status = getaddrinfo(mdestination, port, &hints, &info)) != 0) {
+        slog_error("getaddrinfo error: %s\n", gai_strerror(status));
+        close(msock_fd);  
+        return false;
+    }
+    if (info) {
+        memcpy(&address, info->ai_addr, info->ai_addrlen);
+        freeaddrinfo(info);
     } else {
-        // Get the socket
-        msock_fd = socket(AF_INET, protocol, 0);
-        sockaddr_in address{0};
-        addrinfo hints{0};
-        addrinfo* info;
-        char* port;
-        for (port = mdestination; *port != '\0'; port++) {
-            if (*port == ':') {
-                *port = 0;
-                port = port + 1;
-                break;
-            }
-        }
-        hints.ai_family = AF_UNSPEC;  // don't care IPv4 or IPv6
-        hints.ai_socktype = protocol; // socket type
-        hints.ai_flags = AI_PASSIVE;  // fill in my IP for me // should be 0?
-        if ((status = getaddrinfo(mdestination, port, &hints, &info)) != 0) {
-            slog_error("getaddrinfo error: %s\n", gai_strerror(status));
-            disconnect();
-            return false;
-        }
-        if (info) {
-            memcpy(&address, info->ai_addr, info->ai_addrlen);
-            freeaddrinfo(info);
-        } else {
-            slog_error("Could not resolve hostname %s\n", mdestination);
-            freeaddrinfo(info);
-            disconnect();
-            return false;
-        }
-        auto* caddress = reinterpret_cast<sockaddr*>(&address);
-        auto address_size = sizeof(sockaddr_in);
-        status = ::connect(msock_fd, caddress, address_size);
-        if (status == -1) {
-            slog_error("Failed to connect to %s\n", mdestination);
-            disconnect();
-            return false;
-        }
+        slog_error("Could not resolve hostname %s -- %s\n", mdestination, strerror(errno));
+        freeaddrinfo(info);
+        close(msock_fd);       
+        return false;
+    }
+
+    // Connect to the socket
+    auto* caddress = reinterpret_cast<sockaddr*>(&address);
+    auto address_size = sizeof(sockaddr_in);
+    status = ::connect(msock_fd, caddress, address_size);
+    if (status == -1) {        
+        slog_error("Failed to connect to %s -- %s\n", mdestination, strerror(errno));
+        close(msock_fd);  
+        return false;
+    }
+
+    return true;
+}
+
+bool SyslogSink::connect_unix()
+{
+    int status;
+    // Only udp on unix sockets please
+    muse_tcp = false;
+    // Get the socket
+    msock_fd = socket(AF_UNIX, SOCK_DGRAM, 0);
+    if (msock_fd <= 0) {
+        slog_error("Failed to create socket -- %s\n", strerror(errno));        
+        return false;
+    }
+
+    // Bind to a temp address
+    sockaddr_un address{0};
+    make_unix_socket();
+    strncpy(address.sun_path, munix_socket, sizeof(address.sun_path) - 1);
+    address.sun_family = AF_UNIX;
+    auto* caddress = reinterpret_cast<sockaddr*>(&address);
+    auto address_size = sizeof(sockaddr_un);
+    status = bind(msock_fd, caddress, address_size);
+    if (status < 0) {
+        slog_error("Failed to bind to unix socket -- %s\n", strerror(errno));
+        unlink(munix_socket);
+        close(msock_fd);
+        return false;
+    }
+
+    // Connect to server's socket
+    strncpy(address.sun_path, mdestination, sizeof(address.sun_path) - 1);
+    address.sun_family = AF_UNIX;
+    caddress = reinterpret_cast<sockaddr*>(&address);
+    address_size = sizeof(sockaddr_un);
+    status = ::connect(msock_fd, caddress, address_size);
+    if (status < 0) {
+        slog_error("Failed to connect to %s -- %s\n", mdestination, strerror(errno));
+        close(msock_fd);
+        unlink(munix_socket);
+        return false;
     }
     return true;
 }
@@ -166,7 +199,7 @@ char* SyslogSink::make_unix_socket()
         return munix_socket;
     }
 
-    snprintf(munix_socket, socket_size - 1, "%s/%s%s%s", directory, mapplication_name, tmp_text, stem);
+    snprintf(munix_socket, socket_size - 1, "%s/%s%s%s", directory, mapplication_name, tmp_text, stem);    
     return munix_socket;
 }
 
@@ -202,9 +235,9 @@ int SyslogSink::syslog_priority(int slog_severity) const
 
 void SyslogSink::record(LogRecord const& node)
 {
-    // TODO loop to connect?
-    if (!is_connected()) {
-        connect();
+    if (!is_connected() && !connect()) {
+        slog_error("Could not connect to %s, record dropped", mhostname);
+        return;
     }
 
     rewind(mbufferStream);

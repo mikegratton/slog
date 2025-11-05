@@ -1,14 +1,14 @@
 #pragma once
-#include <atomic>
+#include "Signal.hpp"
 #include <condition_variable>
 #include <mutex>
 #include <thread>
 
-#include "LogChannel.hpp"
 #include "LogRecord.hpp"
 #include "LogRecordPool.hpp"
 #include "LogSink.hpp"
 #include "ThresholdMap.hpp"
+#include "slog/Signal.hpp"
 
 namespace slog {
 
@@ -44,44 +44,36 @@ class LogChannel {
     LogChannel(LogChannel const& i_rhs);
 
     /**
-     * Start the worker thread. Transition to RUN state.
-     * Thread safe.
+     * Start the worker thread. Transition to RUN state. Thread safe.
      */
     void start();
 
     /**
      * Drain the queue into the sink. Stop the worker thread.
-     * Thread safe.
+     * @note This will stop *all* channels. Thread safe.
      */
     void stop();
 
     /**
-     * Check the severity threshold for the given tag. Thread safe
-     * in RUN mode.
+     * Check the severity threshold for the given tag. Thread safe in RUN mode.
      */
     int threshold(char const* tag) { return thresholdMap[tag]; }
 
     /**
-     * Attempt to grab a new record from the pool.
-     * Will return nullptr if the pool is exhausted.
-     * Thread safe.
+     * Attempt to grab a new record from the pool. Will return nullptr if the
+     * pool is exhausted. Thread safe.
      */
     RecordNode* get_fresh_record() { return pool->allocate(); }
 
-    ///////////////////////////////////////////////////////////////////
-    // RUN STATE ONLY
     /**
-     * Send a record to the worker thread. Ownership of
-     * this pointer transfered to the queue. Thread safe.
+     * Send a record to the worker thread. Ownership of this pointer transfered
+     * to the queue. Thread safe. RUN STATE ONLY
      */
     void push(RecordNode* rec);
 
-    //////////////////////////////////////////////////////////////////
-    // SETUP STATE ONLY
-
     /*
-     * For debugging. Compare the number of messages in the pool to the expected number.
-     * Not thread safe.
+     * For debugging. Compare the number of messages in the pool to the expected
+     * number. Not thread safe. SETUP STATE ONLY
      */
     long allocator_count() const { return pool->count(); }
 
@@ -90,11 +82,10 @@ class LogChannel {
     void logging_loop();
 
     /**
-     * A concurrent queue implemented as a linked list using the
-     * next pointer inside of LogRecord. This is mutex-synchronized,
-     * allowing waiting on the condition variable so that the waiting
-     * thread (the LogChannel worker) can be put to sleep and awoken
-     * by the OS efficiently.
+     * A concurrent queue implemented as a linked list using the next pointer
+     * inside of LogRecord. This is mutex-synchronized, allowing waiting on the
+     * condition variable so that the waiting thread (the LogChannel worker) can
+     * be put to sleep and awoken by the OS efficiently.
      */
     class LogQueue {
        public:
@@ -115,7 +106,7 @@ class LogChannel {
     };
 
     enum State { SETUP, RUN };
-    State logger_state() { return (keepalive ? RUN : SETUP); }
+    State logger_state() { return (get_signal_state() == SLOG_ACTIVE ? RUN : SETUP); }
 
     // These object have only thread-safe calls
     std::shared_ptr<LogRecordPool> pool;
@@ -127,7 +118,6 @@ class LogChannel {
 
     // Worker thread stuff
     std::thread workThread;
-    std::atomic_bool keepalive;
 };
 
 }  // namespace slog

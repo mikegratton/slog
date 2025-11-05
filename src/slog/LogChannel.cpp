@@ -1,4 +1,6 @@
 #include "LogChannel.hpp"
+#include "Signal.hpp"
+#include "SlogError.hpp"
 #include <cstdlib>
 #include <cassert>
 #include <chrono>
@@ -12,7 +14,7 @@ constexpr std::chrono::milliseconds WAIT{50};
 
 LogChannel::LogChannel(std::shared_ptr<LogSink> sink_, ThresholdMap const& threshold_,
                        std::shared_ptr<LogRecordPool> pool_)
-    : pool(pool_), thresholdMap(threshold_), sink(sink_), keepalive(false)
+    : pool(pool_), thresholdMap(threshold_), sink(sink_)
 {
 }
 
@@ -30,20 +32,23 @@ void LogChannel::push(RecordNode* node)
     if (node) {
         int level = node->rec.meta.severity;
         queue.push(node);
-        if (level <= FATL) { abort(); }
+        if (level <= FATL) { std::abort(); }
     }
 }
 
 void LogChannel::start()
-{
-    stop();
-    keepalive = true;
+{    
+    if (get_signal_state() != SLOG_ACTIVE) {
+        slog_error("Tried to start channel in STOPPED state\n");
+    }
     workThread = std::thread([this]() { this->logging_loop(); });
 }
 
 void LogChannel::stop()
 {
-    keepalive = false;
+    if (get_signal_state() == SLOG_ACTIVE) {
+        set_signal_state(SLOG_STOPPED);
+    }
     if (workThread.joinable()) { workThread.join(); }    
 }
 
@@ -51,25 +56,24 @@ void LogChannel::logging_loop()
 {
     assert(sink);
     assert(pool);
-    while (keepalive) {
+    while (logger_state() == RUN) {
         RecordNode* node = queue.pop(WAIT);
         if (node) {
-            printf("Log record of size %ld\n", node->rec.message_byte_count);
             sink->record(node->rec);
             pool->free(node);
         }
     }
-    printf("Draining the queue\n");
+    
     // Shutdown. Drain the queue.
     RecordNode* head = queue.pop_all();
     while (head) {
-        printf("Log record of size %ld\n", head->rec.message_byte_count);
         sink->record(head->rec);
         RecordNode* cursor = head->next;
         pool->free(head);
         head = cursor;
     }
     sink->finalize();
+    notify_channel_done();
 }
 
 RecordNode* LogChannel::LogQueue::pop_all()

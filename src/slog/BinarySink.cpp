@@ -11,10 +11,7 @@ BinarySink::BinarySink() : FileSink()
     mfooter = no_op_furniture;
 }
 
-BinarySink::~BinarySink()
-{
-    // Nothing extra here
-}
+BinarySink::~BinarySink() = default;
 
 void BinarySink::record(LogRecord const& rec)
 {

@@ -12,6 +12,8 @@ namespace detail
 /**
  * @brief The Logger singleton manages logger channels, record pools, and
  * signals.
+ *
+ * All public methods are thread safe
  */
 class Logger
 {
@@ -23,7 +25,9 @@ class Logger
     static std::size_t channel_count();
 
     /**
-     *  @brief Set up a channel for each log config
+     *  @brief Set up a channel for each LogConfig.
+     *
+     * This will stop the logger when called.
      */
     static void setup_channels(std::vector<LogConfig>& config);
 
@@ -35,27 +39,20 @@ class Logger
     static LogChannel& get_channel(int channel);
 
     /**
-     * Internal log start function. Also installs thstop_all_channelse
-     * signal handler.
+     * Internal log start function.
      */
     static void start_all_channels();
 
     /**
-     * Inverse of start_all_channels
+     * Internal log stop function.
      */
     static void stop_all_channels();
 
     /**
      * @brief When slog is "stopped", we may still install a channel to log to
-     * the console
+     * the console. This method handles that logic.
      */
     static void setup_stopped_channel();
-
-    // TODO fix that name!
-    // set an atomic int to indicate the need to shut down
-    static void change_run_state(int signal_id);
-
-    static int get_run_state();
 
   private:
     Logger();
@@ -69,11 +66,11 @@ class Logger
     static std::shared_ptr<LogRecordPool> make_default_pool();
 
     std::vector<LogChannel> backend;
-    std::atomic<int> signal_state{~0};
 };
 
 
-/// (For debugging the logger) Check that all pool records are either free or in a queue
+/// (For debugging the logger) Check that all pool records are either free or in
+/// a queue. Not thread safe.
 long get_pool_missing_count();
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -91,10 +88,3 @@ inline LogChannel& Logger::get_channel(int channel)
 
 } // namespace detail
 } // namespace slog
-
-
-/// Signal handler
-extern "C" void slog_handle_signal(int);
-
-/// exit handler
-extern "C" void slog_handle_exit();

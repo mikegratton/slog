@@ -9,8 +9,8 @@
 namespace slog {
 
 namespace {
-/// A streambuf that writes to a fixed sized array. If the message
-/// is too long, allocate another node
+/// A streambuf that writes to the buffer in a node. If the message
+/// is too long for that buffer, another node is allocated
 class IntrusiveBuf : public std::streambuf {
    public:
     void set_node(RecordNode* node, long channel)
@@ -47,7 +47,7 @@ class IntrusiveBuf : public std::streambuf {
             count += write_some(s + count, length - count);
             if (count < length) {
                 RecordNode* extra =
-                    get_fresh_record(m_channel, nullptr, nullptr, 0, m_node->rec.meta.severity, m_node->rec.meta.tag);
+                    get_fresh_record(m_channel, nullptr, nullptr, -1, ~0, nullptr);
                 if (nullptr == extra) { return count; }
                 attach(m_node, extra);
                 set_node(extra, m_channel);

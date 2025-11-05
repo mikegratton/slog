@@ -1,6 +1,7 @@
 #pragma once
 
 #include "LogSink.hpp"
+#include <chrono>
 
 struct sockaddr;
 
@@ -71,7 +72,16 @@ class SyslogSink : public LogSink {
     /// Write the syslog header into the buffer, returning the header size
     int format_header(LogRecord const& node);
 
-    static constexpr std::size_t kMaxDatagramSize = 65507;
+    /// Connect to a unix socket 
+    bool connect_unix();
+
+    /// Connect to a IP socket
+    bool connect_ip();
+
+    std::size_t constexpr static kMaxDatagramSize = 65507;
+    
+    int constexpr static kMaxConnectionAttempts = 10;
+    std::chrono::milliseconds constexpr static kConnectionAttemptWait{50};    
 
     Formatter mformat;
     bool mecho;
