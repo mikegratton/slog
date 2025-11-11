@@ -149,7 +149,7 @@ uint32_t default_binary_format(FILE* sink, LogRecord const& rec)
 
     LogRecord const* r = &rec;
     do {
-        totalBytes += fwrite(r->message, 1, r->message_byte_count, sink);
+        totalBytes += fwrite(r->message, sizeof(char), r->message_byte_count, sink);
         r = r->more;
     } while (r);
     return totalBytes;
@@ -163,7 +163,7 @@ uint32_t short_binary_format(FILE* sink, LogRecord const& rec)
     totalBytes += fwrite(rec.meta.tag, sizeof(char), 4, sink);
     LogRecord const* r = &rec;
     do {
-        totalBytes += fwrite(r->message, 1, r->message_byte_count, sink);
+        totalBytes += fwrite(r->message, sizeof(char), r->message_byte_count, sink);
         r = r->more;
     } while (r);
     return totalBytes;
@@ -174,7 +174,7 @@ uint32_t total_record_size(LogRecord const& rec)
     uint32_t totalSize = 0;
     LogRecord const* r = &rec;
     do {
-        totalSize += static_cast<uint32_t>(rec.message_byte_count);
+        totalSize += static_cast<uint32_t>(r->message_byte_count);
         r = r->more;
     } while (r);
     return totalSize;

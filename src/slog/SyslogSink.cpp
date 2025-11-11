@@ -31,6 +31,8 @@ SyslogSink::SyslogSink(char const* destination, bool use_tcp)
       msyslog_facility(kSyslogUserFacility),
       muse_rfc3164(false),
       muse_tcp(use_tcp),
+      mmax_connection_attempts(10),
+      mconnection_attempt_wait(std::chrono::milliseconds(50)),
       msock_fd(-1),
       munix_socket(nullptr)
 {
@@ -60,8 +62,8 @@ bool SyslogSink::connect()
     }
 
     bool connected = false;
-    for (int try_count = 0; try_count < kMaxConnectionAttempts && !connected;
-         ++try_count, std::this_thread::sleep_for(std::chrono::milliseconds(kConnectionAttemptWait))) {
+    for (int try_count = 0; try_count < mmax_connection_attempts && !connected;
+         ++try_count, std::this_thread::sleep_for(std::chrono::milliseconds(mconnection_attempt_wait))) {
         if (mdestination[0] == '/') {
             connected = connect_unix();
         } else {
@@ -313,5 +315,12 @@ void SyslogSink::set_facility(int facility)
 }
 
 void SyslogSink::set_rfc3164_protocol(bool doit) { muse_rfc3164 = doit; }
+
+void SyslogSink::set_max_connection_attempts(int attempts) { mmax_connection_attempts = std::max(1, attempts); }
+
+void SyslogSink::set_max_connection_wait(std::chrono::milliseconds wait)
+{
+    mconnection_attempt_wait = std::max(std::chrono::milliseconds(10), wait);
+}
 
 } // namespace slog

@@ -17,7 +17,7 @@ void LogRecordMetadata::reset()
     filename = "";
     function = "";
     line = NO_LINE;
-    severity = std::numeric_limits<int>::max();
+    severity = std::numeric_limits<int>::max();    
     memset(tag, 0, sizeof(tag));
 }
 
@@ -49,10 +49,10 @@ LogRecord::LogRecord(char* message_, long max_message_size_)
 
 void LogRecord::reset()
 {
-    meta.reset();
-    more = nullptr;
-    message[0] = '\0';
+    meta.reset();    
     message_byte_count = 0L;
+    message[0] = '\0';
+    more = nullptr;
 }
 
 } // namespace slog

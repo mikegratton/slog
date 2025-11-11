@@ -1,5 +1,6 @@
 #include "doctest.h"
 #include "slog/BinarySink.hpp"
+#include "slog/LogRecordPool.hpp"
 #include "slog/LogSetup.hpp"
 #include "slog/LogSink.hpp"
 #include "slog/slog.hpp"
@@ -154,6 +155,54 @@ TEST_CASE("BinaryLog")
 
     fclose(f);
     std::remove(sink->get_file_name());
+}
+
+
+TEST_CASE("Binary.jumbo")
+{
+    slog::LogConfig config;
+    std::shared_ptr<slog::BinarySink> sink = std::make_shared<slog::BinarySink>();    
+    sink->set_file(".", "blogTest");
+    config.set_sink(sink);
+    config.set_default_threshold(slog::INFO);
+    auto pool = std::make_shared<slog::LogRecordPool>(slog::BLOCK, 1024, 32);
+    config.set_pool(pool);
+    slog::start_logger(config);
+
+    char const* message = "---------1---------1---------1---------1---------1---------1";
+    Blog(NOTE, "tag").record(message, strlen(message));    
+
+    slog::stop_logger();
+    auto time = std::chrono::system_clock::now().time_since_epoch().count();
+
+    // Read the results
+    char const* logname = sink->get_file_name();
+    char buffer[1024];
+    FILE* f = fopen(logname, "r");
+    REQUIRE(f);
+
+    // The header
+    auto count = fread(buffer, 1, 8, f);
+    CHECK(strncmp(buffer, "SLOG", 4) == 0);
+    CHECK((unsigned char) buffer[4] == 0xff);
+    CHECK((unsigned char) buffer[5] == 0xfe);
+    CHECK(buffer[6] == 0);
+    CHECK(buffer[7] == 0);
+
+    // The records
+    fread(buffer, 1, 32, f);
+    CHECK(*reinterpret_cast<uint32_t*>(buffer) == strlen(message));
+    CHECK(*reinterpret_cast<int32_t*>(buffer + 4) == slog::NOTE);    
+    CHECK(*reinterpret_cast<uint64_t*>(buffer + 8) > time - std::chrono::nanoseconds(100000000).count());
+    CHECK(*reinterpret_cast<uint64_t*>(buffer + 8) < time);
+    CHECK(strncmp(buffer + 16, "tag", 16) == 0);
+    fread(buffer, 1, 60, f);
+    CHECK(strncmp(buffer, message, strlen(message)) == 0);
+
+    fclose(f);
+
+    // Remove the file
+    std::remove(logname);    
 }
 
 #endif

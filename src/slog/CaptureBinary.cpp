@@ -1,53 +1,63 @@
-#include <cstring>
-#include <algorithm>
+#include "LogRecordPool.hpp" // For RecordNode
 #include "slogDetail.hpp"
-#include "LogRecordPool.hpp"  // For RecordNode
+#include <algorithm>
+#include <cstring>
 
-namespace slog {
-
-CaptureBinary::CaptureBinary(RecordNode* i_node, long i_channel)
+namespace slog
 {
-    set_node(i_node, i_channel);
+
+CaptureBinary::CaptureBinary(RecordNode* i_node, int i_channel)
+    : head_node(i_node),
+      current_node(nullptr),      
+      cursor(nullptr),
+      buffer_end(nullptr),
+      channel(i_channel)
+{
+    set_node(i_node);
 }
 
 CaptureBinary::~CaptureBinary()
 {
-    slog::push_to_sink(node, channel);
+    set_byte_count();
+    slog::push_to_sink(head_node, channel);
 }
 
-CaptureBinary& CaptureBinary::record(void const* bytes, long byte_count)
+CaptureBinary& CaptureBinary::record(void const* message, long byte_count)
 {
-    long count = 0;
-    do {
-        count += write_some(reinterpret_cast<char const*>(bytes) + count, byte_count - count);
-        if (count < byte_count) {
-            RecordNode* extra =
-                get_fresh_record(channel, nullptr, nullptr, 0, node->rec.meta.severity, node->rec.meta.tag);
-            if (nullptr == extra) { return *this; }
-            attach(node, extra);
-            set_node(extra, channel);
-        }
-    } while (count < byte_count);
+    long count = write_some(reinterpret_cast<char const*>(message), byte_count);
+    while (count < byte_count) {           
+        RecordNode* extra = get_fresh_record(channel, nullptr, nullptr, -1, ~0, nullptr);
+        if (nullptr == extra) {
+            return *this;
+        }            
+        set_node(extra);
+        count += write_some(reinterpret_cast<char const*>(message) + count, byte_count - count);      
+    }
     return *this;
 }
 
-std::streamsize CaptureBinary::write_some(char const* s, std::streamsize count)
+std::streamsize CaptureBinary::write_some(char const* source, long byte_count)
 {
-    count = std::min(count, end - cursor);
-    memcpy(cursor, s, count);
-    *currentByteCount += count;
-    cursor += count;
-    return count;
+    byte_count = std::min(byte_count, buffer_end - cursor);
+    memcpy(cursor, source, byte_count);    
+    cursor += byte_count;
+    return byte_count;
 }
 
-void CaptureBinary::set_node(RecordNode* i_node, long i_channel)
+void CaptureBinary::set_node(RecordNode* i_node)
 {
-    node = i_node;
-    channel = i_channel;
-    cursor = node->rec.message;
-    currentByteCount = &node->rec.message_byte_count;
-    *currentByteCount = 0L;
-    end = cursor + node->rec.message_max_size;
+    if (current_node) {
+        set_byte_count();
+        attach(current_node, i_node);        
+    }
+    current_node = i_node;        
+    cursor = current_node->rec.message;    
+    buffer_end = cursor + current_node->rec.message_max_size;
 }
 
-}  // namespace slog
+void CaptureBinary::set_byte_count()
+{
+    current_node->rec.message_byte_count = cursor - current_node->rec.message;
+}
+
+} // namespace slog

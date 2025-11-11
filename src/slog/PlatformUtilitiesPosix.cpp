@@ -9,6 +9,10 @@
 #include <signal.h>
 #include <sys/stat.h>
 
+#include <set>
+#include <string>
+#include <list>
+
 namespace slog
 {
 
@@ -25,37 +29,25 @@ bool make_directory(char const* directory, int mode)
         return true;
     }
 
-    char working_path[PATH_MAX + 1];
-    realpath(directory, working_path);
-    struct stat path_stat {
-    };
-    if (0 == stat(directory, &path_stat)) {
-        return S_ISDIR(path_stat.st_mode);
-    }
-
-    for (char* cursor = working_path + 1; *cursor; ++cursor) {
-        if (*cursor == '/') {
-            *cursor = '\0';
-            // Check if this subpath exists
-            if (0 == stat(working_path, &path_stat)) {
-                // ... and is a directory
-                if (!S_ISDIR(path_stat.st_mode)) {
-                    return false;
-                }
-            } else {
-                // Okay, try to make this part
-                if (0 != mkdir(working_path, mode)) {
-                    slog_error("Slog: Could not make directory %s -- %s\n", working_path, strerror(errno));
-                    return false;
-                }
+    struct stat path_stat;
+    std::string path(directory);    
+    auto slashIndex = 0;
+    do {
+        slashIndex = path.find('/', slashIndex+1);
+        std::string fragment = path.substr(0, slashIndex);
+        if (0 == stat(fragment.c_str(), &path_stat)) {
+            if (!S_ISDIR(path_stat.st_mode)) {
+                slog_error("Cannot create path %s -- %s is an existing file\n", directory, fragment.c_str());
+                return false;
             }
-            *cursor = '/';
+        } else {
+            if (0 != mkdir(fragment.c_str(), mode)) {
+                slog_error("Could not create directory %s -- %s\n", fragment.c_str(), strerror(errno));
+                return false;
+            }
         }
-    }
-    if (0 != mkdir(working_path, mode)) {
-        slog_error("Could not make directory %s -- %s\n", working_path, strerror(errno));
-        return false;
-    }
+    } while (slashIndex < path.size());
+
     return true;
 }
 

@@ -32,13 +32,13 @@ TEST_CASE("FileLog.basic")
     auto time = std::chrono::system_clock::now().time_since_epoch().count();
 
     // Read the results
-    char const* logname = sink->get_file_name();
-    char buffer[1024];
-    slog::TestLogRecord record;
+    char const* logname = sink->get_file_name();    
     FILE* f = fopen(logname, "r");
     REQUIRE(f);
 
     // The records
+    char buffer[1024];
+    slog::TestLogRecord record;
     fgets(buffer, sizeof(buffer), f);
     parseLogRecord(record, buffer);
     CHECK(record.meta.severity == slog::INFO);
@@ -61,7 +61,7 @@ TEST_CASE("FileLog.basic")
     fclose(f);
 
     // Remove the file
-    std::remove(logname);
+    //std::remove(logname);
 }
 
 static uint32_t fancyFurniture(FILE* sink, int sequence, unsigned long time)

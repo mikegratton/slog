@@ -4,7 +4,6 @@
 #define SLOG_LOGGING_ENABLED 1
 #endif
 
-#cmakedefine01 SLOG_LOG_TO_CONSOLE_WHEN_STOPPED
 #cmakedefine01 SLOG_STREAM
 #cmakedefine01 SLOG_BINARY_LOG
 #cmakedefine01 SLOG_PRINT_ERROR

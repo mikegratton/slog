@@ -22,7 +22,7 @@ TEST_CASE("PlatformUtilities.zulu")
 
 TEST_CASE("PlatformUtilities.make_directory")
 {
-    slog::make_directory("foo/bar/baz");
+    CHECK(slog::make_directory("foo/bar/baz"));
     FILE* f = fopen("foo/bar/baz/buzz", "w");
     CHECK(f != nullptr);
     std::remove("foo/bar/baz/buzz");

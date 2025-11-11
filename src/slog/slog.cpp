@@ -27,7 +27,7 @@ bool will_log(int severity, char const* tag, int channel)
 
 void push_to_sink(RecordNode* node, int channel)
 {
-    if (node) { Logger::get_channel(channel).push(node); }
+    Logger::get_channel(channel).push(node);
 }
 
 RecordNode* get_fresh_record(int channel, char const* file, char const* function, int line, int severity,

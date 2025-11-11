@@ -73,6 +73,7 @@ void Logger::setup_channels(std::vector<LogConfig>& config)
 
 void Logger::start_all_channels()
 {
+    Logger::instance();
     set_signal_state(SLOG_ACTIVE);
     for (auto& chan : instance().backend) {
         chan.start();
@@ -84,6 +85,7 @@ void Logger::start_all_channels()
  */
 void Logger::stop_all_channels()
 {
+    Logger::instance();
     set_signal_state(SLOG_STOPPED);
     for (auto& chan : instance().backend) {
         chan.stop();
@@ -99,13 +101,8 @@ void Logger::do_setup_stopped_channel()
     set_signal_state(SLOG_STOPPED);
     backend.clear();
     ThresholdMap threshold;
-#if SLOG_LOG_TO_CONSOLE_WHEN_STOPPED
-    threshold.set_default(DBUG);
-    backend.emplace_back(std::make_shared<ConsoleSink>(), threshold, make_default_pool());
-#else
     threshold.set_default(FATL);
     backend.emplace_back(std::make_shared<NullSink>(), threshold, make_default_pool());
-#endif
     set_signal_state(SLOG_ACTIVE);
     backend.front().start();
 }

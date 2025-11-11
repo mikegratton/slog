@@ -14,11 +14,10 @@ struct LogRecordMetadata {
     /**
      * @brief Capture the metadata.
      *
-     * This assumes that filename and function are
-     * static strings in the program (i.e. those produced by __FILE__ and
-     * __FUNCTION__ macros), while tag may change on the caller's thread.
-     * Therefore tag is copied, but filename and function just take the
-     * pointer values.
+     * This assumes that filename and function are static strings in the program
+     * (i.e. those produced by __FILE__ and __FUNCTION__ macros), while tag may
+     * change on the caller's thread. Therefore tag is copied, but filename and
+     * function just take the pointer values.
      */
     void capture(char const* filename, char const* function, int line, int severity, const char* tag);
 

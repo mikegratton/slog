@@ -13,12 +13,12 @@
  * Slog(DBUG, "", 1) << "Log with no tag to channel 1 at level DBUG";
  * ```
  *
- * These macros never trigger allocating memory.
- *
- * The macros are built such that if logging is suppressed for the combo of severity
- * level/tag/channel, then the rest of the line IS NOT EXECUTED. Any formatting implied
- * is just skipped. The log stream is derived from std::ostream, but writes to a fixed-
- * size internal buffer.
+ * The macros are built such that if logging is suppressed for the combo of
+ * severity level/tag/channel, then the rest of the line IS NOT EXECUTED. Any
+ * formatting implied is just skipped. The log stream is derived from
+ * std::ostream, but writes to a fixed-size internal buffer. If the record is
+ * longer than one node can hold, extra nodes are allocated automatically and
+ * chained together to form a "jumbo" record.
  *
  */
 // Overloads for Slog() used below
@@ -32,11 +32,13 @@
 #endif
 
 /**
- * printf-style macros. These take printf format string and variable argument lists like
+ * printf-style macros. These take printf format string and variable argument
+ * lists like
  * ```
  * Flog(INFO, "The answer is %d", 42);
  * ```
- * Unlike Slog() and Blog(), Flog() macros can only log up to max_message_size_ bytes.
+ * Unlike Slog() and Blog(), Flog() macros can only log up to max_message_size_
+ * bytes. The results will be silently truncated, if required.
  */
 #define Flog(severity, ...) SLOG_FlogBase(slog::severity, "", slog::DEFAULT_CHANNEL, __VA_ARGS__)
 #define Flogt(severity, tag, ...) SLOG_FlogBase(slog::severity, (tag), slog::DEFAULT_CHANNEL, __VA_ARGS__)
@@ -54,9 +56,15 @@
  *
  * These macros never trigger allocating memory.
  *
- * The macros are built such that if logging is suppressed for the combo of severity
- * level/tag/channel, then the record() calls ARE NOT EXECUTED.
+ * The macros are built such that if logging is suppressed for the combo of
+ * severity level/tag/channel, then the record() calls ARE NOT EXECUTED. If the
+ * record is longer than one node can hold, extra nodes are allocated
+ * automatically and chained together to form a "jumbo" record.
  *
+ * @note The default binary sink formatter presents the tag as a way to
+ * distinguish the binary blob when parsing the log file. If you are logging
+ * without a tag, you should ensure you have a mechanism to determine the
+ * message format.
  */
 #define SLOG_Blogs(severity) SLOG_BlogBase(slog::severity, "", slog::DEFAULT_CHANNEL)
 #define SLOG_Blogst(severity, tag) SLOG_BlogBase(slog::severity, (tag), slog::DEFAULT_CHANNEL)

@@ -62,9 +62,6 @@ void fake_worker()
 
 int main(int, char**) 
 {
-    //printf("SIGINT handler is at %p\n", &test_action);
-    //install_handler(SIGINT);
-
     g_slowSink = std::make_shared<SlowSink>();
     slog::LogConfig config;
     config.set_sink(g_slowSink);
@@ -73,7 +70,7 @@ int main(int, char**)
     install_unlock_handler(SIGABRT);
 
     auto work_thread = std::thread(fake_worker);
-    abort();
+    raise(SIGABRT);
     work_thread.join();
     std::cout << "The numbers 0-9 should be logged\n";
     

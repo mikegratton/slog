@@ -2,6 +2,7 @@
 #include <locale>
 #include <memory>
 
+#include "slog/Signal.hpp"
 #include "slog/slog.hpp"
 
 #include "LogConfig.hpp"
@@ -14,6 +15,7 @@
 #include "slog/LoggerSingleton.hpp"
 #include "slog/ThresholdMap.hpp"
 #include "slog/slog.hpp"
+#include "slog/slogDetail.hpp"
 #include <cstring>
 
 using namespace slog;
@@ -102,6 +104,8 @@ TEST_CASE("LogChannel")
     CHECK(r == c.get_fresh_record());
 
     CHECK(sink->finalized == 0);
+    slog::set_signal_state(SLOG_ACTIVE);
+    c.start();
     c.stop();
     CHECK(sink->finalized == 1);
 }
@@ -167,4 +171,33 @@ TEST_CASE("LogConfig")
     auto pool = std::make_shared<LogRecordPool>(ALLOCATE, 1024, 32);
     cfg.set_pool(pool);
     CHECK(cfg.get_pool() == pool);
+}
+
+struct TestRecord : public slog::LogRecord
+{
+    TestRecord(char* buffer, long length) : slog::LogRecord(buffer, length) {}
+};
+
+TEST_CASE("Stream")
+{
+    LogConfig conifg;
+    conifg.set_sink(std::make_shared<NullSink>());    
+    int pool_size = 8;
+    int message_size = 1024;
+    auto pool = std::make_shared<LogRecordPool>(slog::ALLOCATE, pool_size, message_size);
+    conifg.set_pool(pool);
+    slog::start_logger(conifg);
+    auto* record = pool->allocate();
+    {
+        slog::CaptureStream testStream(record, 0);
+        testStream.stream().put('a');
+        testStream.stream().put('b');
+        CHECK(record->rec.message[0] == 'a');
+        CHECK(record->rec.message[1] == 'b');
+        testStream.stream().write("hello", 5);
+        CHECK(strncmp(record->rec.message, "abhello", 5) == 0);
+    }
+
+    // We need to stop things from crashing due to submittal
+    slog::stop_logger();
 }

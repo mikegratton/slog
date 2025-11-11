@@ -18,8 +18,7 @@ void start_logger(LogConfig const& config)
 }
 
 void start_logger(std::vector<LogConfig> config)
-{    
-    Logger::stop_all_channels();
+{
     if (config.empty()) { return; }    
     Logger::setup_channels(config);
 #if SLOG_STREAM

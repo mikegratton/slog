@@ -1,42 +1,71 @@
+#include "LogConfig.hpp"
+#include <ios>
 #ifndef SLOG_NO_STREAM
 #include <cstring>
+#include <cassert>
 #include <ostream>
 #include <streambuf>
 
+#include "LogRecordPool.hpp" // For RecordNode
 #include "slogDetail.hpp"
-#include "LogRecordPool.hpp"  // For RecordNode
 
-namespace slog {
+namespace slog
+{
 
-namespace {
+namespace
+{
 /// A streambuf that writes to the buffer in a node. If the message
 /// is too long for that buffer, another node is allocated
-class IntrusiveBuf : public std::streambuf {
-   public:
-    void set_node(RecordNode* node, long channel)
+class IntrusiveBuf : public std::streambuf
+{
+  public:
+
+    // Get the head RecordNode*, setting the internal nodes to null.
+    // Idempotent.
+    RecordNode* take_node() 
     {
-        m_node = node;
-        m_channel = channel;
-        m_cursor = node->rec.message;
-        m_currentByteCount = &node->rec.message_byte_count;
-        *m_currentByteCount = 0L;
-        m_end = m_cursor + node->rec.message_max_size - 1;
+        RecordNode* returnValue = nullptr;
+        if (m_recordHead) {
+            set_node_byte_count();
+            returnValue = m_recordHead;
+            m_recordHead = m_node = nullptr;
+            m_channel = DEFAULT_CHANNEL;
+            setp(nullptr, nullptr);
+        }
+        return returnValue;
     }
 
-   protected:
-    RecordNode* m_node;
-    long* m_currentByteCount;
-    long m_channel;
-    char* m_cursor;
-    char* m_end;
+    void set_node(RecordNode* node, int channel)
+    {
+        if (m_recordHead) {
+            set_node_byte_count();
+            assert(m_node->rec.message_byte_count == m_node->rec.message_max_size);
+            attach(m_node, node);
+        } else {
+            m_recordHead = node;
+        }
+        m_node = node;
+        m_channel = channel;        
+        setp(node->rec.message, node->rec.message + node->rec.message_max_size);
+    }
+
+    void set_node_byte_count()
+    {
+        m_node->rec.message_byte_count = pptr() - pbase();
+    }
+
+    int channel() const { return m_channel; }
+
+  protected:
+    RecordNode* m_recordHead{nullptr};
+    RecordNode* m_node{nullptr};
+    int m_channel{DEFAULT_CHANNEL};    
 
     std::streamsize write_some(char const* s, std::streamsize count)
     {
-        count = std::min(count, m_end - m_cursor);
-        memcpy(m_cursor, s, count);
-        *m_currentByteCount += count;
-        m_cursor += count;
-        *m_cursor = '\0';
+        count = std::min(count, epptr() - pptr());
+        memcpy(pptr(), s, count);
+        pbump(count);
         return count;
     }
 
@@ -46,45 +75,78 @@ class IntrusiveBuf : public std::streambuf {
         do {
             count += write_some(s + count, length - count);
             if (count < length) {
-                RecordNode* extra =
-                    get_fresh_record(m_channel, nullptr, nullptr, -1, ~0, nullptr);
-                if (nullptr == extra) { return count; }
-                attach(m_node, extra);
-                set_node(extra, m_channel);
+                this->overflow(std::streambuf::traits_type::eof());
             }
         } while (count < length);
         return count;
     }
+
+    std::streambuf::int_type overflow(std::streambuf::int_type ch) override
+    {
+        if (pptr() >= epptr()) {
+            RecordNode* extra = get_fresh_record(m_channel, nullptr, nullptr, -1, ~0, nullptr);
+            if (!extra) {
+                return std::streambuf::traits_type::eof();
+            }
+            set_node(extra, m_channel);
+        }
+        if (std::streambuf::traits_type::eq_int_type(ch, std::streambuf::traits_type::eof())) {
+            return 1;
+        }
+        write_some(reinterpret_cast<char*>(&ch), 1);
+        return ch;
+    }
 };
 
 /// An ostream using an IntrusiveBuf
-class IntrusiveStream : public std::ostream {
-   public:
-    IntrusiveStream() : std::ostream(&buf) {}
-
-    void set_node(RecordNode* node, long channel)
+class IntrusiveStream : public std::ostream
+{
+  public:
+    IntrusiveStream()
+        : std::ostream(&buf)
     {
+    }
+
+    void set_node(RecordNode* node, int channel)
+    {
+        assert(buf.take_node() == nullptr);
         buf.set_node(node, channel);
         clear();
     }
 
-   protected:
+    RecordNode* take_node() { return buf.take_node(); }
+
+    int channel() const { return buf.channel(); }
+
+  protected:
     IntrusiveBuf buf;
 };
 
 /// An ostream that just discards all input
-class NullStream : public std::ostream {
-   public:
-    NullStream() : std::ostream(&m_sb) {}
+class NullStream : public std::ostream
+{
+  public:
+    NullStream()
+        : std::ostream(&m_sb)
+    {
+    }
 
-   private:
-    class NullBuffer : public std::streambuf {
-       public:
-        int overflow(int c) override { return c; }
+  private:
+    class NullBuffer : public std::streambuf
+    {
+      public:
+        
+        std::streamsize xsputn(char const* s, std::streamsize length) override { return length; }
+
+        int overflow(int c) override
+        {
+            return std::streambuf::traits_type::eq_int_type(c, std::streambuf::traits_type::eof()) ? 1 : c;
+        }
     } m_sb;
 };
 
-namespace {
+namespace
+{
 /// Global locale for slog
 std::locale s_locale;
 
@@ -118,10 +180,10 @@ class StreamHolder
     int m_locale_version;
 };
 
-thread_local StreamHolder st_stream;  // Each thread has its own stream
-NullStream s_null;                    // Since NullStream has no state, all threads share a copy
+thread_local StreamHolder st_stream; // Each thread has its own stream
+NullStream s_null;                   // Since NullStream has no state, all threads share a copy
 
-}  // namespace
+} // namespace
 
 void set_locale(std::locale locale)
 {
@@ -129,33 +191,29 @@ void set_locale(std::locale locale)
     s_locale_version++;
 }
 
-void set_locale_to_global()
+void set_locale_to_global() { set_locale(std::locale()); }
+
+CaptureStream::CaptureStream(RecordNode* node_, int channel_)    
 {
-    set_locale(std::locale());
+    if (node_) {
+        st_stream.stream_direct().set_node(node_, channel_);
+        stream_ptr = &st_stream.stream();
+    } else {
+        stream_ptr = &s_null;
+    }
 }
 
 // On destruction, forward the node to the backend.
 CaptureStream::~CaptureStream()
 {
-    if (node) {
-        push_to_sink(node, channel);  // Push to channel queue
+    if (stream_ptr != &s_null) {
+        // Terminate record and push it        
+        auto& stream = st_stream.stream_direct();
+        stream.put('\0');
+        push_to_sink(stream.take_node(), stream.channel());
     }
 }
 
-// Obtain a stream to log to
-std::ostream& CaptureStream::stream()
-{
-    if (node) {
-        // Set the stream to write to the message buffer
-        IntrusiveStream& s = st_stream.stream();
-        s.set_node(node, channel);
-        return s;
-    } else {
-        // Failure to allocate, just eat the message
-        return s_null;
-    }
-}
-
-}  // namespace slog
+} // namespace slog
 
 #endif

@@ -50,6 +50,12 @@ class SyslogSink : public LogSink {
     /// Use RFC3164 format messages (default is RFC5424)
     void set_rfc3164_protocol(bool doit);
 
+    /// Set the maximum connect tries before dropping a message (default is 10)
+    void set_max_connection_attempts(int attempts);
+
+    /// Set the time to wait *per connection attempt* (default is 50ms)
+    void set_max_connection_wait(std::chrono::milliseconds wait);
+
     /// Close the socket
     void finalize() override;
 
@@ -80,14 +86,14 @@ class SyslogSink : public LogSink {
 
     std::size_t constexpr static kMaxDatagramSize = 65507;
     
-    int constexpr static kMaxConnectionAttempts = 10;
-    std::chrono::milliseconds constexpr static kConnectionAttemptWait{50};    
 
     Formatter mformat;
     bool mecho;
     int msyslog_facility;
     bool muse_rfc3164;
     bool muse_tcp;
+    int mmax_connection_attempts;
+    std::chrono::milliseconds mconnection_attempt_wait;
 
     int msock_fd;
 

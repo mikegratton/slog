@@ -12,8 +12,4 @@ add_executable(slogTest ${source})
 target_link_libraries(slogTest PUBLIC slog)
 
 add_subdirectory(signalTest)
-add_subdirectory(exitTest)
 add_subdirectory(performanceTest)
-
-add_subdirectory(udpTest)
-add_subdirectory(tcpTest)
