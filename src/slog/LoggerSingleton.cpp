@@ -3,9 +3,15 @@
 #include "PlatformUtilities.hpp"
 #include "Signal.hpp"
 #include "SlogError.hpp"
+#include "slog/LogChannel.hpp"
+#include "slog/LogRecordPool.hpp"
+#include "slog/LogSetup.hpp"
+#include "slog/LogSink.hpp"
 #include <atomic>
 #include <cstring>
 #include <endian.h>
+#include <limits>
+#include <memory>
 #include <unistd.h>
 
 namespace slog
@@ -14,21 +20,28 @@ namespace slog
 namespace detail
 {
 
+static std::unique_ptr<LogChannel> make_channel(std::shared_ptr<LogSink> sink, ThresholdMap const& threshold,
+                                                std::shared_ptr<LogRecordPool> pool)
+{
+    LogChannel* ptr = new LogChannel(sink, threshold, pool);
+    return std::unique_ptr<LogChannel>(ptr);
+}
+
 /// Install handlers for signals and exit. Idempotent.
-std::atomic<bool> static s_installedSignalHandlers{false};
+std::atomic<bool> static s_installed_signal_handlers{false};
 static bool install_slog_handlers()
 {
-    if (!s_installedSignalHandlers) {
+    if (!s_installed_signal_handlers) {
         install_signal_handlers(slog_handle_signal);
-        s_installedSignalHandlers = true;
+        s_installed_signal_handlers = true;
     }
 
-    static std::atomic<bool> s_installedAtExitHandler{false};
-    if (!s_installedAtExitHandler) {
+    static std::atomic<bool> s_installed_at_exit_handler{false};
+    if (!s_installed_at_exit_handler) {
         if (0 != std::atexit(slog_handle_exit)) {
             slog_error("Failed to install exit handler-- %s\n", strerror(errno));
         }
-        s_installedAtExitHandler = true;
+        s_installed_at_exit_handler = true;
     }
     return true;
 }
@@ -39,44 +52,47 @@ Logger& Logger::instance()
     return s_logger;
 }
 
-Logger::Logger() { do_setup_stopped_channel(); }
-
-Logger::~Logger() { stop_all_channels(); }
+Logger::Logger() 
+{ 
+    // We don't set up anything by default. We'll wait for a call to
+    // put any channels in place
+}
 
 std::shared_ptr<LogRecordPool> Logger::make_default_pool()
 {
-    return std::make_shared<LogRecordPool>(ALLOCATE, DEFAULT_POOL_RECORD_COUNT * DEFAULT_RECORD_SIZE,
+    return std::make_shared<LogRecordPool>(ALLOCATE, DEFAULT_POOL_RECORD_COUNT * (DEFAULT_RECORD_SIZE + sizeof(LogRecord)),
                                            DEFAULT_RECORD_SIZE);
 }
 
 void Logger::setup_channels(std::vector<LogConfig>& config)
-{    
+{
     install_slog_handlers();
 
     auto& backend = instance().backend;
     instance().stop_all_channels();
     backend.clear();
     auto default_pool = make_default_pool();
-    
-    for (std::size_t i = 0; i < config.size(); i++) {
-        std::shared_ptr<LogRecordPool> pool = config[i].get_pool();
+    auto null_sink = std::make_shared<NullSink>();
+
+    for (auto& con : config) {
+        std::shared_ptr<LogRecordPool> pool = con.get_pool();
         if (!pool) {
             pool = default_pool;
         }
-        std::shared_ptr<LogSink> sink = config[i].get_sink();
+        std::shared_ptr<LogSink> sink = con.get_sink();
         if (nullptr == sink) {
-            sink = std::make_shared<NullSink>();
+            sink = null_sink;
         }
-        backend.emplace_back(sink, config[i].get_threshold_map(), pool);
+        backend.emplace_back(make_channel(sink, con.get_threshold_map(), pool));
     }
 }
 
 void Logger::start_all_channels()
 {
-    Logger::instance();
+    auto& logger = Logger::instance();
     set_signal_state(SLOG_ACTIVE);
-    for (auto& chan : instance().backend) {
-        chan.start();
+    for (auto& chan : logger.backend) {
+        chan->start();
     }
 }
 
@@ -85,13 +101,11 @@ void Logger::start_all_channels()
  */
 void Logger::stop_all_channels()
 {
-    Logger::instance();
-    set_signal_state(SLOG_STOPPED);
-    for (auto& chan : instance().backend) {
-        chan.stop();
-    }
+    auto& logger = Logger::instance();
+    set_signal_state(SLOG_STOPPED);    
+    logger.backend.clear();
     restore_old_signal_handlers();
-    s_installedSignalHandlers = false;
+    s_installed_signal_handlers = false;
 }
 
 void Logger::setup_stopped_channel() { instance().do_setup_stopped_channel(); }
@@ -101,10 +115,18 @@ void Logger::do_setup_stopped_channel()
     set_signal_state(SLOG_STOPPED);
     backend.clear();
     ThresholdMap threshold;
-    threshold.set_default(FATL);
-    backend.emplace_back(std::make_shared<NullSink>(), threshold, make_default_pool());
+#if SLOG_LOG_TO_CONSOLE_WHEN_STOPPED
+    threshold.set_default(slog::DBUG);
+    auto pool = make_default_pool();
+    auto sink = std::make_shared<ConsoleSink>();
+#else
+    threshold.set_default(std::numeric_limits<int>::min());
+    auto pool = std::make_shared<LogRecordPool>(DISCARD, 0, 0);
+    auto sink = std::make_shared<NullSink>();
+#endif
+    backend.emplace_back(make_channel(sink, threshold, pool));
     set_signal_state(SLOG_ACTIVE);
-    backend.front().start();
+    backend.front()->start();
 }
 
 long get_pool_missing_count()

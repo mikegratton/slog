@@ -1,4 +1,5 @@
 #include "testUtilities.hpp"
+#include "LogConfig.hpp"
 #include <cassert>
 #include <cmath>
 #include <cstdint>
@@ -69,32 +70,35 @@ bool parse_time(uint64_t& o_nanoseconds, char const* time_str)
 void parseLogRecord(TestLogRecord& o_record, char const* recordString)
 {    
     
-    // no info for these in default format
-    o_record.meta.filename = "";
-    o_record.meta.function = "";
-    o_record.meta.line = -1; 
-    o_record.meta.thread_id = -1;
+    // no info for these in default format    
+    static char filename[256] = "";
+    static char function[256] = "";
+    int line = -1; 
+    long thread_id = -1;
 
-    o_record.meta.severity = 0; // todo
-    o_record.meta.tag[0] = 0; // todo
-    o_record.meta.time = 0; // todo    
+    int severity = 0; 
+    char tag[TAG_SIZE]{}; 
+    uint64_t time = 0;
 
     // [SEVR TAG TIME] MESSAGE
     assert(recordString[0] == '[');
     recordString++;
-    o_record.meta.severity = severity_from_string(recordString);
+    severity = severity_from_string(recordString);
     recordString += 5;
     if (recordString[23] != ']') { // There's a tag
-        char* cursor = o_record.meta.tag;
+        char* cursor = tag;
         while (*recordString != ' ' && *recordString) {
             *cursor++ = *recordString++;            
         }
         *cursor++ = '\0';
         recordString++;
     }
-    parse_time(o_record.meta.time, recordString);
+    parse_time(time, recordString);
     recordString += 23;
     assert(recordString[0] == ']');
+
+    o_record.meta.capture(filename, function, line, severity, tag);
+
     recordString += 2;
     o_record.message = recordString;
     o_record.message_byte_count = strlen(o_record.message);

@@ -19,7 +19,7 @@
 // tag/severity passes the threshold.
 #define SLOG_FlogBase(severity, tag, channel, format, ...)                     \
   if (SLOG_LOGGING_ENABLED && slog::will_log((severity), (tag), (channel))) {  \
-    slog::RecordNode *rec = slog::get_fresh_record(                            \
+    slog::LogRecord *rec = slog::get_fresh_record(                            \
         (channel), __FILE__, __FUNCTION__, __LINE__, (severity), (tag));       \
     if (rec) {                                                                 \
       slog::push_to_sink(slog::capture_message(rec, format, ##__VA_ARGS__),    \
@@ -39,24 +39,24 @@ namespace slog {
 /*** Implementation details follow ***/
 
 // Internal record of a message
-struct RecordNode;
+struct LogRecord;
 
 /**
  * @brief Send a completed record to the back end for recording.
  */
-void push_to_sink(RecordNode* rec, int channel);
+void push_to_sink(LogRecord* rec, int channel);
 
 /**
  * @brief Obtain a record from the pool, setting the metadata
  */
-RecordNode* get_fresh_record(int channel, char const* file, char const* function, int line, int severity,
+LogRecord* get_fresh_record(int channel, char const* file, char const* function, int line, int severity,
                              char const* tag);
 
 /**
  * printf-style message capture.
- * @warning This will truncate messages longer than one RecordNode long.
+ * @warning This will truncate messages longer than one LogRecord long.
  */
-RecordNode* capture_message(RecordNode* rec, char const* format, ...);
+LogRecord* capture_message(LogRecord* rec, char const* format, ...);
 
 /**
 * @brief Capture binary messages. 
@@ -69,20 +69,41 @@ RecordNode* capture_message(RecordNode* rec, char const* format, ...);
 */
 class CaptureBinary {
    public:
-    CaptureBinary(RecordNode* node_, int channel_);
+    
+    /// Construct a capture object with the given head node destined for
+    /// the given channel
+    CaptureBinary(LogRecord* node, int channel);
+
+    /// Push the record to the channel sink
     ~CaptureBinary();
+
+    /// This is not copyable
     CaptureBinary(CaptureBinary const&) = delete;
     CaptureBinary& operator=(CaptureBinary const&) = delete;
+    CaptureBinary(CaptureBinary&&) noexcept = default;
+    CaptureBinary& operator=(CaptureBinary&&) noexcept = default;
 
+    /**
+     * @brief Write bytes into the record
+     * @param bytes -- Byte array
+     * @param byte_count -- Byte count to write from bytes
+     */
     CaptureBinary& record(void const* bytes, long byte_count);
 
    private:
+
+    /// Write bytes to the current node. This will not write beyond that node's remaining capacity
     long write_some(char const* bytes, long byte_count);
-    void set_node(RecordNode* new_node);
+
+    /// Set the node. If there's a non-null head_node, this node is attached to the current node
+    /// and the cursor/buffer_end are reset to point to its message region
+    void set_node(LogRecord* new_node);
+
+    /// Set the number of bytes written to current_node
     void set_byte_count();
 
-    RecordNode* head_node;
-    RecordNode* current_node;    
+    LogRecord* head_node;
+    LogRecord* current_node;    
     char* cursor;
     char const* buffer_end;
     int channel;
@@ -102,11 +123,19 @@ namespace slog {
  */
 class CaptureStream {
    public:
-    CaptureStream(RecordNode* node_, int channel_);
+    /// Make a capture object that writes to node destined for channel_
+    CaptureStream(LogRecord* node, int channel);
+
+    /// These are not copyable
     CaptureStream(CaptureStream const&) = delete;
     CaptureStream& operator=(CaptureStream const&) = delete;
+    CaptureStream(CaptureStream&&) noexcept = default;
+    CaptureStream& operator=(CaptureStream&&) noexcept = default;
+
+    /// Push the node to the channel sink
     ~CaptureStream();
 
+    /// Obtain the actual stream object
     std::ostream& stream() { return *stream_ptr; }
 
    protected:

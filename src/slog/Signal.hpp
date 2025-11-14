@@ -7,7 +7,7 @@ namespace slog
 /// All signals handled by slog
 std::array<int, 3> extern const HANDLED_SIGNALS;
 
-/// Get the current signal being handled, or the special signal_state codes 
+/// Get the current signal being handled, or the special signal_state codes
 /// below if nothing is being handled
 int get_signal_state();
 
@@ -24,13 +24,12 @@ void notify_channel_done();
 void block_until_all_channels_done();
 
 /// Extra "signal" codes that are special to slog
-enum signal_state : int { 
-    SLOG_ACTIVE = 0,   // Logging is active
-    SLOG_STOPPED = ~0  // Logging is inactive, but there's no signal being handled
+enum signal_state : int {
+    SLOG_ACTIVE = 0,  // Logging is active
+    SLOG_STOPPED = ~0 // Logging is inactive, but there's no signal being handled
 };
 
 } // namespace slog
-
 
 /// Signal handler. Async-signal safe.
 extern "C" void slog_handle_signal(int signal_id);

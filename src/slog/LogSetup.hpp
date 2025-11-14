@@ -5,13 +5,13 @@
 #include <ostream>
 #endif
 
-#include "slog.hpp"
 #include "LogRecordPool.hpp"
 #include "LogSink.hpp"
 #include "ThresholdMap.hpp"
+#include "slog.hpp"
 
-
-namespace slog {
+namespace slog
+{
 
 /**
  * @brief Full control of logging
@@ -65,13 +65,21 @@ void set_locale_to_global();
  * NullSink that discards all messages and the pool is a shared global
  * pool that allocates when empty.
  */
-class LogConfig {
-   public:
+class LogConfig
+{
+  public:
     LogConfig();
 
-    LogConfig(int default_threshold, std::shared_ptr<LogSink> sink_);
+    /**
+     * @brief Construct a config from a threshold and sink
+     * This will use the default pool and have no special tag
+     * thresholds.
+     */
+    LogConfig(int default_threshold, std::shared_ptr<LogSink> sink);
 
-    /// Set the default threshold at which to accept records
+    /**
+     * @brief Set the default threshold at which to accept records
+     */
     void set_default_threshold(int thr) { threshold.set_default(thr); }
 
     /**
@@ -80,14 +88,14 @@ class LogConfig {
      * Note you don't need to register all tags here, only those where you
      * want to log that tag at a different threshold than the default.
      */
-    void add_tag(const char* tag, int thr) { threshold.add_tag(tag, thr); }
+    void add_tag(char const* tag, int thr) { threshold.add_tag(tag, thr); }
 
     /**
      * @brief Set the sink
      * The sink saves log records. There are three sinks included:
      * FileSink, ConsoleSink, and JournaldSink.
      */
-    void set_sink(std::shared_ptr<LogSink> sink_) { sink = sink_; }
+    void set_sink(std::shared_ptr<LogSink> new_sink) { sink = new_sink; }
 
     /**
      * @brief Use a special record pool
@@ -95,7 +103,7 @@ class LogConfig {
      * By default, all channels share a common pool. You can use special pools with
      * different-sized records if required by setting this.
      */
-    void set_pool(std::shared_ptr<LogRecordPool> pool_) { pool = pool_; }
+    void set_pool(std::shared_ptr<LogRecordPool> new_pool) { pool = new_pool; }
 
     /// Get the current sink
     std::shared_ptr<LogSink> const& get_sink() { return sink; }
@@ -106,27 +114,22 @@ class LogConfig {
     /// Get a shared_ptr to the log record pool
     std::shared_ptr<LogRecordPool> const& get_pool() { return pool; }
 
-   protected:
+  private:
     std::shared_ptr<LogRecordPool> pool;
     std::shared_ptr<LogSink> sink;
     ThresholdMap threshold;
 
 #if SLOG_STREAM
-   public:
+  public:
     /// Set the locale for the stream
-    void set_locale(std::locale locale_)
-    {
-        locale = locale_;
-    }
+    void set_locale(std::locale new_locale) { locale = new_locale; }
 
-    std::locale const& get_locale() const
-    {
-        return locale;
-    }
+    /// Get the locale stored here
+    std::locale const& get_locale() const { return locale; }
 
-   protected:
+  private:
     std::locale locale;
 #endif
 };
 
-}  // namespace slog
+} // namespace slog

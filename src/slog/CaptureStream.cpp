@@ -6,7 +6,7 @@
 #include <ostream>
 #include <streambuf>
 
-#include "LogRecordPool.hpp" // For RecordNode
+#include "LogRecord.hpp" 
 #include "slogDetail.hpp"
 
 namespace slog
@@ -20,11 +20,11 @@ class IntrusiveBuf : public std::streambuf
 {
   public:
 
-    // Get the head RecordNode*, setting the internal nodes to null.
+    // Get the head LogRecord*, setting the internal nodes to null.
     // Idempotent.
-    RecordNode* take_node() 
+    LogRecord* take_node() 
     {
-        RecordNode* returnValue = nullptr;
+        LogRecord* returnValue = nullptr;
         if (m_recordHead) {
             set_node_byte_count();
             returnValue = m_recordHead;
@@ -35,30 +35,30 @@ class IntrusiveBuf : public std::streambuf
         return returnValue;
     }
 
-    void set_node(RecordNode* node, int channel)
+    void set_node(LogRecord* node, int channel)
     {
         if (m_recordHead) {
             set_node_byte_count();
-            assert(m_node->rec.message_byte_count == m_node->rec.message_max_size);
-            attach(m_node, node);
+            assert(m_node->message_byte_count() == m_node->message_max_size());
+            m_node->attach(node);
         } else {
             m_recordHead = node;
         }
         m_node = node;
-        m_channel = channel;        
-        setp(node->rec.message, node->rec.message + node->rec.message_max_size);
+        m_channel = channel;
+        setp(node->message(), node->message() + node->message_max_size());
     }
 
     void set_node_byte_count()
     {
-        m_node->rec.message_byte_count = pptr() - pbase();
+        m_node->message_byte_count(pptr() - pbase());
     }
 
     int channel() const { return m_channel; }
 
   protected:
-    RecordNode* m_recordHead{nullptr};
-    RecordNode* m_node{nullptr};
+    LogRecord* m_recordHead{nullptr};
+    LogRecord* m_node{nullptr};
     int m_channel{DEFAULT_CHANNEL};    
 
     std::streamsize write_some(char const* s, std::streamsize count)
@@ -84,7 +84,7 @@ class IntrusiveBuf : public std::streambuf
     std::streambuf::int_type overflow(std::streambuf::int_type ch) override
     {
         if (pptr() >= epptr()) {
-            RecordNode* extra = get_fresh_record(m_channel, nullptr, nullptr, -1, ~0, nullptr);
+            LogRecord* extra = get_fresh_record(m_channel, nullptr, nullptr, -1, ~0, nullptr);
             if (!extra) {
                 return std::streambuf::traits_type::eof();
             }
@@ -107,14 +107,14 @@ class IntrusiveStream : public std::ostream
     {
     }
 
-    void set_node(RecordNode* node, int channel)
+    void set_node(LogRecord* node, int channel)
     {
         assert(buf.take_node() == nullptr);
         buf.set_node(node, channel);
         clear();
     }
 
-    RecordNode* take_node() { return buf.take_node(); }
+    LogRecord* take_node() { return buf.take_node(); }
 
     int channel() const { return buf.channel(); }
 
@@ -193,7 +193,7 @@ void set_locale(std::locale locale)
 
 void set_locale_to_global() { set_locale(std::locale()); }
 
-CaptureStream::CaptureStream(RecordNode* node_, int channel_)    
+CaptureStream::CaptureStream(LogRecord* node_, int channel_)    
 {
     if (node_) {
         st_stream.stream_direct().set_node(node_, channel_);
@@ -206,10 +206,8 @@ CaptureStream::CaptureStream(RecordNode* node_, int channel_)
 // On destruction, forward the node to the backend.
 CaptureStream::~CaptureStream()
 {
-    if (stream_ptr != &s_null) {
-        // Terminate record and push it        
-        auto& stream = st_stream.stream_direct();
-        stream.put('\0');
+    if (stream_ptr != &s_null) {        
+        auto& stream = st_stream.stream_direct();        
         push_to_sink(stream.take_node(), stream.channel());
     }
 }

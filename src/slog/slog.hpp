@@ -72,7 +72,8 @@
 #define Blog(...) SLOG_GET_MACRO(__VA_ARGS__, SLOG_Blosgstc, SLOG_Blogst, SLOG_Blogs)(__VA_ARGS__)
 #endif
 
-namespace slog {
+namespace slog
+{
 /**
  * @brief Basic startup function.  For configuration options, see LogSetup.hpp
  */
@@ -91,4 +92,4 @@ void stop_logger();
  */
 bool will_log(int severity, char const* tag = "", int channel = DEFAULT_CHANNEL);
 
-}  // namespace slog
+} // namespace slog

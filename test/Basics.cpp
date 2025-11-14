@@ -26,7 +26,7 @@ TEST_CASE("RecordPool.Discard")
     int pool_size = 1024;
     int message_size = 32;    
     LogRecordPool pool(DISCARD, pool_size, message_size);
-    CHECK(pool.count() == pool_size / (message_size + sizeof(RecordNode)));
+    CHECK(pool.count() == pool_size / (message_size + sizeof(LogRecord)));
     auto* item = pool.allocate();
     CHECK(item != nullptr);
     pool.free(item);
@@ -66,7 +66,7 @@ TEST_CASE("RecordPool.Allocate")
     int message_size = 32;
     LogRecordPool pool(slog::ALLOCATE, 1024, 32);
     int total_message = pool.count();
-    std::vector<RecordNode*> allocated;
+    std::vector<LogRecord*> allocated;
     for (int i = 0; i < total_message ; i++) {
         allocated.push_back(pool.allocate());
         CHECK(allocated.back() != nullptr);
@@ -130,18 +130,18 @@ TEST_CASE("LogRecord")
 {
     LogRecordMetadata meta;
     meta.capture("filename", "function", 1, 2, "tag");
-    CHECK(strcmp(meta.filename, "filename") == 0);
-    CHECK(strcmp(meta.function, "function") == 0);
-    CHECK(meta.line == 1);
-    CHECK(meta.severity == 2);
-    CHECK(strcmp(meta.tag , "tag") == 0);
+    CHECK(strcmp(meta.filename(), "filename") == 0);
+    CHECK(strcmp(meta.function(), "function") == 0);
+    CHECK(meta.line() == 1);
+    CHECK(meta.severity() == 2);
+    CHECK(strcmp(meta.tag() , "tag") == 0);
 
     meta.reset();
-    CHECK(strcmp(meta.filename, "") == 0);
-    CHECK(strcmp(meta.function, "") == 0);
-    CHECK(meta.line == -1);
-    CHECK(meta.severity > slog::DBUG);
-    for (int i = 0 ; i < slog::TAG_SIZE; i++) { CHECK(meta.tag[i] == 0); }    
+    CHECK(strcmp(meta.filename(), "") == 0);
+    CHECK(strcmp(meta.function(), "") == 0);
+    CHECK(meta.line() == -1);
+    CHECK(meta.severity() > slog::DBUG);
+    for (int i = 0 ; i < slog::TAG_SIZE; i++) { CHECK(meta.tag()[i] == 0); }
 }
 
 TEST_CASE("Locale")
@@ -173,11 +173,6 @@ TEST_CASE("LogConfig")
     CHECK(cfg.get_pool() == pool);
 }
 
-struct TestRecord : public slog::LogRecord
-{
-    TestRecord(char* buffer, long length) : slog::LogRecord(buffer, length) {}
-};
-
 TEST_CASE("Stream")
 {
     LogConfig conifg;
@@ -192,12 +187,16 @@ TEST_CASE("Stream")
         slog::CaptureStream testStream(record, 0);
         testStream.stream().put('a');
         testStream.stream().put('b');
-        CHECK(record->rec.message[0] == 'a');
-        CHECK(record->rec.message[1] == 'b');
+        CHECK(record->message()[0] == 'a');
+        CHECK(record->message()[1] == 'b');
         testStream.stream().write("hello", 5);
-        CHECK(strncmp(record->rec.message, "abhello", 5) == 0);
+        CHECK(strncmp(record->message(), "abhello", 5) == 0);
     }
 
-    // We need to stop things from crashing due to submittal
     slog::stop_logger();
+}
+
+TEST_CASE("StoppedLogger")
+{
+    Slog(DBUG) << "This message was sent while slog was stopped";
 }

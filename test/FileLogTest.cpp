@@ -41,18 +41,18 @@ TEST_CASE("FileLog.basic")
     slog::TestLogRecord record;
     fgets(buffer, sizeof(buffer), f);
     parseLogRecord(record, buffer);
-    CHECK(record.meta.severity == slog::INFO);
-    CHECK(record.meta.time < time);
-    CHECK(record.meta.time > time - 100000000UL);
-    CHECK(strcmp(record.meta.tag, "012345678901234") == 0);
+    CHECK(record.meta.severity() == slog::INFO);
+    CHECK(record.meta.time() < time);
+    CHECK(record.meta.time() > time - 100000000UL);
+    CHECK(strcmp(record.meta.tag(), "012345678901234") == 0);
     CHECK(strcmp(record.message, "hello\n") == 0);
 
     fgets(buffer, sizeof(buffer), f);
     parseLogRecord(record, buffer);
-    CHECK(record.meta.severity == slog::NOTE);
-    CHECK(record.meta.time < time);
-    CHECK(record.meta.time > time - 100000000UL);
-    CHECK(strcmp(record.meta.tag, "") == 0);
+    CHECK(record.meta.severity() == slog::NOTE);
+    CHECK(record.meta.time() < time);
+    CHECK(record.meta.time() > time - 100000000UL);
+    CHECK(strcmp(record.meta.tag(), "") == 0);
     CHECK(strcmp(record.message, "goodbye\n") == 0);
 
     int count = fscanf(f, "%s", buffer);

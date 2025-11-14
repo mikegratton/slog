@@ -12,7 +12,7 @@ char const* program_short_name();
 /**
  * @brief Transform seconds from 1970-01-01 00:00:00Z to a tm struct
  */
-void zulu_time_r( struct tm* o_datetime, time_t const* seconds_since_epoch);
+void zulu_time_r(struct tm* o_datetime, time_t const* seconds_since_epoch);
 
 /**
  * @brief Create the directory, including needed parent directories (like mkdir -p)
@@ -20,7 +20,7 @@ void zulu_time_r( struct tm* o_datetime, time_t const* seconds_since_epoch);
  * This will return true if the directory is a valid path, and false if directories
  * can't be created.
  */
-bool make_directory(const char* directory, int mode = 509);
+bool make_directory(char const* directory, int mode = 509);
 
 /**
  * Install this handler for all slog-handled signals
@@ -38,4 +38,4 @@ void restore_old_signal_handlers();
  * install a handler for signal_id, do nothing
  */
 void forward_signal(int signal_id);
-}
+} // namespace slog

@@ -1,7 +1,8 @@
 #pragma once
 #include "LogConfig.hpp"
 
-namespace slog {
+namespace slog
+{
 
 /**
  * @brief A char const* to int map with a default value for
@@ -10,12 +11,15 @@ namespace slog {
  * This is a flat structure sorted by key (and re-sorted with
  * every addTag()), then searched via bisection.
  */
-class FlatThresholdMap {
-   public:
+class FlatThresholdMap
+{
+  public:
     FlatThresholdMap();
     ~FlatThresholdMap();
     FlatThresholdMap& operator=(FlatThresholdMap const&);
     FlatThresholdMap(FlatThresholdMap const& other);
+    FlatThresholdMap& operator=(FlatThresholdMap&&) noexcept = default;
+    FlatThresholdMap(FlatThresholdMap&& other) noexcept = default;
 
     /**
      * @brief Defines the severity threshold to apply for unknown or empty
@@ -26,18 +30,21 @@ class FlatThresholdMap {
     /**
      * @brief Add (or replace) a tag, setting its threshold
      */
-    void add_tag(const char* tag, int threshold);
+    void add_tag(char const* tag, int threshold);
 
     /**
      * @brief Look up the threshold for the given tag.
      *
-     * If the tag isn't found, is null, or empty, then return the
+     * If the tag isn't found, is null, or is empty, then return the
      * defaultThreshold
      */
-    int operator[](const char* tag) const;
+    int operator[](char const* tag) const;
 
-   protected:
+  protected:
+    // Function used to search the map
     static int map_compare(void const* vkey, void const* velement);
+
+    // Function used to sort the map
     static int map_sort(void const* velement1, void const* velement2);
 
     struct Threshold {
@@ -52,4 +59,4 @@ class FlatThresholdMap {
 };
 
 using ThresholdMap = FlatThresholdMap;
-}  // namespace slog
+} // namespace slog

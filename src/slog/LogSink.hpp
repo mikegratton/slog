@@ -5,27 +5,32 @@
 
 #include "LogRecord.hpp"
 
-namespace slog {
+namespace slog
+{
 
 /**
  * @brief Base class for all log sinks.
  *
  * To implement a new sink, only the record() function is required.
  */
-class LogSink {
-   public:
+class LogSink
+{
+  public:
     virtual ~LogSink() = default;
 
     /// Save a record to a device.
     virtual void record(LogRecord const& node) = 0;
 
     /// Notification that logging is done (i.e. close up any files)
-    virtual void finalize() { }
+    virtual void finalize() {}
 };
 
-/// Simple sink that ignores messages
-class NullSink : public LogSink {
-   public:
+/**
+ * @brief A sink that discards messages
+ */
+class NullSink : public LogSink
+{
+  public:
     void record(LogRecord const&) override {}
 };
 
@@ -52,9 +57,9 @@ void format_severity(char* severity_str, int severity);
 char const* severity_string(int severity);
 
 enum TimeFormatMode {
-    FULL_SPACE,  // YYYY-MM-DD hh:mm:ss.fZ
-    COMPACT,     // YYYYMMDDThhmmss.fZ
-    FULL_T       // YYYY-MM-DDThh:mm:ss.fZ
+    FULL_SPACE, // YYYY-MM-DD hh:mm:ss.fZ
+    COMPACT,    // YYYYMMDDThhmmss.fZ
+    FULL_T      // YYYY-MM-DDThh:mm:ss.fZ
 };
 
 /**
@@ -68,8 +73,7 @@ enum TimeFormatMode {
  * @note The string should be at least 21 characters long for zero fractional seconds.
  * For the default form, 25 characters are required.
  */
-void format_time(char* time_str, uint64_t time, int seconds_decimal_precision = 3,
-                 TimeFormatMode format = FULL_SPACE);
+void format_time(char* time_str, uint64_t time, int seconds_decimal_precision = 3, TimeFormatMode format = FULL_SPACE);
 
 /**
  * @brief Makes a code location string.
@@ -135,9 +139,6 @@ uint32_t default_binary_header_furniture(FILE* sink, int sequence, uint64_t time
 /**
  * @brief A furniture function that writes nothing
  */
-inline uint32_t no_op_furniture(FILE* sink, int sequence, uint64_t time)
-{
-    return 0;
-}
+inline uint32_t no_op_furniture(FILE* sink, int sequence, uint64_t time) { return 0; }
 
-}  // namespace slog
+} // namespace slog

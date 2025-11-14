@@ -19,6 +19,10 @@ class BinarySink : public FileSink {
    public:
     BinarySink();
     ~BinarySink();
+    BinarySink(BinarySink const&) = delete;
+    BinarySink(BinarySink&&) noexcept = default;
+    BinarySink& operator=(BinarySink const&) = delete;
+    BinarySink& operator=(BinarySink&&) noexcept = default;
 
     /// Write the record to the file
     void record(LogRecord const& node) override;

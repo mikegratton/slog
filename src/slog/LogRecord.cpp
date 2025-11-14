@@ -1,4 +1,5 @@
 #include "LogRecord.hpp"
+#include "LogConfig.hpp"
 
 #include <chrono>
 #include <cstring>
@@ -14,11 +15,11 @@ LogRecordMetadata::LogRecordMetadata() { reset(); }
 
 void LogRecordMetadata::reset()
 {
-    filename = "";
-    function = "";
-    line = NO_LINE;
-    severity = std::numeric_limits<int>::max();    
-    memset(tag, 0, sizeof(tag));
+    m_filename = "";
+    m_function = "";
+    m_line = NO_LINE;
+    m_severity = std::numeric_limits<int>::max();    
+    memset(m_tag, 0, TAG_SIZE);
 }
 
 void LogRecordMetadata::capture(char const* filename_, char const* function_, int line_, int severity_,
@@ -26,33 +27,36 @@ void LogRecordMetadata::capture(char const* filename_, char const* function_, in
 {
     // Because we might be attaching a record to another record to form a "jumbo" record, sometimes the
     // metadata isn't meaningful. We avoid system calls in these cases.
-    filename = filename_;
-    function = function_;
-    line = line_;
-    severity = severity_;
-    if (line >= 0) {
-        time = std::chrono::system_clock::now().time_since_epoch().count();
-        thread_id = std::hash<std::thread::id>{}(std::this_thread::get_id());
+    m_filename = filename_;
+    m_function = function_;
+    m_line = line_;
+    m_severity = severity_;
+    if (m_line >= 0) {
+        m_time = std::chrono::system_clock::now().time_since_epoch().count();
+        m_thread_id = std::hash<std::thread::id>{}(std::this_thread::get_id());
     }    
     if (tag_) {
-        strncpy(tag, tag_, sizeof(tag) - 1);
+        strncpy(m_tag, tag_, TAG_SIZE - 1);
     }
 }
 
-LogRecord::LogRecord(char* message_, long max_message_size_)
+LogRecord::LogRecord()
+: m_message_max_size(0)
+, m_message_byte_count(0)
+, m_message(nullptr)
+, m_more(nullptr)
+, m_next(nullptr)
 {
-    message_max_size = max_message_size_;
-    message_byte_count = 0L;
-    message = message_;
-    reset();
+    m_meta.reset();
 }
 
 void LogRecord::reset()
 {
-    meta.reset();    
-    message_byte_count = 0L;
-    message[0] = '\0';
-    more = nullptr;
+    m_meta.reset();    
+    m_message_byte_count = 0L;
+    m_message[0] = '\0';
+    m_more = nullptr;
+    m_next = nullptr;
 }
 
 } // namespace slog

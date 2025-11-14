@@ -5,7 +5,8 @@
 
 struct sockaddr;
 
-namespace slog {
+namespace slog
+{
 
 /**
  * @brief A log sink compatible with syslog. Messages are sent over unix sockets
@@ -20,8 +21,9 @@ namespace slog {
  * Longer messages will be silently truncated. Messages sent to a unix socket
  * via UDP or over TCP/IP do not have this limitation.
  */
-class SyslogSink : public LogSink {
-   public:
+class SyslogSink : public LogSink
+{
+  public:
     static constexpr int kSyslogUserFacility = 1;
 
     /**
@@ -36,10 +38,10 @@ class SyslogSink : public LogSink {
     void record(LogRecord const& node) final;
 
     /// Change the formatting for each record (default is default_format)
-    void set_formatter(Formatter format) { mformat = format; }
+    void set_formatter(Formatter format) { format = format; }
 
     /// Set echo to console on/off (default is on)
-    void set_echo(bool doit = true) { mecho = doit; }
+    void set_echo(bool doit = true) { echo = doit; }
 
     /// Change the application name (default is slog::program_short_name())
     void set_application_name(char const* application_name);
@@ -59,7 +61,7 @@ class SyslogSink : public LogSink {
     /// Close the socket
     void finalize() override;
 
-   protected:
+  protected:
     /// Compute the syslog priority from the slog severity
     int syslog_priority(int slog_severity) const;
 
@@ -78,34 +80,33 @@ class SyslogSink : public LogSink {
     /// Write the syslog header into the buffer, returning the header size
     int format_header(LogRecord const& node);
 
-    /// Connect to a unix socket 
+    /// Connect to a unix socket
     bool connect_unix();
 
     /// Connect to a IP socket
     bool connect_ip();
 
-    std::size_t constexpr static kMaxDatagramSize = 65507;
-    
+    std::size_t constexpr static MAX_DATAGRAM_SIZE = 65507;
 
-    Formatter mformat;
-    bool mecho;
-    int msyslog_facility;
-    bool muse_rfc3164;
-    bool muse_tcp;
-    int mmax_connection_attempts;
-    std::chrono::milliseconds mconnection_attempt_wait;
+    Formatter format;
+    bool echo;
+    int syslog_facility;
+    bool use_rfc3164;
+    bool use_tcp;
+    int max_connection_attempts;
+    std::chrono::milliseconds connection_attempt_wait;
 
-    int msock_fd;
+    int sock_fd;
 
-    char* mbuffer;
-    std::size_t mbuffer_size;
-    FILE* mbufferStream;
+    char* buffer;
+    std::size_t buffer_size;
+    FILE* buffer_stream;
 
-    char mdestination[1024];
-    char mapplication_name[64];
-    char mhostname[1024];
-    char mtimestamp[32];
-    char* munix_socket;
+    char destination[1024];
+    char application_name[64];
+    char hostname[1024];
+    char timestamp[32];
+    char* unix_socket;
 };
 
-}  // namespace slog
+} // namespace slog

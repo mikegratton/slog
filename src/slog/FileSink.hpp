@@ -18,6 +18,10 @@ class FileSink : public LogSink {
    public:
     FileSink();
     ~FileSink();
+    FileSink(FileSink const&) = delete;
+    FileSink(FileSink&&) noexcept = default;
+    FileSink& operator=(FileSink const&) = delete;
+    FileSink& operator=(FileSink&&) noexcept= default;
 
     /**
      * @brief Close the open file.

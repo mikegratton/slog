@@ -57,17 +57,14 @@ class Logger
   private:
     Logger();
 
-    ~Logger();
-
     static Logger& instance();
 
     void do_setup_stopped_channel();
 
     static std::shared_ptr<LogRecordPool> make_default_pool();
 
-    std::vector<LogChannel> backend;
+    std::vector<std::unique_ptr<LogChannel>> backend;
 };
-
 
 /// (For debugging the logger) Check that all pool records are either free or in
 /// a queue. Not thread safe.
@@ -79,12 +76,12 @@ inline std::size_t Logger::channel_count() { return instance().backend.size(); }
 
 inline LogChannel& Logger::get_channel(int channel)
 {
-    if (channel < 0 || channel >= instance().backend.size()) {
+    if (instance().backend.size() == 0) { setup_stopped_channel(); }
+    if (channel < 0 || channel >= channel_count()) {
         channel = DEFAULT_CHANNEL;
     }
-    return instance().backend[channel];
+    return *instance().backend[channel];
 }
-
 
 } // namespace detail
 } // namespace slog

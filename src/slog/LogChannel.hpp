@@ -33,7 +33,7 @@ class LogChannel {
     /**
      * Ctor.
      */
-    LogChannel(std::shared_ptr<LogSink> sink_, ThresholdMap const& threshold_, std::shared_ptr<LogRecordPool> pool_);
+    LogChannel(std::shared_ptr<LogSink> sink, ThresholdMap const& threshold, std::shared_ptr<LogRecordPool> pool);
 
     /**
      * Dtor. Calls stop() so that all enqued messages will
@@ -41,7 +41,10 @@ class LogChannel {
      */
     ~LogChannel();
 
-    LogChannel(LogChannel const& i_rhs);
+    LogChannel(LogChannel const&) = delete;
+    LogChannel& operator=(LogChannel const&) = delete;
+    LogChannel(LogChannel&&) noexcept = delete;
+    LogChannel& operator=(LogChannel&&) noexcept = delete;
 
     /**
      * Start the worker thread. Transition to RUN state. Thread safe.
@@ -57,19 +60,19 @@ class LogChannel {
     /**
      * Check the severity threshold for the given tag. Thread safe in RUN mode.
      */
-    int threshold(char const* tag) { return thresholdMap[tag]; }
+    int threshold(char const* tag) { return threshold_map[tag]; }
 
     /**
      * Attempt to grab a new record from the pool. Will return nullptr if the
      * pool is exhausted. Thread safe.
      */
-    RecordNode* get_fresh_record() { return pool->allocate(); }
+    LogRecord* get_fresh_record() { return pool->allocate(); }
 
     /**
      * Send a record to the worker thread. Ownership of this pointer transfered
      * to the queue. Thread safe. RUN STATE ONLY
      */
-    void push(RecordNode* rec);
+    void push(LogRecord* rec);
 
     /*
      * For debugging. Compare the number of messages in the pool to the expected
@@ -89,20 +92,20 @@ class LogChannel {
      */
     class LogQueue {
        public:
-        LogQueue() : mtail(nullptr), mhead(nullptr) {}
+        LogQueue() : tail(nullptr), head(nullptr) {}
 
-        void push(RecordNode* record);
+        void push(LogRecord* record);
 
-        RecordNode* pop(std::chrono::milliseconds wait);
+        LogRecord* pop(std::chrono::milliseconds wait);
 
-        RecordNode* pop_all();
+        LogRecord* pop_all();
 
        protected:
         std::mutex lock;
         std::condition_variable pending;
 
-        RecordNode* mtail;
-        RecordNode* mhead;
+        LogRecord* tail;
+        LogRecord* head;
     };
 
     enum State { SETUP, RUN };
@@ -113,11 +116,11 @@ class LogChannel {
     LogQueue queue;
 
     // This state should not be mutated in RUN mode
-    ThresholdMap thresholdMap;
+    ThresholdMap threshold_map;
     std::shared_ptr<LogSink> sink;
 
     // Worker thread stuff
-    std::thread workThread;
+    std::thread work_thread;
 };
 
 }  // namespace slog

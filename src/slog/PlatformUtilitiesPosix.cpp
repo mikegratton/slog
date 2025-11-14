@@ -1,6 +1,6 @@
 #include "PlatformUtilities.hpp"
-#include "SlogError.hpp"
 #include "Signal.hpp"
+#include "SlogError.hpp"
 #include <cerrno>
 #include <cstdio>
 #include <cstdlib>
@@ -9,9 +9,7 @@
 #include <signal.h>
 #include <sys/stat.h>
 
-#include <set>
 #include <string>
-#include <list>
 
 namespace slog
 {
@@ -30,11 +28,11 @@ bool make_directory(char const* directory, int mode)
     }
 
     struct stat path_stat;
-    std::string path(directory);    
-    auto slashIndex = 0;
+    std::string path(directory);
+    auto slash_index = 0;
     do {
-        slashIndex = path.find('/', slashIndex+1);
-        std::string fragment = path.substr(0, slashIndex);
+        slash_index = path.find('/', slash_index + 1);
+        std::string fragment = path.substr(0, slash_index);
         if (0 == stat(fragment.c_str(), &path_stat)) {
             if (!S_ISDIR(path_stat.st_mode)) {
                 slog_error("Cannot create path %s -- %s is an existing file\n", directory, fragment.c_str());
@@ -46,13 +44,13 @@ bool make_directory(char const* directory, int mode)
                 return false;
             }
         }
-    } while (slashIndex < path.size());
+    } while (slash_index < path.size());
 
     return true;
 }
 
 //////////////////////////////////////////////////////////////////////////
-// Signal handling & handler storage
+// Signal handling
 namespace
 {
 
@@ -68,10 +66,7 @@ template <class T> sigset_t make_signal_mask(T const& handled_signals)
     return mask;
 }
 
-void restore_old_signal_handler(int signal_id)
-{
-    signal(signal_id, SIG_DFL);
-}
+void restore_old_signal_handler(int signal_id) { signal(signal_id, SIG_DFL); }
 
 bool install_signal_handler_if_not_ignored(int signal_id, signal_handler handler)
 {

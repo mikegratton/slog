@@ -6,36 +6,41 @@
 #include "ConsoleSink.hpp"
 #include "LoggerSingleton.hpp"
 
-namespace slog {
+namespace slog
+{
 
 using Logger = ::slog::detail::Logger;
 
-
 void start_logger(LogConfig const& config)
 {
-    std::vector<LogConfig> vconfig{config};    
+    std::vector<LogConfig> vconfig{config};
     start_logger(vconfig);
 }
 
 void start_logger(std::vector<LogConfig> config)
 {
-    if (config.empty()) { return; }    
+    if (config.empty()) {
+        return;
+    }
     Logger::setup_channels(config);
 #if SLOG_STREAM
-    if (config.size() > 0) { set_locale(config.front().get_locale()); }
+    if (config.size() > 0) {
+        set_locale(config.front().get_locale());
+    }
 #endif
     Logger::start_all_channels();
 }
 
-
-LogConfig::LogConfig() : pool(nullptr), sink(std::make_shared<ConsoleSink>())
+LogConfig::LogConfig()
+    : pool(nullptr),
+      sink(std::make_shared<ConsoleSink>())
 {
 }
 
-LogConfig::LogConfig(int default_threshold, std::shared_ptr<LogSink> sink_) 
-: sink(sink_)
+LogConfig::LogConfig(int default_threshold, std::shared_ptr<LogSink> new_sink)
+    : sink(new_sink)
 {
     threshold.set_default(default_threshold);
 }
 
-}  // namespace slog
+} // namespace slog

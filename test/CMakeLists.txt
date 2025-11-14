@@ -10,6 +10,11 @@ endif()
 
 add_executable(slogTest ${source})
 target_link_libraries(slogTest PUBLIC slog)
+target_compile_definitions(slogTest 
+    PUBLIC 
+        -DDOCTEST_CONFIG_INCLUDE_TYPE_TRAITS 
+        -DDOCTEST_CONFIG_SUPER_FAST_ASSERTS
+)
 
 add_subdirectory(signalTest)
 add_subdirectory(performanceTest)

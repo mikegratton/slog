@@ -1,8 +1,9 @@
-#include "LoggerSingleton.hpp"
 #include "FileSink.hpp"
+#include "LoggerSingleton.hpp"
 #include <cstdarg>
 
-namespace slog {
+namespace slog
+{
 
 using Logger = ::slog::detail::Logger;
 
@@ -17,7 +18,6 @@ void start_logger(int severity)
 void stop_logger()
 {
     Logger::stop_all_channels();
-    Logger::setup_stopped_channel();    
 }
 
 bool will_log(int severity, char const* tag, int channel)
@@ -25,29 +25,28 @@ bool will_log(int severity, char const* tag, int channel)
     return severity <= Logger::get_channel(channel).threshold(tag);
 }
 
-void push_to_sink(RecordNode* node, int channel)
-{
-    Logger::get_channel(channel).push(node);
-}
+void push_to_sink(LogRecord* node, int channel) { Logger::get_channel(channel).push(node); }
 
-RecordNode* get_fresh_record(int channel, char const* file, char const* function, int line, int severity,
-                             char const* tag)
+LogRecord* get_fresh_record(int channel, char const* file, char const* function, int line, int severity,
+                            char const* tag)
 {
-    RecordNode* node = Logger::get_channel(channel).get_fresh_record();
-    if (node) { node->rec.meta.capture(file, function, line, severity, tag); }
+    LogRecord* node = Logger::get_channel(channel).get_fresh_record();
+    if (node) {
+        node->meta().capture(file, function, line, severity, tag);
+    }
     return node;
 }
 
 /// printf-style record capture
-RecordNode* capture_message(RecordNode* node, char const* format_, ...)
+LogRecord* capture_message(LogRecord* node, char const* format_, ...)
 {
     if (node) {
         va_list vlist;
         va_start(vlist, format_);
-        node->rec.message_byte_count = vsnprintf(node->rec.message, node->rec.message_max_size, format_, vlist) + 1;
+        node->message_byte_count(vsnprintf(node->message(), node->message_max_size(), format_, vlist) + 1);
         va_end(vlist);
     }
     return node;
 }
 
-}
+} // namespace slog

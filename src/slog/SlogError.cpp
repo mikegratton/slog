@@ -5,9 +5,9 @@
 namespace slog
 {
 
-void slog_print_error(char const* format_, va_list args)
+void slog_print_error(char const* format, va_list args)
 {
     fprintf(stderr, "Slog: ");
-    vfprintf(stderr, format_, args);
+    vfprintf(stderr, format, args);
 }
 } // namespace slog

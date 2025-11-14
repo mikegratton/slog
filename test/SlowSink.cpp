@@ -22,5 +22,5 @@ void SlowSink::finalize()
 void SlowSink::record(slog::LogRecord const& rec)
 {
     std::lock_guard<std::mutex> guard(mwait_for_end);
-    mcontents.push_back(rec.message);    
+    mcontents.push_back(rec.message());    
 }
