@@ -73,7 +73,7 @@ void parseLogRecord(TestLogRecord& o_record, char const* recordString)
     // no info for these in default format    
     static char filename[256] = "";
     static char function[256] = "";
-    int line = -1; 
+    int line = 1; // This forces some system calls in capture()
     long thread_id = -1;
 
     int severity = 0; 

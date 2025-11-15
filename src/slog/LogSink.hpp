@@ -97,6 +97,18 @@ uint32_t default_format(FILE* sink, LogRecord const& node);
 uint32_t no_meta_format(FILE* sink, LogRecord const& node);
 
 /**
+ * @brief This writes data in a byte delimited format with an 8 byte record header
+ *
+ * Each record becomes an entry of the form
+ *    <size><tag><record...>
+ * where
+ *    <size> is a four byte unsigned int
+ *    <tag> is the first four bytes of the tag (short tags are padded out with nulls)
+ *    <record> is the logged data
+ */
+uint32_t default_binary_format(FILE* sink, LogRecord const& node);
+
+/**
  * @brief This writes data in a byte delimited format with a 32 byte record header.
  *
  * Each record becomes an entry of the form
@@ -109,19 +121,7 @@ uint32_t no_meta_format(FILE* sink, LogRecord const& node);
  *    <tag> is 16 one-byte characters. The final character is always '\0'
  *    <record> is the logged data
  */
-uint32_t default_binary_format(FILE* sink, LogRecord const& node);
-
-/**
- * @brief This writes data in a byte delimited format with an 8 byte record header
- *
- * Each record becomes an entry of the form
- *    <size><tag><record...>
- * where
- *    <size> is a four byte unsigned int
- *    <tag> is the first four bytes of the tag (short tags are padded out with nulls)
- *    <record> is the logged data
- */
-uint32_t short_binary_format(FILE* sink, LogRecord const& node);
+uint32_t long_binary_format(FILE* sink, LogRecord const& node);
 
 /**
  * @brief Compute the total number of bytes in a record (including any attached extra

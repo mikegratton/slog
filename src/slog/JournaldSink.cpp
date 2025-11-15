@@ -143,8 +143,8 @@ long JournaldSink::line_max()
                 }
             }
         }
-    }
-    fclose(config_pipe);
+        fclose(config_pipe);
+    }    
     return std::max(line_max_value, 79L);
 }
 

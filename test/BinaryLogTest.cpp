@@ -100,7 +100,7 @@ TEST_CASE("BinaryLog")
     sink->set_max_file_size(40);
     sink->set_file_header_format(fancyFurniture);
     sink->set_file_footer_format(fancyFurniture);
-    sink->set_formatter(slog::short_binary_format);
+    sink->set_formatter(slog::default_binary_format);
     config.set_sink(sink);
     config.set_default_threshold(slog::INFO);
     slog::start_logger(config);

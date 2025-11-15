@@ -129,7 +129,7 @@ void format_time(char* time_str, uint64_t nanoseconds, int seconds_precision, Ti
     cursor = put_int(cursor, time_count.tm_sec, 10, 2);
     if (seconds_precision > 0) {
         *cursor++ = '.';
-        cursor = put_int(cursor, nano_remainder, 100000000, seconds_precision);
+        put_int(cursor, nano_remainder, 100000000, seconds_precision);
     }
 }
 
@@ -145,7 +145,7 @@ void ConsoleSink::record(LogRecord const& rec)
     fflush(stdout);
 }
 
-uint32_t default_binary_format(FILE* sink, LogRecord const& rec)
+uint32_t long_binary_format(FILE* sink, LogRecord const& rec)
 {
     // write leader here
     uint32_t total_bytes = 0;
@@ -165,7 +165,7 @@ uint32_t default_binary_format(FILE* sink, LogRecord const& rec)
     return total_bytes;
 }
 
-uint32_t short_binary_format(FILE* sink, LogRecord const& rec)
+uint32_t default_binary_format(FILE* sink, LogRecord const& rec)
 {
     uint32_t total_bytes = 0;
     uint32_t record_size = total_record_size(rec);

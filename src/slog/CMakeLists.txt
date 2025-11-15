@@ -101,6 +101,13 @@ target_include_directories(slog PUBLIC
     $<INSTALL_INTERFACE:include/slog>
 )
 
+# Tooling
+add_custom_target(clang-tidy
+    COMMAND clang-tidy -p ${CMAKE_BINARY_DIR} ${source}
+    VERBATIM
+    WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
+)
+
 # Installation
 include(GNUInstallDirs)
 

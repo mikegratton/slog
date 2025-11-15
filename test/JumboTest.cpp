@@ -50,7 +50,7 @@ TEST_CASE("Jumbo.Record")
     CHECK(feof(f));
     fclose(f);
     std::remove(sink->get_file_name());
-
+    delete[] buffer;
 }
 
 TEST_CASE("Jumbo.Pool")
