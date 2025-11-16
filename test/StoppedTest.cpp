@@ -20,7 +20,7 @@ TEST_CASE("StoppedLogToConsole")
     char buffer[1024];
     CHECK(fgets(buffer, sizeof(buffer) - 1, f));
     slog::TestLogRecord record;
-    parseLogRecord(record, buffer);
+    parse_log_record(record, buffer);
     CHECK(record.meta.severity() == slog::NOTE);
     CHECK(strncmp(record.meta.tag(), "tag", slog::TAG_SIZE - 1) == 0);
     CHECK(strncmp(record.message, "This should be visible", record.message_byte_count) == 0);

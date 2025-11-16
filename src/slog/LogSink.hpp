@@ -78,10 +78,28 @@ void format_time(char* time_str, uint64_t time, int seconds_decimal_precision = 
 /**
  * @brief Makes a code location string.
  *
- * This removes the path from file_name, then appends the line number: "Foo.cpp@15"
- * @note location_str must be at least size 64. Locations are truncated after 63 characters.
+ * This removes the path from file_name, then appends the line number:
+ * "Foo.cpp@15"
+ * @note location_str must be at least size 64. Locations are truncated after 63
+ * characters.
  */
 void format_location(char* location_str, char const* file_name, int line_number);
+
+/**
+ * @brief Compute the total number of bytes in a record (including any attached extra
+ * record nodes)
+ */
+uint32_t total_record_size(LogRecord const& node);
+
+/**
+ * @brief Write the message portion of rec to the sink (including all of the
+ * more() pieces)
+ * @return Number of bytes written
+ *
+ * Using the byte count, write rec to the file. Follow all of the more()
+ * pointers as required.
+ */
+uint32_t write_message_to_file(FILE* sink, LogRecord const& rec);
 
 /**
  * @brief The default record format: "[SEVR TAG YYYY-MM-DD hh:mm:ss.sssZ]"
@@ -122,12 +140,6 @@ uint32_t default_binary_format(FILE* sink, LogRecord const& node);
  *    <record> is the logged data
  */
 uint32_t long_binary_format(FILE* sink, LogRecord const& node);
-
-/**
- * @brief Compute the total number of bytes in a record (including any attached extra
- * record nodes)
- */
-uint32_t total_record_size(LogRecord const& node);
 
 /**
  * @brief Simple 8 byte file header of the form "SLOG<BOM><SS>" where the literal

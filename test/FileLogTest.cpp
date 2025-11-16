@@ -40,7 +40,7 @@ TEST_CASE("FileLog.basic")
     char buffer[1024];
     slog::TestLogRecord record;
     fgets(buffer, sizeof(buffer), f);
-    parseLogRecord(record, buffer);
+    parse_log_record(record, buffer);
     CHECK(record.meta.severity() == slog::INFO);
     CHECK(record.meta.time() < time);
     CHECK(record.meta.time() > time - 100000000UL);
@@ -48,7 +48,7 @@ TEST_CASE("FileLog.basic")
     CHECK(strcmp(record.message, "hello\n") == 0);
 
     fgets(buffer, sizeof(buffer), f);
-    parseLogRecord(record, buffer);
+    parse_log_record(record, buffer);
     CHECK(record.meta.severity() == slog::NOTE);
     CHECK(record.meta.time() < time);
     CHECK(record.meta.time() > time - 100000000UL);
@@ -131,20 +131,20 @@ TEST_CASE("FileLog.rotation")
     config.set_sink(sink);
     slog::start_logger(config);
     Slog(INFO) << "012345678901234567890";
+    std::string firstname(sink->get_file_name());
     Slog(INFO) << "012345678901234567890";
     slog::stop_logger();
     
-    std::string filename(sink->get_file_name());
-    auto underscore = filename.find('_');
+    auto underscore = firstname.find('_');
     REQUIRE(underscore != std::string::npos);
-    CHECK(filename.substr(0, underscore) == "./otherName");
+    CHECK(firstname.substr(0, underscore) == "./otherName");
 
-    underscore = filename.rfind('_');
+    underscore = firstname.rfind('_');
     REQUIRE(underscore != std::string::npos);
-    int sequence = atoi(filename.data() + underscore + 1);
-    CHECK(sequence == 1);
+    int sequence = atoi(firstname.data() + underscore + 1);
+    CHECK(sequence == 0);
       
-    std::string secondName = filename.substr(0, underscore) + "_001.stem";
+    std::string secondName = firstname.substr(0, underscore) + "_001.stem";
     FILE* f = fopen(secondName.c_str(), "r");
     REQUIRE(f);
     char buffer[1024];
@@ -152,5 +152,5 @@ TEST_CASE("FileLog.rotation")
     CHECK(strncmp(buffer, "012345678901234567890\n", sizeof(buffer)) == 0);
 
     std::remove(secondName.c_str());
-    std::remove(filename.c_str());
+    std::remove(firstname.c_str());
 }

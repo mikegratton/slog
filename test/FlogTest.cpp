@@ -37,7 +37,7 @@ TEST_CASE("Flog")
     char buffer[1024];
     slog::TestLogRecord record;
     fgets(buffer, sizeof(buffer), f);
-    slog::parseLogRecord(record, buffer);
+    slog::parse_log_record(record, buffer);
     CHECK(record.meta.severity() == slog::INFO);
     CHECK(record.meta.tag()[0] == '\0');
     CHECK(record.meta.time() < time);
@@ -45,18 +45,18 @@ TEST_CASE("Flog")
     CHECK(strcmp(record.message, "Info text 7\n") == 0);
 
     fgets(buffer, sizeof(buffer), f);
-    slog::parseLogRecord(record, buffer);
+    slog::parse_log_record(record, buffer);
     CHECK(record.meta.severity() == slog::WARN);    
     CHECK(strcmp(record.message, "Hello guv\n") == 0);
 
     fgets(buffer, sizeof(buffer), f);
-    slog::parseLogRecord(record, buffer);
+    slog::parse_log_record(record, buffer);
     CHECK(record.meta.severity() == slog::INFO);    
     CHECK(strncmp(record.meta.tag(), "tag", 15) == 0);
     CHECK(strcmp(record.message, "Tag message 1\n") == 0);
 
     fgets(buffer, sizeof(buffer), f);
-    slog::parseLogRecord(record, buffer);
+    slog::parse_log_record(record, buffer);
     CHECK(record.meta.severity() == slog::INFO);    
     CHECK(strncmp(record.meta.tag(), "tag2", 15) == 0);
     CHECK(strcmp(record.message, "Channel message 2\n") == 0);

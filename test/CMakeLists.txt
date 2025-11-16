@@ -1,10 +1,25 @@
 file(GLOB source CONFIGURE_DEPENDS *.cpp)
 
-if (NOT SLOG_JOURNALD)
-    list(FILTER source EXCLUDE REGEX ".*Journald.*")
+set(source
+    Basics.cpp
+    BinaryLogTest.cpp
+    FileLogTest.cpp
+    FlogTest.cpp
+    HandlerTest.cpp
+    JumboTest.cpp
+    main.cpp
+    PlatformUtilitiesTest.cpp
+    SlowSink.cpp
+    StoppedTest.cpp
+    testUtilities.cpp
+    ThresholdMapTest.cpp
+)
+
+if (SLOG_JOURNALD)
+    list(APPEND source JournaldTest.cpp)
 endif()
-if (NOT SLOG_SYSLOG)
-    list(FILTER source EXCLUDE REGEX ".*Syslog.*")
+if (SLOG_SYSLOG)
+    list(APPEND source SyslogTest.cpp)
 endif()
 
 
@@ -16,5 +31,5 @@ target_compile_definitions(slogTest
         -DDOCTEST_CONFIG_SUPER_FAST_ASSERTS
 )
 
-add_subdirectory(signalTest)
-add_subdirectory(performanceTest)
+add_executable(HandlerProgram HandlerProgram.cpp SlowSink.cpp)
+target_link_libraries(HandlerProgram PUBLIC slog)

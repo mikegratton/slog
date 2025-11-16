@@ -1,8 +1,7 @@
 configure_file(LogConfig.hpp.in LogConfig.hpp)
 
 set(SLOG_SOURCE
-    BinarySink.cpp
-    CaptureBinary.cpp    
+    BinarySink.cpp    
     CaptureStream.cpp
     FileSink.cpp
     LogChannel.cpp
@@ -11,6 +10,7 @@ set(SLOG_SOURCE
     LogRecordPool.cpp
     LogSetup.cpp
     LogSink.cpp
+    RecordInserter.cpp
     Signal.cpp
     slog.cpp
     SlogError.cpp
@@ -58,7 +58,7 @@ endif()
 # Journald
 find_package(Journald)
 if (JOURNALD_FOUND AND SLOG_JOURNALD)
-    message(STATUS "Systemd journal log sink enabled")
+    message(STATUS "Journald log sink enabled")
     list(APPEND SLOG_SOURCE JournaldSink.cpp)
     list(APPEND SLOG_PUBLIC_HEADERS JournaldSink.hpp)    
 else()    

@@ -9,8 +9,6 @@
 #include <cstring>
 #include <memory>
 
-#include "testUtilities.hpp"
-
 #if SLOG_BINARY_LOG
 
 TEST_CASE("BinaryishLog")
@@ -18,6 +16,7 @@ TEST_CASE("BinaryishLog")
     slog::LogConfig config;
     std::shared_ptr<slog::BinarySink> sink = std::make_shared<slog::BinarySink>();
     sink->set_file(".", "blogTest");
+    sink->set_formatter(slog::long_binary_format);
     config.set_sink(sink);
     config.set_default_threshold(slog::INFO);
 
@@ -163,6 +162,7 @@ TEST_CASE("Binary.jumbo")
     slog::LogConfig config;
     std::shared_ptr<slog::BinarySink> sink = std::make_shared<slog::BinarySink>();    
     sink->set_file(".", "blogTest");
+    sink->set_formatter(slog::long_binary_format);
     config.set_sink(sink);
     config.set_default_threshold(slog::INFO);
     auto pool = std::make_shared<slog::LogRecordPool>(slog::BLOCK, 1024, 32);

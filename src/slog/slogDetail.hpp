@@ -1,5 +1,6 @@
 #pragma once
 #include "LogConfig.hpp"
+#include "RecordInserter.hpp"
 
 #define SLOG_GET_MACRO(_1, _2, _3, NAME, ...) NAME
 
@@ -69,45 +70,34 @@ LogRecord* capture_message(LogRecord* rec, char const* format, ...);
 */
 class CaptureBinary {
    public:
-    
-    /// Construct a capture object with the given head node destined for
-    /// the given channel
-    CaptureBinary(LogRecord* node, int channel);
+     /**
+      * @brief Construct a capture object with the given head node destined for
+      *the given channel.
+      */
+     CaptureBinary(LogRecord* node, int channel);
 
-    /// Push the record to the channel sink
-    ~CaptureBinary();
-
-    /// This is not copyable
-    CaptureBinary(CaptureBinary const&) = delete;
-    CaptureBinary& operator=(CaptureBinary const&) = delete;
-    CaptureBinary(CaptureBinary&&) noexcept = default;
-    CaptureBinary& operator=(CaptureBinary&&) noexcept = default;
-
-    /**
-     * @brief Write bytes into the record
-     * @param bytes -- Byte array
-     * @param byte_count -- Byte count to write from bytes
-     */
-    CaptureBinary& record(void const* bytes, long byte_count);
+     /**
+      * @brief Write bytes into the record
+      * @param bytes -- Byte array
+      * @param byte_count -- Byte count to write from bytes
+      */
+     CaptureBinary& record(void const* bytes, long byte_count);
 
    private:
-
-    /// Write bytes to the current node. This will not write beyond that node's remaining capacity
-    long write_some(char const* bytes, long byte_count);
-
-    /// Set the node. If there's a non-null head_node, this node is attached to the current node
-    /// and the cursor/buffer_end are reset to point to its message region
-    void set_node(LogRecord* new_node);
-
-    /// Set the number of bytes written to current_node
-    void set_byte_count();
-
-    LogRecord* head_node;
-    LogRecord* current_node;    
-    char* cursor;
-    char const* buffer_end;
-    int channel;
+    RecordInserter inserter;
 };
+
+inline CaptureBinary::CaptureBinary(LogRecord* node, int channel)
+    : inserter(node, channel)
+{
+}
+
+inline CaptureBinary& CaptureBinary::record(void const* message, long byte_count)
+{
+    inserter.write(message, byte_count);
+    return *this;    
+}
+
 }  // namespace slog
 
 #if SLOG_STREAM
@@ -126,7 +116,8 @@ class CaptureStream {
     /// Make a capture object that writes to node destined for channel_
     CaptureStream(LogRecord* node, int channel);
 
-    /// These are not copyable
+    /// These are not copyable (this is enforced by inserter, but let's make it
+    /// explicit)
     CaptureStream(CaptureStream const&) = delete;
     CaptureStream& operator=(CaptureStream const&) = delete;
     CaptureStream(CaptureStream&&) noexcept = default;
@@ -139,6 +130,7 @@ class CaptureStream {
     std::ostream& stream() { return *stream_ptr; }
 
    private:
+    RecordInserter inserter;
     std::ostream* stream_ptr;    
 };
 }  // namespace slog

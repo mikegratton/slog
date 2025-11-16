@@ -2,6 +2,7 @@
 #include "slog/LogSetup.hpp"
 #include "slog/slog.hpp"
 #include "SlowSink.hpp"
+#include "testUtilities.hpp"
 #include <csignal>
 #include <cstdlib>
 #include <cstring>
@@ -10,130 +11,95 @@
 #include <unistd.h>
 #include <signal.h>
 
-std::shared_ptr<SlowSink> g_sink;
 
-static void unlock_sink()
+static int run_test(char const* name)
 {
-    g_sink->unlock();
-}
-
-static void wait_for_child(int pid)
-{
-    int wait_status = 0;
-    do {
-        waitpid(pid, &wait_status, 0);
-        printf("Current status of test child %d is ", pid);
-        if (WIFEXITED(wait_status)) {
-            printf("exited, status=%d\n", WEXITSTATUS(wait_status));
-        } else if (WIFSIGNALED(wait_status)) {
-            printf("killed by signal %d\n", WTERMSIG(wait_status));
-        } else if (WIFSTOPPED(wait_status)) {
-            printf("stopped by signal %d\n", WSTOPSIG(wait_status));
-        } else if (WIFCONTINUED(wait_status)) {
-            printf("continued\n");
-        }
-    } while (!WIFEXITED(wait_status) && !WIFSIGNALED(wait_status) && !WCOREDUMP(wait_status));
-}
+    printf("----------------Child Process Output-----------------------\n");
+    // call signalTest/HandlerProgram & get pid    
+    std::string command = slog::get_path_to_test() + "/HandlerProgram " + name;
+    int pid;
+    auto p = slog::popen2(command.c_str(), "r", &pid);
+    REQUIRE(p);
+    int exit_code = slog::wait_for_child(pid);
+    pclose(p);
+    printf("-----------------------------------------------------------\n");
+    return exit_code;
+} 
 
 TEST_CASE("ExitTest")
-{
-    int id = fork();
-    if (id == 0) {
-        g_sink = std::make_shared<SlowSink>();        
-        slog::LogConfig config(slog::DBUG, g_sink);        
-        slog::start_logger(config);
-        std::atexit(unlock_sink);        
-        Slog(NOTE) << "Test record";        
-        exit(0);
-    } else {
-        wait_for_child(id);
-        FILE* f = fopen(SlowSink::file_name(), "r");       
-        REQUIRE(f);
-        char buffer[1024];
-        fgets(buffer, sizeof(buffer), f);
-        CHECK(strncmp(buffer, "Test record\n", 64) == 0);
-
-        fclose(f);
-        std::remove(SlowSink::file_name());
-    }
+{    
+    int exit_code = run_test("exit");
+    CHECK(exit_code == 0);        
+    FILE* f = fopen(SlowSink::file_name(), "r");       
+    REQUIRE(f);
+    char buffer[1024];
+    fgets(buffer, sizeof(buffer), f);
+    CHECK(strncmp(buffer, "Test record\n", 64) == 0);
+    fclose(f);
+    std::remove(SlowSink::file_name());
 }
 
 
 TEST_CASE("FatalTest")
 {
-    int id = fork();
-    if (id == 0) {
-        g_sink = std::make_shared<SlowSink>();
-        g_sink->unlock();    
-        slog::LogConfig config(slog::DBUG, g_sink);        
-        slog::start_logger(config);        
-        Slog(FATL) << "Test record";
-        Slog(NOTE) << "Not logged";
-        exit(0);
-    } else {
-        wait_for_child(id);
-        FILE* f = fopen(SlowSink::file_name(), "r");       
-        REQUIRE(f);
-        char buffer[1024];
-        fgets(buffer, sizeof(buffer), f);
-        CHECK(strncmp(buffer, "Test record\n", 64) == 0);
-        
-        fclose(f);
-        std::remove(SlowSink::file_name());
-    }
+    int exit_code = run_test("fatal");
+    CHECK(exit_code == SIGABRT);
+    FILE* f = fopen(SlowSink::file_name(), "r");
+    REQUIRE(f);
+    char buffer[1024];
+    fgets(buffer, sizeof(buffer), f);
+    CHECK(strncmp(buffer, "Test record\n", 64) == 0);
+
+    fclose(f);
+    std::remove(SlowSink::file_name());
 }
 
 TEST_CASE("AbortTest")
 {
-    int id = fork();
-    if (id == 0) {
-        g_sink = std::make_shared<SlowSink>();         
-        slog::LogConfig config(slog::DBUG, g_sink);        
-        slog::start_logger(config);        
-        Slog(NOTE) << "Test record";
-        g_sink->unlock();
-        abort();
-        exit(1);
-    } else {
-        wait_for_child(id);
-        FILE* f = fopen(SlowSink::file_name(), "r");       
-        REQUIRE(f);
-        char buffer[1024];
-        fgets(buffer, sizeof(buffer), f);
-        CHECK(strncmp(buffer, "Test record\n", 64) == 0);
+    int exit_code = run_test("abort");
+    CHECK(exit_code == SIGABRT);
+    FILE* f = fopen(SlowSink::file_name(), "r");
+    REQUIRE(f);
+    char buffer[1024];
+    fgets(buffer, sizeof(buffer), f);
+    CHECK(strncmp(buffer, "Test record\n", 64) == 0);
 
-        fclose(f);
-        std::remove(SlowSink::file_name());
-    }
+    fclose(f);
+    std::remove(SlowSink::file_name());
 }
-
 
 TEST_CASE("InterruptTest")
 {
-    int id = fork();
-    if (id == 0) {
-        g_sink = std::make_shared<SlowSink>();         
-        slog::LogConfig config(slog::DBUG, g_sink);        
-        slog::start_logger(config);
-        Slog(NOTE) << "Test record";
-        g_sink->unlock();        
-        raise(SIGINT);
-        exit(1);
-    } else {
-        wait_for_child(id);
-        FILE* f = fopen(SlowSink::file_name(), "r");       
-        REQUIRE(f);
-        char buffer[1024];
-        fgets(buffer, sizeof(buffer), f);
-        CHECK(strncmp(buffer, "Test record\n", 64) == 0);
+    int exit_code = run_test("interrupt");
+    CHECK(exit_code == SIGINT);
+    FILE* f = fopen(SlowSink::file_name(), "r");
+    REQUIRE(f);
+    char buffer[1024];
+    fgets(buffer, sizeof(buffer), f);
+    CHECK(strncmp(buffer, "Test record\n", 64) == 0);
 
-        fclose(f);        
-        std::remove(SlowSink::file_name());
-    }
+    fclose(f);
+    std::remove(SlowSink::file_name());
+}
+
+TEST_CASE("TermTest")
+{
+    int exit_code = run_test("term");
+    CHECK(exit_code == SIGTERM);
+    FILE* f = fopen(SlowSink::file_name(), "r");
+    REQUIRE(f);
+    char buffer[1024];
+    fgets(buffer, sizeof(buffer), f);
+    CHECK(strncmp(buffer, "Test record\n", 64) == 0);
+
+    fclose(f);
+    std::remove(SlowSink::file_name());
 }
 
 TEST_CASE("StartStop")
 {
+    std::remove(SlowSink::file_name());
+
     auto sink = std::make_shared<SlowSink>();
     sink->unlock();
     slog::LogConfig config(slog::DBUG, sink);
@@ -144,13 +110,16 @@ TEST_CASE("StartStop")
     probe = std::signal(SIGINT, nullptr);
     CHECK(reinterpret_cast<void*>(probe) == nullptr);
     slog::start_logger(config);
+    probe = std::signal(SIGINT, nullptr);
+    CHECK(reinterpret_cast<void*>(probe));
     Slog(NOTE) << "Test record";
     slog::stop_logger();
+    
     FILE* f = fopen(SlowSink::file_name(), "r");    
     REQUIRE(f);
     char buffer[1024];
     fgets(buffer, sizeof(buffer), f);
-    CHECK(strncmp(buffer, "Test record\n", 64) == 0);
+    CHECK_MESSAGE(strncmp(buffer, "Test record\n", 64) == 0, "Read ", buffer, ", but expected \"Test record\\n\"");
     fclose(f);        
     std::remove(SlowSink::file_name());
 }

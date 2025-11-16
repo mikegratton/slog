@@ -2,7 +2,7 @@
 #include "slog/LogSetup.hpp"
 #include "slog/slog.hpp"
 #include "slog/FileSink.hpp"
-#include "slog/ConsoleSink.hpp"
+#include "SlowSink.hpp"
 #include <cstring>
 
 /*
@@ -55,8 +55,10 @@ TEST_CASE("Jumbo.Record")
 
 TEST_CASE("Jumbo.Pool")
 {
+    auto sink = std::make_shared<SlowSink>();
+    sink->unlock();
     slog::LogConfig config;
-    config.set_sink(std::make_shared<slog::ConsoleSink>());
+    config.set_sink(sink);
     config.set_default_threshold(slog::INFO);
     auto pool = std::make_shared<slog::LogRecordPool>(slog::ALLOCATE, 1024 * 128, 64);
     long initial_pool_size = pool->count();
@@ -69,4 +71,18 @@ TEST_CASE("Jumbo.Pool")
 
     slog::stop_logger();
     CHECK(pool->count() == initial_pool_size);
+
+    FILE* f = fopen(SlowSink::file_name(), "r");
+    REQUIRE(f);
+    char buffer[2048];
+    for (int i=0; i<N; i++) {
+        REQUIRE(fgets(buffer, sizeof(buffer) - 1, f));
+        char part[256];
+        char arrow[256];
+        int sequence;
+        REQUIRE(3 == sscanf(buffer, "%s %s %d", part, arrow, &sequence));
+        CHECK(sequence == i);
+    }
+    fclose(f);
+    std::remove(SlowSink::file_name());
 }
