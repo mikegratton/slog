@@ -105,7 +105,10 @@ Public Member Functions</h2></td></tr>
 std::pair&lt; <a class="el" href="classslog_1_1LogRecord.html">LogRecord</a> *, char * &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><b>allocate</b> (uint64_t count, uint64_t message_size)</td></tr>
 <tr class="separator:a76fee855321b6a85d5e2d8c1c788404a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
-<hr/>The documentation for this class was generated from the following file:<ul>
+<a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
+<div class="textblock"><p>This holds all allocations from the heap that are in use by the <a class="el" href="classslog_1_1LogRecordPool.html" title="A memory pool for unused log records.">LogRecordPool</a>. Each request for more memory is served by two allocations: one for the records and one for the message storage in the record.</p>
+<p>For BLOCK or DISCARD pools, there will only ever be one allocation. For ALLOCATE pools, additional allocations can occur when the <a class="el" href="classslog_1_1LogRecordPool.html" title="A memory pool for unused log records.">LogRecordPool</a> is exhausted. </p>
+</div><hr/>The documentation for this class was generated from the following file:<ul>
 <li>/home/mike/git/slog/src/slog/<b>LogRecordPool.cpp</b></li>
 </ul>
 </div><!-- contents -->

@@ -92,6 +92,16 @@ void stop_logger();
  */
 bool will_log(int severity, char const* tag = "", int channel = DEFAULT_CHANNEL);
 
+/**
+ * @brief Obtain the number of free record in the pool for the given channel.
+ *
+ * This can be used to tune the pool parameters. Using an ALLOCATE policy with a
+ * small number of records per allocation, run the program periodically logging
+ * free_record_count(). From this, you can determine an acceptable pool size to
+ * use with the BLOCK policy.
+ */
+long free_record_count(int channel = DEFAULT_CHANNEL);
+
 } // namespace slog
 
 /**

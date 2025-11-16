@@ -98,7 +98,7 @@ TEST_CASE("LogChannel")
                  
     CHECK(c.threshold("bar") == slog::DBUG);
     CHECK(c.threshold("foo") == slog::NOTE);
-    CHECK(c.allocator_count() == pool->count());
+    CHECK(c.pool_free_count() == pool->count());
     auto r = c.get_fresh_record();
     pool->free(r);
     CHECK(r == c.get_fresh_record());

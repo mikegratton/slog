@@ -25,6 +25,11 @@ bool will_log(int severity, char const* tag, int channel)
     return severity <= Logger::get_channel(channel).threshold(tag);
 }
 
+long free_record_count(int channel)
+{
+    return Logger::get_channel(channel).pool_free_count();
+}
+
 void push_to_sink(LogRecord* node, int channel) { Logger::get_channel(channel).push(node); }
 
 LogRecord* get_fresh_record(int channel, char const* file, char const* function, int line, int severity,

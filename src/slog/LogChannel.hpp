@@ -74,11 +74,10 @@ class LogChannel
      */
     void push(LogRecord* rec);
 
-    /*
-     * For debugging. Compare the number of messages in the pool to the expected
-     * number. Not thread safe. SETUP STATE ONLY
+    /**
+     * @brief Obtain the number of free records in the pool
      */
-    long allocator_count() const { return pool->count(); }
+    long pool_free_count() const { return pool->count(); }
 
   protected:
     // Internal work function call on the workThread

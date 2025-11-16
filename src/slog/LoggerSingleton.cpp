@@ -140,7 +140,7 @@ long get_pool_missing_count()
     long count = 0;
     for (int i = 0; i < Logger::channel_count(); i++) {
         auto& chan = Logger::get_channel(i);
-        count += chan.allocator_count();
+        count += chan.pool_free_count();
     }
     return count;
 }

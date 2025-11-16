@@ -147,27 +147,26 @@ $(document).ready(function(){initNavTree('FileSink_8hpp_source.html',''); initRe
 <div class="line"><a id="l00078" name="l00078"></a><span class="lineno">   78</span> </div>
 <div class="line"><a id="l00079" name="l00079"></a><span class="lineno">   79</span>    <span class="keywordtype">void</span> make_file_name();</div>
 <div class="line"><a id="l00080" name="l00080"></a><span class="lineno">   80</span> </div>
-<div class="line"><a id="l00081" name="l00081"></a><span class="lineno">   81</span>  <span class="keyword">private</span>:</div>
-<div class="line"><a id="l00082" name="l00082"></a><span class="lineno">   82</span>    FILE* mfile;</div>
-<div class="line"><a id="l00083" name="l00083"></a><span class="lineno">   83</span>    Formatter mformat;</div>
-<div class="line"><a id="l00084" name="l00084"></a><span class="lineno">   84</span>    LogFileFurniture mheader;</div>
-<div class="line"><a id="l00085" name="l00085"></a><span class="lineno">   85</span>    LogFileFurniture mfooter;</div>
-<div class="line"><a id="l00086" name="l00086"></a><span class="lineno">   86</span>    <span class="keywordtype">char</span> mlogDirectory[1024];</div>
-<div class="line"><a id="l00087" name="l00087"></a><span class="lineno">   87</span>    <span class="keywordtype">char</span> mlogBaseName[256];</div>
-<div class="line"><a id="l00088" name="l00088"></a><span class="lineno">   88</span>    <span class="keywordtype">char</span> mlogExtension[128];</div>
-<div class="line"><a id="l00089" name="l00089"></a><span class="lineno">   89</span>    <span class="keywordtype">char</span> msessionStartTimeStr[20];</div>
-<div class="line"><a id="l00090" name="l00090"></a><span class="lineno">   90</span>    uint64_t msessionStartTime;</div>
-<div class="line"><a id="l00091" name="l00091"></a><span class="lineno">   91</span>    <span class="keywordtype">int</span> msequence;</div>
-<div class="line"><a id="l00092" name="l00092"></a><span class="lineno">   92</span>    <span class="keywordtype">long</span> mbytesWritten;</div>
-<div class="line"><a id="l00093" name="l00093"></a><span class="lineno">   93</span>    <span class="keywordtype">long</span> mmaxBytes;</div>
-<div class="line"><a id="l00094" name="l00094"></a><span class="lineno">   94</span>    <span class="keywordtype">bool</span> mecho;</div>
-<div class="line"><a id="l00095" name="l00095"></a><span class="lineno">   95</span> </div>
-<div class="line"><a id="l00096" name="l00096"></a><span class="lineno">   96</span>    <span class="keywordtype">char</span> mfullLogName[<span class="keyword">sizeof</span>(mlogDirectory) + <span class="keyword">sizeof</span>(mlogBaseName) + <span class="keyword">sizeof</span>(mlogExtension) +</div>
-<div class="line"><a id="l00097" name="l00097"></a><span class="lineno">   97</span>                      <span class="keyword">sizeof</span>(msessionStartTimeStr) + 8];</div>
-<div class="line"><a id="l00098" name="l00098"></a><span class="lineno">   98</span>};</div>
+<div class="line"><a id="l00081" name="l00081"></a><span class="lineno">   81</span>    FILE* mfile;</div>
+<div class="line"><a id="l00082" name="l00082"></a><span class="lineno">   82</span>    Formatter mformat;</div>
+<div class="line"><a id="l00083" name="l00083"></a><span class="lineno">   83</span>    LogFileFurniture mheader;</div>
+<div class="line"><a id="l00084" name="l00084"></a><span class="lineno">   84</span>    LogFileFurniture mfooter;</div>
+<div class="line"><a id="l00085" name="l00085"></a><span class="lineno">   85</span>    <span class="keywordtype">char</span> mlogDirectory[1024];</div>
+<div class="line"><a id="l00086" name="l00086"></a><span class="lineno">   86</span>    <span class="keywordtype">char</span> mlogBaseName[256];</div>
+<div class="line"><a id="l00087" name="l00087"></a><span class="lineno">   87</span>    <span class="keywordtype">char</span> mlogExtension[128];</div>
+<div class="line"><a id="l00088" name="l00088"></a><span class="lineno">   88</span>    <span class="keywordtype">char</span> msessionStartTimeStr[20];</div>
+<div class="line"><a id="l00089" name="l00089"></a><span class="lineno">   89</span>    uint64_t msessionStartTime;</div>
+<div class="line"><a id="l00090" name="l00090"></a><span class="lineno">   90</span>    <span class="keywordtype">int</span> msequence;</div>
+<div class="line"><a id="l00091" name="l00091"></a><span class="lineno">   91</span>    <span class="keywordtype">long</span> mbytesWritten;</div>
+<div class="line"><a id="l00092" name="l00092"></a><span class="lineno">   92</span>    <span class="keywordtype">long</span> mmaxBytes;</div>
+<div class="line"><a id="l00093" name="l00093"></a><span class="lineno">   93</span>    <span class="keywordtype">bool</span> mecho;</div>
+<div class="line"><a id="l00094" name="l00094"></a><span class="lineno">   94</span> </div>
+<div class="line"><a id="l00095" name="l00095"></a><span class="lineno">   95</span>    <span class="keywordtype">char</span> mfullLogName[<span class="keyword">sizeof</span>(mlogDirectory) + <span class="keyword">sizeof</span>(mlogBaseName) + <span class="keyword">sizeof</span>(mlogExtension) +</div>
+<div class="line"><a id="l00096" name="l00096"></a><span class="lineno">   96</span>                      <span class="keyword">sizeof</span>(msessionStartTimeStr) + 8];</div>
+<div class="line"><a id="l00097" name="l00097"></a><span class="lineno">   97</span>};</div>
 </div>
-<div class="line"><a id="l00099" name="l00099"></a><span class="lineno">   99</span> </div>
-<div class="line"><a id="l00100" name="l00100"></a><span class="lineno">  100</span>} <span class="comment">// namespace slog</span></div>
+<div class="line"><a id="l00098" name="l00098"></a><span class="lineno">   98</span> </div>
+<div class="line"><a id="l00099" name="l00099"></a><span class="lineno">   99</span>} <span class="comment">// namespace slog</span></div>
 <div class="ttc" id="aclassslog_1_1FileSink_html"><div class="ttname"><a href="classslog_1_1FileSink.html">slog::FileSink</a></div><div class="ttdoc">Simple file storage for log records FileSink writes records to conventional files....</div><div class="ttdef"><b>Definition</b> FileSink.hpp:19</div></div>
 <div class="ttc" id="aclassslog_1_1FileSink_html_a338b9769a6336b4126b9ae306eb5aaf9"><div class="ttname"><a href="classslog_1_1FileSink.html#a338b9769a6336b4126b9ae306eb5aaf9">slog::FileSink::set_file_header_format</a></div><div class="ttdeci">void set_file_header_format(LogFileFurniture headerFormat)</div><div class="ttdoc">The header is inserted into each log file before any records.</div><div class="ttdef"><b>Definition</b> FileSink.cpp:116</div></div>
 <div class="ttc" id="aclassslog_1_1FileSink_html_a3b2d7814a8051fcc18ebb7a651e79b91"><div class="ttname"><a href="classslog_1_1FileSink.html#a3b2d7814a8051fcc18ebb7a651e79b91">slog::FileSink::record</a></div><div class="ttdeci">virtual void record(LogRecord const &amp;node) override</div><div class="ttdoc">Write the record to the file.</div><div class="ttdef"><b>Definition</b> FileSink.cpp:101</div></div>
