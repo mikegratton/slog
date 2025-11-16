@@ -22,12 +22,13 @@ var searchData=
   ['signal_20handling_19',['Signal Handling',['../index.html#autotoc_md4',1,'']]],
   ['sink_20',['Writing Your Own Sink',['../index.html#autotoc_md19',1,'']]],
   ['sinks_21',['Log Sinks',['../index.html#autotoc_md12',1,'']]],
-  ['slog_22',['Building Slog',['../index.html#autotoc_md21',1,'']]],
-  ['slog_20concepts_23',['Slog Concepts',['../index.html#autotoc_md6',1,'']]],
-  ['slog_3a_20a_20c_20logging_20library_20for_20robotic_20systems_24',['Slog: A C++ Logging Library for Robotic Systems',['../index.html',1,'']]],
-  ['start_25',['start',['../classslog_1_1LogChannel.html#aacd4bbb7a05f526e5fed007bd1cd228a',1,'slog::LogChannel']]],
-  ['stop_26',['stop',['../classslog_1_1LogChannel.html#a7d5db2021aeb6598bae3c87160cf20a0',1,'slog::LogChannel']]],
-  ['syslog_5fpriority_27',['syslog_priority',['../classslog_1_1SyslogSink.html#a7adabd415f16818f5cd59ed919de97b2',1,'slog::SyslogSink']]],
-  ['syslogsink_28',['syslogsink',['../classslog_1_1SyslogSink.html#aae1f6c6d80c6f2966a4925fb201fd2eb',1,'slog::SyslogSink::SyslogSink()'],['../index.html#autotoc_md16',1,'SyslogSink'],['../classslog_1_1SyslogSink.html',1,'slog::SyslogSink']]],
-  ['systems_29',['Slog: A C++ Logging Library for Robotic Systems',['../index.html',1,'']]]
+  ['size_22',['size',['../classslog_1_1LogRecord.html#a438a423c603ffc1a670750a188d923d3',1,'slog::LogRecord::size() const'],['../classslog_1_1LogRecord.html#a13bca2254811b888ccad249a9b2b58e1',1,'slog::LogRecord::size(uint32_t count)']]],
+  ['slog_23',['Building Slog',['../index.html#autotoc_md21',1,'']]],
+  ['slog_20concepts_24',['Slog Concepts',['../index.html#autotoc_md6',1,'']]],
+  ['slog_3a_20a_20c_20logging_20library_20for_20robotic_20systems_25',['Slog: A C++ Logging Library for Robotic Systems',['../index.html',1,'']]],
+  ['start_26',['start',['../classslog_1_1LogChannel.html#aacd4bbb7a05f526e5fed007bd1cd228a',1,'slog::LogChannel']]],
+  ['stop_27',['stop',['../classslog_1_1LogChannel.html#a7d5db2021aeb6598bae3c87160cf20a0',1,'slog::LogChannel']]],
+  ['syslog_5fpriority_28',['syslog_priority',['../classslog_1_1SyslogSink.html#a7adabd415f16818f5cd59ed919de97b2',1,'slog::SyslogSink']]],
+  ['syslogsink_29',['syslogsink',['../classslog_1_1SyslogSink.html#aae1f6c6d80c6f2966a4925fb201fd2eb',1,'slog::SyslogSink::SyslogSink()'],['../index.html#autotoc_md16',1,'SyslogSink'],['../classslog_1_1SyslogSink.html',1,'slog::SyslogSink']]],
+  ['systems_30',['Slog: A C++ Logging Library for Robotic Systems',['../index.html',1,'']]]
 ];

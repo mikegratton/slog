@@ -56,7 +56,7 @@ void JournaldSink::record(LogRecord const& rec)
     long rec_bytes_used = 0; // Bytes of current record consumed
     LogRecord const* cursor = &rec; // Current record
     do {        
-        long write_size = std::min(buffer_size - buffer_used, cursor->message_byte_count() - rec_bytes_used);
+        long write_size = std::min(buffer_size - buffer_used, cursor->size() - rec_bytes_used);
         memcpy(message_buffer + buffer_used, cursor->message() + rec_bytes_used, write_size);
         buffer_used += write_size;        
         rec_bytes_used += write_size;
@@ -64,7 +64,7 @@ void JournaldSink::record(LogRecord const& rec)
             write_to_journal(rec);
             buffer_used = 0;
         }
-        if (rec_bytes_used == cursor->message_byte_count()) {
+        if (rec_bytes_used == cursor->size()) {
             cursor = cursor->more();
             rec_bytes_used = 0;
         }

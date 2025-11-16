@@ -1,6 +1,6 @@
 <map id="slog::LogSink" name="slog::LogSink">
 <area shape="rect" id="Node000001" title="Base class for all log sinks." alt="" coords="315,5,423,31"/>
-<area shape="rect" id="Node000002" href="$classslog_1_1ConsoleSink.html" title="Simple sink that dumps messages to stdout." alt="" coords="5,79,143,104"/>
+<area shape="rect" id="Node000002" href="$classslog_1_1ConsoleSink.html" title="A simple sink that writes messages to stdout. Messages are guarateed to end in &#39; &#39;." alt="" coords="5,79,143,104"/>
 <area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="309,36,122,81,121,76,308,31"/>
 <area shape="rect" id="Node000003" href="$classslog_1_1FileSink.html" title="Simple file storage for log records FileSink writes records to conventional files...." alt="" coords="167,79,275,104"/>
 <area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="334,39,246,81,244,76,332,34"/>

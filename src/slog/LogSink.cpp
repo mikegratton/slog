@@ -114,7 +114,7 @@ uint32_t total_record_size(LogRecord const& rec)
     uint32_t total_size = 0;
     LogRecord const* r = &rec;
     do {
-        total_size += static_cast<uint32_t>(r->message_byte_count());
+        total_size += static_cast<uint32_t>(r->size());
         r = r->more();
     } while (r);
     return total_size;
@@ -123,9 +123,9 @@ uint32_t total_record_size(LogRecord const& rec)
 uint32_t write_message_to_file(FILE* sink, LogRecord const& rec)
 {
     uint32_t count = 0;
-    count += fwrite(rec.message(), sizeof(char), rec.message_byte_count(), sink);
+    count += fwrite(rec.message(), sizeof(char), rec.size(), sink);
     for (LogRecord const* more = rec.more(); more != nullptr; more = more->more()) {
-        count += fwrite(more->message(), sizeof(char), more->message_byte_count(), sink);
+        count += fwrite(more->message(), sizeof(char), more->size(), sink);
     }
     return count;
 }

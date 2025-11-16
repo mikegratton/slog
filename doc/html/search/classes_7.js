@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['syslogsink_0',['SyslogSink',['../classslog_1_1SyslogSink.html',1,'slog']]]
+  ['recordinserter_0',['RecordInserter',['../classslog_1_1RecordInserter.html',1,'slog']]]
 ];

@@ -9,7 +9,7 @@ var searchData=
   ['set_5ffile_6',['set_file',['../classslog_1_1FileSink.html#aa67629468c296a9b930360dbec19cfce',1,'slog::FileSink']]],
   ['set_5ffile_5ffooter_5fformat_7',['set_file_footer_format',['../classslog_1_1FileSink.html#ac886768d8535b203d296edc27a2c990c',1,'slog::FileSink']]],
   ['set_5ffile_5fheader_5fformat_8',['set_file_header_format',['../classslog_1_1FileSink.html#a338b9769a6336b4126b9ae306eb5aaf9',1,'slog::FileSink']]],
-  ['set_5fformatter_9',['set_formatter',['../classslog_1_1JournaldSink.html#a4ac23c881136cbc57f6743af8cc91276',1,'slog::JournaldSink::set_formatter()'],['../classslog_1_1SyslogSink.html#a3770f8cffe3ef12414134ed857f59a38',1,'slog::SyslogSink::set_formatter()'],['../classslog_1_1FileSink.html#a4564dac756b845b9e41314528a190b76',1,'slog::FileSink::set_formatter()'],['../classslog_1_1ConsoleSink.html#ab75b0088a35c5647fc144ec1f95a79c5',1,'slog::ConsoleSink::set_formatter()']]],
+  ['set_5fformatter_9',['set_formatter',['../classslog_1_1SyslogSink.html#a3770f8cffe3ef12414134ed857f59a38',1,'slog::SyslogSink::set_formatter()'],['../classslog_1_1JournaldSink.html#a4ac23c881136cbc57f6743af8cc91276',1,'slog::JournaldSink::set_formatter()'],['../classslog_1_1FileSink.html#a4564dac756b845b9e41314528a190b76',1,'slog::FileSink::set_formatter()'],['../classslog_1_1ConsoleSink.html#ab75b0088a35c5647fc144ec1f95a79c5',1,'slog::ConsoleSink::set_formatter()']]],
   ['set_5fmax_5fconnection_5fattempts_10',['set_max_connection_attempts',['../classslog_1_1SyslogSink.html#a1326e51199e0fe1b54ad9271321df4b3',1,'slog::SyslogSink']]],
   ['set_5fmax_5fconnection_5fwait_11',['set_max_connection_wait',['../classslog_1_1SyslogSink.html#a1650f2eac6f8037db1c34661a878c361',1,'slog::SyslogSink']]],
   ['set_5fmax_5ffile_5fsize_12',['set_max_file_size',['../classslog_1_1FileSink.html#ae289bb0b312dc7638371caa809b44f02',1,'slog::FileSink']]],
@@ -17,8 +17,9 @@ var searchData=
   ['set_5frfc3164_5fprotocol_14',['set_rfc3164_protocol',['../classslog_1_1SyslogSink.html#a8698dd3b4ecd3335ac00cda6102b732c',1,'slog::SyslogSink']]],
   ['set_5fsink_15',['set_sink',['../classslog_1_1LogConfig.html#a9f4e0865405e139cc43688d76ded2c58',1,'slog::LogConfig']]],
   ['severity_16',['severity',['../classslog_1_1LogRecordMetadata.html#a5148f6dfc3706af08da82022e9996ac2',1,'slog::LogRecordMetadata']]],
-  ['start_17',['start',['../classslog_1_1LogChannel.html#aacd4bbb7a05f526e5fed007bd1cd228a',1,'slog::LogChannel']]],
-  ['stop_18',['stop',['../classslog_1_1LogChannel.html#a7d5db2021aeb6598bae3c87160cf20a0',1,'slog::LogChannel']]],
-  ['syslog_5fpriority_19',['syslog_priority',['../classslog_1_1SyslogSink.html#a7adabd415f16818f5cd59ed919de97b2',1,'slog::SyslogSink']]],
-  ['syslogsink_20',['SyslogSink',['../classslog_1_1SyslogSink.html#aae1f6c6d80c6f2966a4925fb201fd2eb',1,'slog::SyslogSink']]]
+  ['size_17',['size',['../classslog_1_1LogRecord.html#a438a423c603ffc1a670750a188d923d3',1,'slog::LogRecord::size() const'],['../classslog_1_1LogRecord.html#a13bca2254811b888ccad249a9b2b58e1',1,'slog::LogRecord::size(uint32_t count)']]],
+  ['start_18',['start',['../classslog_1_1LogChannel.html#aacd4bbb7a05f526e5fed007bd1cd228a',1,'slog::LogChannel']]],
+  ['stop_19',['stop',['../classslog_1_1LogChannel.html#a7d5db2021aeb6598bae3c87160cf20a0',1,'slog::LogChannel']]],
+  ['syslog_5fpriority_20',['syslog_priority',['../classslog_1_1SyslogSink.html#a7adabd415f16818f5cd59ed919de97b2',1,'slog::SyslogSink']]],
+  ['syslogsink_21',['SyslogSink',['../classslog_1_1SyslogSink.html#aae1f6c6d80c6f2966a4925fb201fd2eb',1,'slog::SyslogSink']]]
 ];

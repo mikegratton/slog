@@ -18,5 +18,6 @@ var hierarchy =
       [ "slog::SyslogSink", "classslog_1_1SyslogSink.html", null ]
     ] ],
     [ "slog::PoolMemory", "classslog_1_1PoolMemory.html", null ],
+    [ "slog::RecordInserter", "classslog_1_1RecordInserter.html", null ],
     [ "slog::FlatThresholdMap::Threshold", "structslog_1_1FlatThresholdMap_1_1Threshold.html", null ]
 ];

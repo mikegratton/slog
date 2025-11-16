@@ -111,17 +111,17 @@ Public Member Functions</h2></td></tr>
 <a class="el" href="classslog_1_1LogRecordMetadata.html">LogRecordMetadata</a> const &amp;&#160;</td><td class="memItemRight" valign="bottom"><b>meta</b> () const</td></tr>
 <tr class="memdesc:a557f1f2ad0b3a36076bd334538b49cbf"><td class="mdescLeft">&#160;</td><td class="mdescRight">Inspect the metadata. <br /></td></tr>
 <tr class="separator:a557f1f2ad0b3a36076bd334538b49cbf"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a2a3c061aab8ec4d7e70e4f3932ec1433" id="r_a2a3c061aab8ec4d7e70e4f3932ec1433"><td class="memItemLeft" align="right" valign="top"><a id="a2a3c061aab8ec4d7e70e4f3932ec1433" name="a2a3c061aab8ec4d7e70e4f3932ec1433"></a>
-uint32_t&#160;</td><td class="memItemRight" valign="bottom"><b>message_max_size</b> () const</td></tr>
-<tr class="memdesc:a2a3c061aab8ec4d7e70e4f3932ec1433"><td class="mdescLeft">&#160;</td><td class="mdescRight">The maximum number of bytes in <a class="el" href="classslog_1_1LogRecord.html#a10f48c0abf3709d74731d4cf86cf6aba" title="Mutate the message.">message()</a> <br /></td></tr>
-<tr class="separator:a2a3c061aab8ec4d7e70e4f3932ec1433"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a9d7e620548ca9b689d2d6030ef3f9a93" id="r_a9d7e620548ca9b689d2d6030ef3f9a93"><td class="memItemLeft" align="right" valign="top"><a id="a9d7e620548ca9b689d2d6030ef3f9a93" name="a9d7e620548ca9b689d2d6030ef3f9a93"></a>
-uint32_t&#160;</td><td class="memItemRight" valign="bottom"><b>message_byte_count</b> () const</td></tr>
-<tr class="memdesc:a9d7e620548ca9b689d2d6030ef3f9a93"><td class="mdescLeft">&#160;</td><td class="mdescRight">The current number of bytes in <a class="el" href="classslog_1_1LogRecord.html#a10f48c0abf3709d74731d4cf86cf6aba" title="Mutate the message.">message()</a> <br /></td></tr>
-<tr class="separator:a9d7e620548ca9b689d2d6030ef3f9a93"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ada5e15f15498ec4216815801a45c78f0" id="r_ada5e15f15498ec4216815801a45c78f0"><td class="memItemLeft" align="right" valign="top"><a id="ada5e15f15498ec4216815801a45c78f0" name="ada5e15f15498ec4216815801a45c78f0"></a>
+uint32_t&#160;</td><td class="memItemRight" valign="bottom"><b>capacity</b> () const</td></tr>
+<tr class="memdesc:ada5e15f15498ec4216815801a45c78f0"><td class="mdescLeft">&#160;</td><td class="mdescRight">The maximum number of bytes in <a class="el" href="classslog_1_1LogRecord.html#a10f48c0abf3709d74731d4cf86cf6aba" title="Mutate the message.">message()</a> <br /></td></tr>
+<tr class="separator:ada5e15f15498ec4216815801a45c78f0"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a438a423c603ffc1a670750a188d923d3" id="r_a438a423c603ffc1a670750a188d923d3"><td class="memItemLeft" align="right" valign="top"><a id="a438a423c603ffc1a670750a188d923d3" name="a438a423c603ffc1a670750a188d923d3"></a>
+uint32_t&#160;</td><td class="memItemRight" valign="bottom"><b>size</b> () const</td></tr>
+<tr class="memdesc:a438a423c603ffc1a670750a188d923d3"><td class="mdescLeft">&#160;</td><td class="mdescRight">The current number of valid bytes in <a class="el" href="classslog_1_1LogRecord.html#a10f48c0abf3709d74731d4cf86cf6aba" title="Mutate the message.">message()</a> <br /></td></tr>
+<tr class="separator:a438a423c603ffc1a670750a188d923d3"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a5e2b4fc16fb1605be45109da7adcb10b" id="r_a5e2b4fc16fb1605be45109da7adcb10b"><td class="memItemLeft" align="right" valign="top"><a id="a5e2b4fc16fb1605be45109da7adcb10b" name="a5e2b4fc16fb1605be45109da7adcb10b"></a>
 char const *&#160;</td><td class="memItemRight" valign="bottom"><b>message</b> () const</td></tr>
-<tr class="memdesc:a5e2b4fc16fb1605be45109da7adcb10b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the message. This string is not null terminated. Use <a class="el" href="classslog_1_1LogRecord.html#a9d7e620548ca9b689d2d6030ef3f9a93" title="The current number of bytes in message()">message_byte_count()</a> to determine the end of the string. <br /></td></tr>
+<tr class="memdesc:a5e2b4fc16fb1605be45109da7adcb10b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the message. This string is not null terminated. Use message_byte_count() to determine the end of the string. <br /></td></tr>
 <tr class="separator:a5e2b4fc16fb1605be45109da7adcb10b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a327a2cd36f1b83ac31e09557719b2143" id="r_a327a2cd36f1b83ac31e09557719b2143"><td class="memItemLeft" align="right" valign="top"><a id="a327a2cd36f1b83ac31e09557719b2143" name="a327a2cd36f1b83ac31e09557719b2143"></a>
 <a class="el" href="classslog_1_1LogRecord.html">LogRecord</a> const *&#160;</td><td class="memItemRight" valign="bottom"><b>more</b> () const</td></tr>
@@ -131,10 +131,10 @@ char const *&#160;</td><td class="memItemRight" valign="bottom"><b>message</b> (
 <a class="el" href="classslog_1_1LogRecordMetadata.html">LogRecordMetadata</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><b>meta</b> ()</td></tr>
 <tr class="memdesc:aea17fb23b4002dbb9613c14e1564f05e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Mutate the metadata. <br /></td></tr>
 <tr class="separator:aea17fb23b4002dbb9613c14e1564f05e"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ac823d376e4625f38222d35bb9c4d661a" id="r_ac823d376e4625f38222d35bb9c4d661a"><td class="memItemLeft" align="right" valign="top"><a id="ac823d376e4625f38222d35bb9c4d661a" name="ac823d376e4625f38222d35bb9c4d661a"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>message_byte_count</b> (uint32_t count)</td></tr>
-<tr class="memdesc:ac823d376e4625f38222d35bb9c4d661a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set the valid message byte count() <br /></td></tr>
-<tr class="separator:ac823d376e4625f38222d35bb9c4d661a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a13bca2254811b888ccad249a9b2b58e1" id="r_a13bca2254811b888ccad249a9b2b58e1"><td class="memItemLeft" align="right" valign="top"><a id="a13bca2254811b888ccad249a9b2b58e1" name="a13bca2254811b888ccad249a9b2b58e1"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><b>size</b> (uint32_t count)</td></tr>
+<tr class="memdesc:a13bca2254811b888ccad249a9b2b58e1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set the number of valid bytes in <a class="el" href="classslog_1_1LogRecord.html#a10f48c0abf3709d74731d4cf86cf6aba" title="Mutate the message.">message()</a> <br /></td></tr>
+<tr class="separator:a13bca2254811b888ccad249a9b2b58e1"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a10f48c0abf3709d74731d4cf86cf6aba" id="r_a10f48c0abf3709d74731d4cf86cf6aba"><td class="memItemLeft" align="right" valign="top"><a id="a10f48c0abf3709d74731d4cf86cf6aba" name="a10f48c0abf3709d74731d4cf86cf6aba"></a>
 char *&#160;</td><td class="memItemRight" valign="bottom"><b>message</b> ()</td></tr>
 <tr class="memdesc:a10f48c0abf3709d74731d4cf86cf6aba"><td class="mdescLeft">&#160;</td><td class="mdescRight">Mutate the message. <br /></td></tr>

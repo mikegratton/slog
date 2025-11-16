@@ -84,10 +84,10 @@ class LogRecord
     LogRecordMetadata const& meta() const { return m_meta; }
 
     /// The maximum number of bytes in message()
-    uint32_t message_max_size() const { return m_message_max_size; }
+    uint32_t capacity() const { return m_message_max_size; }
 
-    /// The current number of bytes in message()
-    uint32_t message_byte_count() const { return m_message_byte_count; }
+    /// The current number of valid bytes in message()
+    uint32_t size() const { return m_message_byte_count; }
 
     /// Get the message. This string is not null terminated. Use message_byte_count() to 
     /// determine the end of the string.
@@ -100,8 +100,8 @@ class LogRecord
     /// Mutate the metadata
     LogRecordMetadata& meta() { return m_meta; }
 
-    /// Set the valid message byte count()
-    void message_byte_count(uint32_t count) { m_message_byte_count = count; }
+    /// Set the number of valid bytes in message()
+    void size(uint32_t count) { m_message_byte_count = count; }
 
     /// Mutate the message
     char* message() { return m_message; }

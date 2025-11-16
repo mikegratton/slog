@@ -11,6 +11,7 @@ var dir_95be75e0f8e573547a5556ed938590f2 =
     [ "LogSetup.hpp", "LogSetup_8hpp_source.html", null ],
     [ "LogSink.hpp", "LogSink_8hpp_source.html", null ],
     [ "PlatformUtilities.hpp", "PlatformUtilities_8hpp_source.html", null ],
+    [ "RecordInserter.hpp", "RecordInserter_8hpp_source.html", null ],
     [ "Signal.hpp", "Signal_8hpp_source.html", null ],
     [ "slog.hpp", "slog_8hpp_source.html", null ],
     [ "slogDetail.hpp", "slogDetail_8hpp_source.html", null ],

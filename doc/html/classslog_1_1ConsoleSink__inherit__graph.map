@@ -1,5 +1,5 @@
 <map id="slog::ConsoleSink" name="slog::ConsoleSink">
-<area shape="rect" id="Node000001" title="Simple sink that dumps messages to stdout." alt="" coords="5,79,143,104"/>
+<area shape="rect" id="Node000001" title="A simple sink that writes messages to stdout. Messages are guarateed to end in &#39; &#39;." alt="" coords="5,79,143,104"/>
 <area shape="rect" id="Node000002" href="$classslog_1_1LogSink.html" title="Base class for all log sinks." alt="" coords="20,5,128,31"/>
 <area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="77,44,77,79,71,79,71,44"/>
 </map>

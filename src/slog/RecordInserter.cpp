@@ -79,9 +79,9 @@ void RecordInserter::set_node(LogRecord* i_node)
     }
     current_node = i_node;
     cursor = current_node->message();
-    buffer_end = cursor + current_node->message_max_size();
+    buffer_end = cursor + current_node->capacity();
 }
 
-void RecordInserter::set_byte_count() { current_node->message_byte_count(cursor - current_node->message()); }
+void RecordInserter::set_byte_count() { current_node->size(cursor - current_node->message()); }
 
 } // namespace slog

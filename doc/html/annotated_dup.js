@@ -15,6 +15,7 @@ var annotated_dup =
       [ "LogSink", "classslog_1_1LogSink.html", "classslog_1_1LogSink" ],
       [ "NullSink", "classslog_1_1NullSink.html", "classslog_1_1NullSink" ],
       [ "PoolMemory", "classslog_1_1PoolMemory.html", null ],
+      [ "RecordInserter", "classslog_1_1RecordInserter.html", "classslog_1_1RecordInserter" ],
       [ "SyslogSink", "classslog_1_1SyslogSink.html", "classslog_1_1SyslogSink" ]
     ] ]
 ];
