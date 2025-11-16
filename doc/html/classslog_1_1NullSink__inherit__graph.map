@@ -1,4 +1,5 @@
 <map id="slog::NullSink" name="slog::NullSink">
-<area shape="rect" id="node1" title="Simple sink that ignores messages." alt="" coords="5,80,116,107"/>
-<area shape="rect" id="node2" href="$classslog_1_1LogSink.html" title="Base class for all log sinks." alt="" coords="7,5,115,32"/>
+<area shape="rect" id="Node000001" title="A sink that discards messages." alt="" coords="5,79,116,104"/>
+<area shape="rect" id="Node000002" href="$classslog_1_1LogSink.html" title="Base class for all log sinks." alt="" coords="7,5,115,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="63,44,63,79,58,79,58,44"/>
 </map>

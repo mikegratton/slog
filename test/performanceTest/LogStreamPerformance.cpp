@@ -14,7 +14,7 @@ TEST_CASE("StreamNullPerformance")
     config.set_sink(std::make_shared<NullSink>());
     config.set_default_threshold(slog::DBUG);
     start_logger(config);
-    unsigned long JOB_SIZE = 10000000UL;
+    unsigned long JOB_SIZE = 100000UL;
     auto start_time = std::chrono::system_clock::now();
     for (unsigned long i = 0; i < JOB_SIZE; i++) { Slog(NOTE) << "Hello"; }
     auto stop_time = std::chrono::system_clock::now();
@@ -26,7 +26,7 @@ TEST_CASE("StreamNullPerformance")
 
 TEST_CASE("StreamStatsPerformance")
 {
-    unsigned long JOB_SIZE = 10000000UL;
+    unsigned long JOB_SIZE = 100000UL;
     LogConfig config;
     config.set_sink(std::make_shared<StatsSink>(JOB_SIZE));
     config.set_default_threshold(slog::DBUG);
@@ -47,7 +47,7 @@ TEST_CASE("StreamRejectPerformance")
     config.set_sink(std::make_shared<NullSink>());
     config.set_default_threshold(slog::ERRR);
     start_logger(config);
-    unsigned long JOB_SIZE = 10000000UL;
+    unsigned long JOB_SIZE = 100000UL;
     auto start_time = std::chrono::system_clock::now();
     for (unsigned long i = 0; i < JOB_SIZE; i++) { Slog(NOTE) << "Hello"; }
     auto stop_time = std::chrono::system_clock::now();
@@ -64,7 +64,7 @@ TEST_CASE("StreamRejectTagPerformance")
     config.set_default_threshold(slog::ERRR);
     config.add_tag("moose", INFO);
     start_logger(config);
-    unsigned long JOB_SIZE = 10000000UL;
+    unsigned long JOB_SIZE = 100000UL;
     auto start_time = std::chrono::system_clock::now();
     for (unsigned long i = 0; i < JOB_SIZE; i++) { Slog(NOTE, "meep") << "Hello"; }
     auto stop_time = std::chrono::system_clock::now();

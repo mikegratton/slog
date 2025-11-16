@@ -30,7 +30,7 @@ void install_handler(int signal) {
     assert(status == 0);        
 }
 
-struct sigaction g_slogHandler;
+struct sigaction g_slogHandler{};
 
 void unlock_handler(int signal) {
     std::cout << "unlock_handler(): Unlocking sink" << std::endl;
@@ -66,11 +66,15 @@ int main(int, char**)
     slog::LogConfig config;
     config.set_sink(g_slowSink);
     config.set_default_threshold(slog::INFO);
+
     slog::start_logger(config);
-    install_unlock_handler(SIGABRT);
+    sigaction(SIGTERM, nullptr, &g_slogHandler);
+    printf("Current handler for %d is %p\n", SIGTERM, g_slogHandler.sa_sigaction);
+
+    install_unlock_handler(SIGTERM);
 
     auto work_thread = std::thread(fake_worker);
-    raise(SIGABRT);
+    raise(SIGTERM);
     work_thread.join();
     std::cout << "The numbers 0-9 should be logged\n";
     

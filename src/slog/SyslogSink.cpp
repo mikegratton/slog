@@ -35,8 +35,7 @@ SyslogSink::SyslogSink(char const* host, bool use_tcp)
       connection_attempt_wait(std::chrono::milliseconds(50)),
       sock_fd(-1),
       unix_socket(nullptr)
-{
-    int status;
+{    
     strncpy(destination, host, sizeof(destination) - 1);
     set_application_name(::slog::program_short_name());
     gethostname(hostname, sizeof(hostname) - 1);
@@ -89,9 +88,9 @@ bool SyslogSink::connect_ip()
     }
 
     // Fill out the address
-    sockaddr_in address{0};
-    addrinfo hints{0};
-    addrinfo* info;
+    sockaddr_in address{};
+    addrinfo hints{};
+    addrinfo* info = nullptr;
     char* port;
     for (port = destination; *port != '\0'; port++) {
         if (*port == ':') {
@@ -144,7 +143,7 @@ bool SyslogSink::connect_unix()
     }
 
     // Bind to a temp address
-    sockaddr_un address{0};
+    sockaddr_un address{};
     make_unix_socket();
     strncpy(address.sun_path, unix_socket, sizeof(address.sun_path) - 1);
     address.sun_family = AF_UNIX;

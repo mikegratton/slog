@@ -2,21 +2,37 @@
 #include "slog/LogSetup.hpp"
 #include "slog/slog.hpp"
 #include "SlowSink.hpp"
-#include <chrono>
 #include <csignal>
 #include <cstdlib>
 #include <cstring>
 #include <memory>
 #include <sys/wait.h>
-#include <thread>
 #include <unistd.h>
 #include <signal.h>
 
 std::shared_ptr<SlowSink> g_sink;
 
-void unlock_sink()
+static void unlock_sink()
 {
     g_sink->unlock();
+}
+
+static void wait_for_child(int pid)
+{
+    int wait_status = 0;
+    do {
+        waitpid(pid, &wait_status, 0);
+        printf("Current status of test child %d is ", pid);
+        if (WIFEXITED(wait_status)) {
+            printf("exited, status=%d\n", WEXITSTATUS(wait_status));
+        } else if (WIFSIGNALED(wait_status)) {
+            printf("killed by signal %d\n", WTERMSIG(wait_status));
+        } else if (WIFSTOPPED(wait_status)) {
+            printf("stopped by signal %d\n", WSTOPSIG(wait_status));
+        } else if (WIFCONTINUED(wait_status)) {
+            printf("continued\n");
+        }
+    } while (!WIFEXITED(wait_status) && !WIFSIGNALED(wait_status) && !WCOREDUMP(wait_status));
 }
 
 TEST_CASE("ExitTest")
@@ -30,14 +46,8 @@ TEST_CASE("ExitTest")
         Slog(NOTE) << "Test record";        
         exit(0);
     } else {
-        FILE* f = nullptr;
-        for (int i = 0; i < 10; i++) {
-            f = fopen(SlowSink::file_name(), "r");
-            if (f) {
-                break;
-            }
-            std::this_thread::sleep_for(std::chrono::milliseconds(100));
-        }
+        wait_for_child(id);
+        FILE* f = fopen(SlowSink::file_name(), "r");       
         REQUIRE(f);
         char buffer[1024];
         fgets(buffer, sizeof(buffer), f);
@@ -56,19 +66,13 @@ TEST_CASE("FatalTest")
         g_sink = std::make_shared<SlowSink>();
         g_sink->unlock();    
         slog::LogConfig config(slog::DBUG, g_sink);        
-        slog::start_logger(config);              
+        slog::start_logger(config);        
         Slog(FATL) << "Test record";
         Slog(NOTE) << "Not logged";
         exit(0);
-    } else {           
-        FILE* f = nullptr;
-        for (int i = 0; i < 10; i++) {            
-            f = fopen(SlowSink::file_name(), "r");
-            if (f) {
-                break;
-            }
-            std::this_thread::sleep_for(std::chrono::milliseconds(100));
-        }
+    } else {
+        wait_for_child(id);
+        FILE* f = fopen(SlowSink::file_name(), "r");       
         REQUIRE(f);
         char buffer[1024];
         fgets(buffer, sizeof(buffer), f);
@@ -88,16 +92,11 @@ TEST_CASE("AbortTest")
         slog::start_logger(config);        
         Slog(NOTE) << "Test record";
         g_sink->unlock();
-        abort();  
+        abort();
+        exit(1);
     } else {
-        FILE* f = nullptr;
-        for (int i = 0; i < 10; i++) {            
-            f = fopen(SlowSink::file_name(), "r");
-            if (f) {
-                break;
-            }
-            std::this_thread::sleep_for(std::chrono::milliseconds(100));
-        }
+        wait_for_child(id);
+        FILE* f = fopen(SlowSink::file_name(), "r");       
         REQUIRE(f);
         char buffer[1024];
         fgets(buffer, sizeof(buffer), f);
@@ -117,18 +116,12 @@ TEST_CASE("InterruptTest")
         slog::LogConfig config(slog::DBUG, g_sink);        
         slog::start_logger(config);
         Slog(NOTE) << "Test record";
-        g_sink->unlock();
-        printf("Finished\n");
+        g_sink->unlock();        
         raise(SIGINT);
+        exit(1);
     } else {
-        FILE* f = nullptr;
-        for (int i = 0; i < 10; i++) {
-            f = fopen(SlowSink::file_name(), "r");
-            if (f) {
-                break;
-            }
-            std::this_thread::sleep_for(std::chrono::milliseconds(100));
-        }
+        wait_for_child(id);
+        FILE* f = fopen(SlowSink::file_name(), "r");       
         REQUIRE(f);
         char buffer[1024];
         fgets(buffer, sizeof(buffer), f);

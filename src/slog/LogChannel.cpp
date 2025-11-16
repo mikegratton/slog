@@ -117,4 +117,9 @@ LogRecord* LogChannel::LogQueue::pop(std::chrono::milliseconds wait)
     return popped;
 }
 
+LogChannel::State LogChannel::logger_state() 
+{ 
+    return (get_signal_state() == SLOG_ACTIVE ? RUN : SETUP); 
+}
+
 } // namespace slog

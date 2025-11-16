@@ -1,5 +1,4 @@
 #include "LoggerSingleton.hpp"
-#include "ConsoleSink.hpp"
 #include "PlatformUtilities.hpp"
 #include "Signal.hpp"
 #include "SlogError.hpp"
@@ -8,6 +7,7 @@
 #include "slog/LogSetup.hpp"
 #include "slog/LogSink.hpp"
 #include <atomic>
+#include <csignal>
 #include <cstring>
 #include <endian.h>
 #include <limits>
@@ -66,11 +66,11 @@ std::shared_ptr<LogRecordPool> Logger::make_default_pool()
 
 void Logger::setup_channels(std::vector<LogConfig>& config)
 {
-    install_slog_handlers();
-
     auto& backend = instance().backend;
     instance().stop_all_channels();
     backend.clear();
+    install_slog_handlers();
+
     auto default_pool = make_default_pool();
     auto null_sink = std::make_shared<NullSink>();
 
@@ -102,7 +102,9 @@ void Logger::start_all_channels()
 void Logger::stop_all_channels()
 {
     auto& logger = Logger::instance();
-    set_signal_state(SLOG_STOPPED);    
+    if (get_signal_state() == SLOG_ACTIVE) {
+        set_signal_state(SLOG_STOPPED);
+    }
     logger.backend.clear();
     restore_old_signal_handlers();
     s_installed_signal_handlers = false;
@@ -112,7 +114,9 @@ void Logger::setup_stopped_channel() { instance().do_setup_stopped_channel(); }
 
 void Logger::do_setup_stopped_channel()
 {
-    set_signal_state(SLOG_STOPPED);
+    if (get_signal_state() == SLOG_ACTIVE) {
+        set_signal_state(SLOG_STOPPED);
+    }
     backend.clear();
     ThresholdMap threshold;
 #if SLOG_LOG_TO_CONSOLE_WHEN_STOPPED
@@ -132,7 +136,7 @@ void Logger::do_setup_stopped_channel()
 long get_pool_missing_count()
 {
     long count = 0;
-    for (unsigned long i = 0; i < Logger::channel_count(); i++) {
+    for (int i = 0; i < Logger::channel_count(); i++) {
         auto& chan = Logger::get_channel(i);
         count += chan.allocator_count();
     }

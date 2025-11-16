@@ -5,6 +5,7 @@
 #include <cstdint>
 #include <cstdlib>
 #include <cstring>
+#include <cstdio>
 #include <unistd.h>
 #include <ctime>
 
@@ -68,40 +69,29 @@ bool parse_time(uint64_t& o_nanoseconds, char const* time_str)
 }
 
 void parseLogRecord(TestLogRecord& o_record, char const* recordString)
-{    
-    
-    // no info for these in default format    
-    static char filename[256] = "";
-    static char function[256] = "";
-    int line = 1; // This forces some system calls in capture()
-    long thread_id = -1;
-
+{        
     int severity = 0; 
     char tag[TAG_SIZE]{}; 
     uint64_t time = 0;
-
-    // [SEVR TAG TIME] MESSAGE
+    
     assert(recordString[0] == '[');
     recordString++;
-    severity = severity_from_string(recordString);
+    severity = severity_from_string(recordString);    
     recordString += 5;
     if (recordString[23] != ']') { // There's a tag
         char* cursor = tag;
         while (*recordString != ' ' && *recordString) {
-            *cursor++ = *recordString++;            
+            *cursor++ = *recordString++;
         }
         *cursor++ = '\0';
         recordString++;
     }
     parse_time(time, recordString);
     recordString += 23;
-    assert(recordString[0] == ']');
-
-    o_record.meta.capture(filename, function, line, severity, tag);
-
-    recordString += 2;
-    o_record.message = recordString;
-    o_record.message_byte_count = strlen(o_record.message);
+    assert(recordString[0] == ']');    
+    o_record.meta.set_data("", "", 1, severity, tag, time, -1L);
+    strncpy(o_record.message, recordString + 2, sizeof(o_record.message));
+    o_record.message_byte_count = strlen(o_record.message) - 1; // exclude newline
 }
 
 } // namespace slog

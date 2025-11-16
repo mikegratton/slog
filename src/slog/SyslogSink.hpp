@@ -86,7 +86,8 @@ class SyslogSink : public LogSink
     /// Connect to a IP socket
     bool connect_ip();
 
-    std::size_t constexpr static MAX_DATAGRAM_SIZE = 65507;
+  private:
+    int constexpr static MAX_DATAGRAM_SIZE = 65507;
 
     Formatter format;
     bool echo;

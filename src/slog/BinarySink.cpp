@@ -6,9 +6,9 @@ namespace slog {
 
 BinarySink::BinarySink() : FileSink()
 {
-    mformat = long_binary_format;
-    mheader = default_binary_header_furniture;
-    mfooter = no_op_furniture;
+    set_formatter(default_binary_format);
+    set_file_header_format(default_binary_header_furniture);
+    set_file_footer_format(no_op_furniture);
 }
 
 BinarySink::~BinarySink() = default;

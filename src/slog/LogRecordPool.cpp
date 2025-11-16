@@ -9,6 +9,15 @@
 namespace slog
 {
 
+/**
+ * This holds all allocations from the heap that are in use by the
+ * LogRecordPool. Each request for more memory is served by two allocations: one
+ * for the records and one for the message storage in the record.
+ *
+ * For BLOCK or DISCARD pools, there will only ever be one allocation. For
+ * ALLOCATE pools, additional allocations can occur when the LogRecordPool is
+ * exhausted.
+ */
 class PoolMemory
 {
   public:

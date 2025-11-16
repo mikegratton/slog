@@ -44,7 +44,11 @@ class LogRecordMetadata {
     /// Get the attached severity. Lower numbers are more important
     int severity() const { return m_severity; }
 
-    private:
+    /// Set all fields in the metdata
+    void set_data(char const* filename, char const* function, int line, int severity, char const* tag, uint64_t time,
+                  unsigned long threadh_id);
+
+  private:
     //! Associated tag metadata
     char m_tag[TAG_SIZE];
 

@@ -38,7 +38,6 @@ void block_until_all_channels_done()
     auto it = std::find(HANDLED_SIGNALS.begin(), HANDLED_SIGNALS.end(), g_signal_state.load());
     if (it != HANDLED_SIGNALS.end()) {
         slog::forward_signal(g_signal_state);
-        std::this_thread::sleep_for(std::chrono::hours(1000000));
     }
 }
 
@@ -47,7 +46,10 @@ void block_until_all_channels_done()
 extern "C" void slog_handle_signal(int signal)
 {
     slog::set_signal_state(signal);
-    slog::block_until_all_channels_done();
+    slog::block_until_all_channels_done();        
 }
 
-extern "C" void slog_handle_exit() { slog::detail::Logger::stop_all_channels(); }
+extern "C" void slog_handle_exit() 
+{ 
+    slog_handle_signal(slog::SLOG_STOPPED);
+}

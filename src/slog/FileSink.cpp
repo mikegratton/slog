@@ -57,9 +57,9 @@ void FileSink::set_max_file_size(long isize)
 
 void FileSink::set_file(char const* location, char const* name, char const* end)
 {
-    strncpy(mlogDirectory, location, sizeof(mlogDirectory));
-    strncpy(mlogBaseName, name, sizeof(mlogBaseName));
-    strncpy(mlogExtension, end, sizeof(mlogExtension));
+    strncpy(mlogDirectory, location, sizeof(mlogDirectory) - 1);
+    strncpy(mlogBaseName, name, sizeof(mlogBaseName) - 1);
+    strncpy(mlogExtension, end, sizeof(mlogExtension) - 1);
     make_file_name();
 
     // Try to open the file
@@ -104,6 +104,7 @@ void FileSink::record(LogRecord const& rec)
     if (nullptr == mfile) { return; }
     mbytesWritten += mformat(mfile, rec);
     fputc('\n', mfile);
+    mbytesWritten++;
     fflush(mfile);
     if (mecho) {
         mformat(stdout, rec);

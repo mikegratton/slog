@@ -21,13 +21,15 @@ set(SLOG_DEFAULT_POOL_RECORD_COUNT 256 CACHE STRING "Number of records to alloca
 set(SLOG_SANITIZER_BUILD "none" CACHE STRING "Build with Google sanitizers")
 set_property(CACHE SLOG_SANITIZER_BUILD PROPERTY STRINGS "none" "address" "thread")
 if (${SLOG_SANITIZER_BUILD} STREQUAL "none")
-    # 
+    message(STATUS "Sanitizers disabled")
 elseif (${SLOG_SANITIZER_BUILD} STREQUAL "address")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fsanitize=address -fsanitize=leak -fsanitize=undefined -ggdb -fno-omit-frame-pointer")
+    message(STATUS "Building with asan and ubsan")
 elseif (${SLOG_SANITIZER_BUILD} STREQUAL "thread")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fsanitize=thread -ggdb -fno-omit-frame-pointer")
+    message(STATUS "Building with tsan")
 else()
-    message(STATUS "SLOG_SANITIZER_BUILD setting of \"${SLOG_SANITIZER_BUILD}\" is not known")
+    message(STATUS "SLOG_SANITIZER_BUILD \"${SLOG_SANITIZER_BUILD}\" is not known. Sanitizers have been disabled")
 endif()
 
 # Core library
@@ -46,16 +48,3 @@ endif()
 if(SLOG_BUILD_BENCHMARK)
     add_subdirectory(benchmark)
 endif()
-
-# Installation
-install(TARGETS slog
-    EXPORT SlogTargets
-    ARCHIVE DESTINATION lib
-    LIBRARY DESTINATION lib
-    )
- 
-install(EXPORT SlogTargets 
-    NAMESPACE slog::
-    DESTINATION lib/cmake
-    COMPONENT Development
-    )

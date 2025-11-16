@@ -136,7 +136,7 @@ class NullStream : public std::ostream
     {
       public:
         
-        std::streamsize xsputn(char const* s, std::streamsize length) override { return length; }
+        std::streamsize xsputn(char const*, std::streamsize length) override { return length; }
 
         int overflow(int c) override
         {

@@ -6,9 +6,9 @@ namespace slog
 {
 
 struct TestLogRecord {    
-    LogRecordMetadata meta;    
+    LogRecordMetadata meta;
     long message_byte_count;
-    char const* message;
+    char message[2048];
 };
 
 void rmdir(char const* dirname);

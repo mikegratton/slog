@@ -22,14 +22,15 @@ void zulu_time_r(struct tm* o_datetime, time_t const* seconds_since_epoch);
  */
 bool make_directory(char const* directory, int mode = 509);
 
-/**
- * Install this handler for all slog-handled signals
- */
 typedef void (*signal_handler)(int);
+
+/**
+ * @brief Install this handler for all slog-handled signals
+ */
 void install_signal_handlers(signal_handler handler);
 
 /**
- * Remove the slog signal handler and reinstall the old handlers
+ * @brief Remove the slog signal handler and reinstall the old handlers
  */
 void restore_old_signal_handlers();
 

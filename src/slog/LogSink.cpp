@@ -6,6 +6,7 @@
 #include <ctime>
 
 #include "ConsoleSink.hpp"
+#include "LogConfig.hpp"
 #include "PlatformUtilities.hpp"
 
 namespace slog
@@ -22,7 +23,7 @@ uint32_t default_format(FILE* sink, LogRecord const& rec)
     fputc(' ', sink);
     write_count++;
     if (rec.meta().tag()[0]) {
-        write_count += fwrite(rec.meta().tag(), sizeof(char), strnlen(rec.meta().tag(), sizeof(rec.meta().tag())), sink);
+        write_count += fwrite(rec.meta().tag(), sizeof(char), strnlen(rec.meta().tag(), TAG_SIZE), sink);
         fputc(' ', sink);
         write_count++;
     }
@@ -37,7 +38,7 @@ uint32_t no_meta_format(FILE* sink, LogRecord const& rec)
     int count = 0;
     count += fwrite(rec.message(), sizeof(char), rec.message_byte_count(), sink);
     for (LogRecord const* more = rec.more(); more != nullptr; more = more->more()) {
-        count += fwrite(more->message(), sizeof(char), rec.message_byte_count(), sink);
+        count += fwrite(more->message(), sizeof(char), more->message_byte_count(), sink);
     }
     return count;
 }

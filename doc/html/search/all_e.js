@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['_7elogchannel_58',['~LogChannel',['../classslog_1_1LogChannel.html#a32c4e19ebf1d60ed1a75a8bbb1d85afa',1,'slog::LogChannel']]]
+  ['quickstart_0',['Quickstart',['../index.html#autotoc_md1',1,'']]]
 ];

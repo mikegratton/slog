@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['nullsink_29',['NullSink',['../classslog_1_1NullSink.html',1,'slog']]]
+  ['journaldsink_0',['journaldsink',['../classslog_1_1JournaldSink.html',1,'slog::JournaldSink'],['../index.html#autotoc_md15',1,'JournaldSink']]]
 ];

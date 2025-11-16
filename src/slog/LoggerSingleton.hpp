@@ -22,7 +22,7 @@ class Logger
     /**
      * @brief Number of active channels
      */
-    static std::size_t channel_count();
+    static int channel_count();
 
     /**
      *  @brief Set up a channel for each LogConfig.
@@ -72,7 +72,7 @@ long get_pool_missing_count();
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////
 
-inline std::size_t Logger::channel_count() { return instance().backend.size(); }
+inline int Logger::channel_count() { return static_cast<int>(instance().backend.size()); }
 
 inline LogChannel& Logger::get_channel(int channel)
 {

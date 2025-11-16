@@ -138,7 +138,7 @@ class CaptureStream {
     /// Obtain the actual stream object
     std::ostream& stream() { return *stream_ptr; }
 
-   protected:
+   private:
     std::ostream* stream_ptr;    
 };
 }  // namespace slog

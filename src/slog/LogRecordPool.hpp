@@ -54,7 +54,7 @@ class LogRecordPool
     // Count items in the pool. Not thread-safe
     long count() const;
 
-  protected:
+  private:
     void acquire_blank_records();
 
     mutable std::mutex lock;

@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['recordnode_74',['RecordNode',['../structslog_1_1RecordNode.html',1,'slog']]]
+  ['syslogsink_0',['SyslogSink',['../classslog_1_1SyslogSink.html',1,'slog']]]
 ];

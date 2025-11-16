@@ -93,3 +93,11 @@ void stop_logger();
 bool will_log(int severity, char const* tag = "", int channel = DEFAULT_CHANNEL);
 
 } // namespace slog
+
+/**
+ * @brief Async-signal-safe signal handler
+ *
+ * If you are handling a signal and want Slog to stop, this is the function to
+ * call. It will block until the log queues are drained.
+ */
+extern "C" void slog_handle_signal(int signal_id);

@@ -26,7 +26,7 @@ TEST_CASE("RecordPool.Discard")
     int pool_size = 1024;
     int message_size = 32;    
     LogRecordPool pool(DISCARD, pool_size, message_size);
-    CHECK(pool.count() == pool_size / (message_size + sizeof(LogRecord)));
+    CHECK(pool.count() == std::max<long>(16, pool_size / (64 + sizeof(LogRecord))));
     auto* item = pool.allocate();
     CHECK(item != nullptr);
     pool.free(item);
@@ -48,7 +48,7 @@ TEST_CASE("RecordPool.Block")
     int pool_size = 1024;
     int message_size = 32;
     long blocking_ms = 100;
-    LogRecordPool pool(BLOCK, 1024, 32, blocking_ms);
+    LogRecordPool pool(BLOCK, pool_size, message_size, blocking_ms);
     int total_message = pool.count();
     for (int i = 0; i < total_message ; i++) {
         CHECK(pool.allocate() != nullptr);
@@ -64,7 +64,7 @@ TEST_CASE("RecordPool.Allocate")
 {
     int pool_size = 1024;
     int message_size = 32;
-    LogRecordPool pool(slog::ALLOCATE, 1024, 32);
+    LogRecordPool pool(slog::ALLOCATE, pool_size, message_size);
     int total_message = pool.count();
     std::vector<LogRecord*> allocated;
     for (int i = 0; i < total_message ; i++) {
@@ -78,14 +78,14 @@ TEST_CASE("RecordPool.Allocate")
     CHECK(pool.count() == 2*total_message);
 }
 
-namespace {
-    struct TestSink : public slog::LogSink
-    {
-        int finalized = 0;
-        void record(LogRecord const& ) override { };
-        void finalize() override { finalized = 1; }
-    };
-}
+namespace
+{
+struct TestSink : public slog::LogSink {
+    int finalized = 0;
+    void record(LogRecord const&) override {};
+    void finalize() override { finalized = 1; }
+};
+} // namespace
 
 TEST_CASE("LogChannel")
 {

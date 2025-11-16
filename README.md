@@ -133,8 +133,8 @@ These cases include normal end of program (`return` from main), calls to
 Slog will only install a handler for SIGIN, SIGABRT, or SIGTERM if it discovers
 the default handler in place. If you wish to ignore a signal, register SIG_IGN
 before calling `start_logger()`.  If you have your own handlers for these
-signals, you must call `stop_logger()` from that handler. Note that
-`stop_logger()` is async signal safe.
+signals, you must call `slog_handle_signal(int signal_id)` from that handler.
+Note that `stop_logger()` is async signal safe.
 
 ## API
 
@@ -443,7 +443,7 @@ int my_format(FILE* sink, LogRecord const& rec) {
     count += fwrite(rec.message(), sizeof(char), rec.message_byte_count(), sink);
     // Note handling of "jumbo" records
     for (LogRecord const* more = rec.more(); more != nullptr; more = more->more()) {
-        count += fwrite(more->message(), sizeof(char), rec.message_byte_count(), sink);
+        count += fwrite(more->message(), sizeof(char), more->message_byte_count(), sink);
     }
     return count;
 }
@@ -577,21 +577,6 @@ In addition, building with `-DSLOG_LOGGING_ENABLED=0` will suppress all logging
 in a translation unit.
 
 # Version History
-
-* *1.0.0* Initial release.
-* *1.1.0* Alter main include path to be `slog/slog.hpp`. Fix bug with "jumbo"
-  messages being truncated.
-* *1.2.0* 
-    * Default sink changed to `ConsoleSink`. 
-    * Made pool sizes configurable in cmake
-    * Added a syslog sink that can use unix, UDP/IP, or TCP/IP sockets
-    * Fixed signal handling bug when handlers installed before slog's handlers
-* *1.3.0*
-    * Add `BinarySink` and `Blog()` macro for binary logging
-    * Moved details out of `slog.hpp` so that this header summarizes the basics
-    * Tests, examples, and benchmark programs are now not built by default
-* *1.3.1*
-    * Fix issues when building Slog without journald support
 * *2.0.0*
     * *Breaking change:* LogRecord and LogRecordMetadata fields are now accessed
       by methods. Fields like `message` are now access via `message()`
@@ -616,4 +601,17 @@ in a translation unit.
     * LogRecordPool has been refactored to use a more conventional memory
       allocation scheme.
     * The unit test suite has been expanded and automated.
-    
+* *1.3.1*
+    * Fix issues when building Slog without journald support    
+* *1.3.0*
+    * Add `BinarySink` and `Blog()` macro for binary logging
+    * Moved details out of `slog.hpp` so that this header summarizes the basics
+    * Tests, examples, and benchmark programs are now not built by default
+* *1.2.0* 
+    * Default sink changed to `ConsoleSink`. 
+    * Made pool sizes configurable in cmake
+    * Added a syslog sink that can use unix, UDP/IP, or TCP/IP sockets
+    * Fixed signal handling bug when handlers installed before slog's handlers
+* *1.1.0* Alter main include path to be `slog/slog.hpp`. Fix bug with "jumbo"
+  messages being truncated.
+* *1.0.0* Initial release.

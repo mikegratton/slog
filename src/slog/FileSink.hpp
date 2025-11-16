@@ -4,7 +4,8 @@
 
 #include "LogSink.hpp"
 
-namespace slog {
+namespace slog
+{
 
 /**
  * @brief Simple file storage for log records
@@ -14,14 +15,15 @@ namespace slog {
  * - Custom file naming
  * - Custom record formatting
  */
-class FileSink : public LogSink {
-   public:
+class FileSink : public LogSink
+{
+  public:
     FileSink();
     ~FileSink();
     FileSink(FileSink const&) = delete;
     FileSink(FileSink&&) noexcept = default;
     FileSink& operator=(FileSink const&) = delete;
-    FileSink& operator=(FileSink&&) noexcept= default;
+    FileSink& operator=(FileSink&&) noexcept = default;
 
     /**
      * @brief Close the open file.
@@ -69,8 +71,7 @@ class FileSink : public LogSink {
     /// count from the unix epoch.
     uint64_t get_start_timestamp() const { return msessionStartTime; }
 
-   protected:
-
+  protected:
     void open_or_rotate();
 
     void close_file();
@@ -91,7 +92,8 @@ class FileSink : public LogSink {
     long mmaxBytes;
     bool mecho;
 
-    char mfullLogName[sizeof(mlogDirectory) + sizeof(mlogBaseName) + sizeof(mlogExtension) + sizeof(msessionStartTimeStr) + 8];
+    char mfullLogName[sizeof(mlogDirectory) + sizeof(mlogBaseName) + sizeof(mlogExtension) +
+                      sizeof(msessionStartTimeStr) + 8];
 };
 
-}  // namespace slog
+} // namespace slog

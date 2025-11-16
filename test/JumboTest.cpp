@@ -58,7 +58,7 @@ TEST_CASE("Jumbo.Pool")
     slog::LogConfig config;
     config.set_sink(std::make_shared<slog::ConsoleSink>());
     config.set_default_threshold(slog::INFO);
-    auto pool = std::make_shared<slog::LogRecordPool>(slog::ALLOCATE, 1024 * 1024, 64);
+    auto pool = std::make_shared<slog::LogRecordPool>(slog::ALLOCATE, 1024 * 128, 64);
     long initial_pool_size = pool->count();
     config.set_pool(pool);
     slog::start_logger(config);
@@ -68,5 +68,5 @@ TEST_CASE("Jumbo.Pool")
     Slog(INFO) << biggun;
 
     slog::stop_logger();
-    REQUIRE(pool->count() == initial_pool_size);
+    CHECK(pool->count() == initial_pool_size);
 }

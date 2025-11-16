@@ -94,13 +94,13 @@ long JournaldSink::line_max()
     while (nullptr != fgets(line, sizeof(line)-1, version_pipe)) {
         if (2 == sscanf(line, "%s %d", identifier, &version) && strncmp(identifier, "systemd", 7) == 0) {            
             if (version < LINEMAX_VERSION) {
-                fclose(version_pipe);
+                pclose(version_pipe);
                 return line_max_value;
             }
             break;
         }        
     }
-    fclose(version_pipe);
+    pclose(version_pipe);
     if (version < LINEMAX_VERSION) {
         // This is true if we never found the version
         slog_error("Could not determine systemd version. Using to LINE_MAX = %ld\n", line_max_value);
@@ -143,7 +143,7 @@ long JournaldSink::line_max()
                 }
             }
         }
-        fclose(config_pipe);
+        pclose(config_pipe);
     }    
     return std::max(line_max_value, 79L);
 }

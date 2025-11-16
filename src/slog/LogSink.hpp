@@ -139,6 +139,6 @@ uint32_t default_binary_header_furniture(FILE* sink, int sequence, uint64_t time
 /**
  * @brief A furniture function that writes nothing
  */
-inline uint32_t no_op_furniture(FILE* sink, int sequence, uint64_t time) { return 0; }
+inline uint32_t no_op_furniture(FILE*, int, uint64_t) { return 0; }
 
 } // namespace slog

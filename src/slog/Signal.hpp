@@ -31,8 +31,5 @@ enum signal_state : int {
 
 } // namespace slog
 
-/// Signal handler. Async-signal safe.
-extern "C" void slog_handle_signal(int signal_id);
-
 /// Exit handler. Stop all channels and record remaining messages in the queue.
 extern "C" void slog_handle_exit();

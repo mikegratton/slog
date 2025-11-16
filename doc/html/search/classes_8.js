@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['syslogsink_75',['SyslogSink',['../classslog_1_1SyslogSink.html',1,'slog']]]
+  ['threshold_0',['Threshold',['../structslog_1_1FlatThresholdMap_1_1Threshold.html',1,'slog::FlatThresholdMap']]]
 ];

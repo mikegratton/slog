@@ -18,8 +18,8 @@ class FlatThresholdMap
     ~FlatThresholdMap();
     FlatThresholdMap& operator=(FlatThresholdMap const&);
     FlatThresholdMap(FlatThresholdMap const& other);
-    FlatThresholdMap& operator=(FlatThresholdMap&&) noexcept = default;
-    FlatThresholdMap(FlatThresholdMap&& other) noexcept = default;
+    FlatThresholdMap& operator=(FlatThresholdMap&&) noexcept;
+    FlatThresholdMap(FlatThresholdMap&& other) noexcept;
 
     /**
      * @brief Defines the severity threshold to apply for unknown or empty
@@ -52,6 +52,7 @@ class FlatThresholdMap
         int threshold;
     };
 
+  private:
     int defaultThreshold;
     Threshold* map;
     unsigned long mapSize;

@@ -1,5 +1,4 @@
 #pragma once
-#include "Signal.hpp"
 #include <condition_variable>
 #include <mutex>
 #include <thread>
@@ -8,9 +7,9 @@
 #include "LogRecordPool.hpp"
 #include "LogSink.hpp"
 #include "ThresholdMap.hpp"
-#include "slog/Signal.hpp"
 
-namespace slog {
+namespace slog
+{
 
 /**
  * @brief Principle worker of the slog system.
@@ -28,8 +27,9 @@ namespace slog {
  * In RUN, calls to push() are legal.
  *
  */
-class LogChannel {
-   public:
+class LogChannel
+{
+  public:
     /**
      * Ctor.
      */
@@ -80,7 +80,7 @@ class LogChannel {
      */
     long allocator_count() const { return pool->count(); }
 
-   protected:
+  protected:
     // Internal work function call on the workThread
     void logging_loop();
 
@@ -90,9 +90,14 @@ class LogChannel {
      * condition variable so that the waiting thread (the LogChannel worker) can
      * be put to sleep and awoken by the OS efficiently.
      */
-    class LogQueue {
-       public:
-        LogQueue() : tail(nullptr), head(nullptr) {}
+    class LogQueue
+    {
+      public:
+        LogQueue()
+            : tail(nullptr),
+              head(nullptr)
+        {
+        }
 
         void push(LogRecord* record);
 
@@ -100,7 +105,7 @@ class LogChannel {
 
         LogRecord* pop_all();
 
-       protected:
+      private:
         std::mutex lock;
         std::condition_variable pending;
 
@@ -108,8 +113,9 @@ class LogChannel {
         LogRecord* head;
     };
 
+  private:
     enum State { SETUP, RUN };
-    State logger_state() { return (get_signal_state() == SLOG_ACTIVE ? RUN : SETUP); }
+    State logger_state();
 
     // These object have only thread-safe calls
     std::shared_ptr<LogRecordPool> pool;
@@ -123,4 +129,4 @@ class LogChannel {
     std::thread work_thread;
 };
 
-}  // namespace slog
+} // namespace slog

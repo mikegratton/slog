@@ -29,7 +29,7 @@ bool make_directory(char const* directory, int mode)
 
     struct stat path_stat;
     std::string path(directory);
-    auto slash_index = 0;
+    std::size_t slash_index = 0;
     do {
         slash_index = path.find('/', slash_index + 1);
         std::string fragment = path.substr(0, slash_index);
@@ -82,6 +82,7 @@ bool install_signal_handler_if_not_ignored(int signal_id, signal_handler handler
     }
     if (current_handler.sa_handler == SIG_IGN || current_handler.sa_handler == handler) {
         // Nothing to do. Either the signal is ignored or our handler is already in place
+        printf("Handler for %d is %p, nothing to do\n", signal_id, current_handler.sa_handler);
         return true;
     }
     status = sigaction(signal_id, &action, nullptr);

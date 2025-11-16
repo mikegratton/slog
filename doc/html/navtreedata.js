@@ -25,45 +25,14 @@
 var NAVTREE =
 [
   [ "Slog", "index.html", [
-    [ "Slog: A C++ Logging Library for Robotic Systems", "index.html", [
-      [ "Features:", "index.html#autotoc_md0", null ],
-      [ "Quickstart", "index.html#autotoc_md1", null ],
-      [ "Design", "index.html#autotoc_md2", null ],
-      [ "Asynchronous Logging", "index.html#autotoc_md3", null ],
-      [ "API", "index.html#autotoc_md4", [
-        [ "Slog Concepts", "index.html#autotoc_md5", [
-          [ "Severity", "index.html#autotoc_md6", null ],
-          [ "Tags", "index.html#autotoc_md7", null ],
-          [ "Channels", "index.html#autotoc_md8", null ]
-        ] ],
-        [ "General Use", "index.html#autotoc_md9", null ],
-        [ "Setup", "index.html#autotoc_md10", null ],
-        [ "Log Sinks", "index.html#autotoc_md11", [
-          [ "ConsoleSink", "index.html#autotoc_md12", null ],
-          [ "FileSink", "index.html#autotoc_md13", null ],
-          [ "JournaldSink", "index.html#autotoc_md14", null ],
-          [ "SyslogSink", "index.html#autotoc_md15", null ],
-          [ "BinarySink", "index.html#autotoc_md16", null ]
-        ] ],
-        [ "Tweaking the Format", "index.html#autotoc_md17", null ],
-        [ "Writing Your Own Sink", "index.html#autotoc_md18", null ],
-        [ "Locale Setting", "index.html#autotoc_md19", null ]
-      ] ],
-      [ "Building Slog", "index.html#autotoc_md20", null ],
-      [ "LogConfig", "index.html#autotoc_md21", [
-        [ "LogRecordPool", "index.html#autotoc_md22", null ]
-      ] ],
-      [ "Compile-time Configuration", "index.html#autotoc_md23", null ],
-      [ "Version History", "index.html#autotoc_md24", null ]
-    ] ],
+    [ "Slog: A C++ Logging Library for Robotic Systems", "index.html", "index" ],
     [ "Classes", "annotated.html", [
       [ "Class List", "annotated.html", "annotated_dup" ],
       [ "Class Index", "classes.html", null ],
       [ "Class Hierarchy", "hierarchy.html", "hierarchy" ],
       [ "Class Members", "functions.html", [
         [ "All", "functions.html", null ],
-        [ "Functions", "functions_func.html", null ],
-        [ "Variables", "functions_vars.html", null ]
+        [ "Functions", "functions_func.html", null ]
       ] ]
     ] ],
     [ "Files", "files.html", [
