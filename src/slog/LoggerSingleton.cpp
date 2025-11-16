@@ -2,15 +2,17 @@
 #include "PlatformUtilities.hpp"
 #include "Signal.hpp"
 #include "SlogError.hpp"
-#include "slog/LogChannel.hpp"
-#include "slog/LogRecordPool.hpp"
-#include "slog/LogSetup.hpp"
-#include "slog/LogSink.hpp"
+#include "LogChannel.hpp"
+#include "LogRecordPool.hpp"
+#include "LogSetup.hpp"
+#include "LogSink.hpp"
+#if SLOG_LOG_TO_CONSOLE_WHEN_STOPPED
+#include "ConsoleSink.hpp"
+#endif
 #include <atomic>
 #include <csignal>
 #include <cstring>
 #include <endian.h>
-#include <limits>
 #include <memory>
 #include <unistd.h>
 

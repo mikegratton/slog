@@ -1,5 +1,5 @@
 
-#include "slog/LogSetup.hpp"
+#include "LogSetup.hpp"
 #include <cassert>
 #include <vector>
 

@@ -1,7 +1,7 @@
 #pragma once
 #include "LogChannel.hpp"
 #include "LogSetup.hpp"
-#include "slog/LogRecordPool.hpp"
+#include "LogRecordPool.hpp"
 #include <memory>
 #include <vector>
 

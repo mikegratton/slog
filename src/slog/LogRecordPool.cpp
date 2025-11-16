@@ -1,5 +1,5 @@
 #include "LogRecordPool.hpp"
-#include "slog/LogRecord.hpp"
+#include "LogRecord.hpp"
 
 #include <cassert>
 #include <cstdint>

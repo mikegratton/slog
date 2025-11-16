@@ -2,7 +2,7 @@
 #include <cstdio>
 
 #include "LogSink.hpp"
-#include "slog/LogRecord.hpp"
+#include "LogRecord.hpp"
 
 namespace slog {
 

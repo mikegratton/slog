@@ -1,6 +1,6 @@
 #include "BinarySink.hpp"
-#include "slog/LogRecord.hpp"
-#include "slog/LogSink.hpp"
+#include "LogRecord.hpp"
+#include "LogSink.hpp"
 
 namespace slog {
 
