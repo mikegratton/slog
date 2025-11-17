@@ -1,8 +1,15 @@
-if (SLOG_JOURNALD)
+if (SLOG_JOURNALD AND SLOG_FORMAT_LOG AND SLOG_STREAM_LOG)
     file(GLOB source CONFIGURE_DEPENDS *.cpp)
     add_compile_options(-pg)
     add_executable(slogBenchmark bench.cpp)
     target_link_libraries(slogBenchmark PUBLIC slog)
+
+    if (SLOG_FORMAT_LOG)
+        set_target_properties(slogBenchmark PROPERTIES CXX_STANDARD 20)
+    else()
+        set_target_properties(slogBenchmark PROPERTIES CXX_STANDARD 11)
+    endif()
+
 else()
-    message(STATUS "Benchmark requires journald")
+    message(STATUS "Benchmark requires journald, SLOG_FORMAT_LOG, and SLOG_STREAM_LOG")
 endif()

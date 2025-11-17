@@ -1,7 +1,7 @@
 #pragma once
 #include <condition_variable>
 #include <mutex>
-
+#include "config.hpp"
 #include "LogRecord.hpp"
 
 namespace slog
@@ -31,8 +31,10 @@ enum LogRecordPoolPolicy { ALLOCATE, BLOCK, DISCARD };
 class LogRecordPool
 {
   public:
-    LogRecordPool(LogRecordPoolPolicy policy, long pool_alloc_size, long message_size,
-                  long max_blocking_time_ms = 50);
+    LogRecordPool(LogRecordPoolPolicy policy,
+                  long pool_alloc_size = DEFAULT_POOL_RECORD_COUNT *
+                                         (DEFAULT_RECORD_SIZE + sizeof(LogRecord)),
+                  long message_size = DEFAULT_RECORD_SIZE, long max_blocking_time_ms = 50);
 
     ~LogRecordPool();
     LogRecordPool(LogRecordPool const&) = delete;

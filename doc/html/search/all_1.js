@@ -1,5 +1,4 @@
 var searchData=
 [
-  ['binarysink_0',['binarysink',['../classslog_1_1BinarySink.html',1,'slog::BinarySink'],['../index.html#autotoc_md17',1,'BinarySink']]],
-  ['building_20slog_1',['Building Slog',['../index.html#autotoc_md21',1,'']]]
+  ['2_0',['Migrating from Version 1 to Version 2',['../index.html#autotoc_md25',1,'']]]
 ];

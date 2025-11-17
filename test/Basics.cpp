@@ -1,12 +1,11 @@
 #include <chrono>
-#include <locale>
 #include <memory>
-
+#include "SlowSink.hpp"
 #include "slog/Signal.hpp"
 #include "slog/slog.hpp"
 
-#include "LogConfig.hpp"
 #include "doctest.h"
+#include <csignal>
 #include "slog/LogChannel.hpp"
 #include "slog/LogRecord.hpp"
 #include "slog/LogRecordPool.hpp"
@@ -199,4 +198,33 @@ TEST_CASE("Stream")
 TEST_CASE("StoppedLogger")
 {
     Slog(DBUG) << "This message was sent while slog was stopped";
+}
+
+
+TEST_CASE("StartStop")
+{
+    std::remove(SlowSink::file_name());
+
+    auto sink = std::make_shared<SlowSink>();
+    sink->unlock();
+    slog::LogConfig config(slog::DBUG, sink);
+    auto* probe = std::signal(SIGINT, nullptr);
+    CHECK(reinterpret_cast<void*>(probe) == nullptr);
+    slog::start_logger(config);
+    slog::stop_logger();
+    probe = std::signal(SIGINT, nullptr);
+    CHECK(reinterpret_cast<void*>(probe) == nullptr);
+    slog::start_logger(config);
+    probe = std::signal(SIGINT, nullptr);
+    CHECK(reinterpret_cast<void*>(probe));
+    Slog(NOTE) << "Test record";
+    slog::stop_logger();
+    
+    FILE* f = fopen(SlowSink::file_name(), "r");    
+    REQUIRE(f);
+    char buffer[1024];
+    fgets(buffer, sizeof(buffer), f);
+    CHECK_MESSAGE(strncmp(buffer, "Test record\n", 64) == 0, "Read \"", buffer, "\", but expected \"Test record\n\"");
+    fclose(f);        
+    std::remove(SlowSink::file_name());
 }

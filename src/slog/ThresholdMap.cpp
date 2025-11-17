@@ -1,5 +1,5 @@
 #include "ThresholdMap.hpp"
-#include "LogConfig.hpp"
+#include "config.hpp"
 #include <cstdlib>
 #include <cstring>
 

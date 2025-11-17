@@ -1,4 +1,5 @@
 var searchData=
 [
-  ['journaldsink_0',['journaldsink',['../classslog_1_1JournaldSink.html',1,'slog::JournaldSink'],['../index.html#autotoc_md15',1,'JournaldSink']]]
+  ['handling_0',['Signal Handling',['../index.html#autotoc_md4',1,'']]],
+  ['history_1',['Version History',['../index.html#autotoc_md26',1,'']]]
 ];

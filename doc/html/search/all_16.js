@@ -1,5 +1,5 @@
 var searchData=
 [
-  ['_7elogchannel_0',['~LogChannel',['../classslog_1_1LogChannel.html#a32c4e19ebf1d60ed1a75a8bbb1d85afa',1,'slog::LogChannel']]],
-  ['_7erecordinserter_1',['~RecordInserter',['../classslog_1_1RecordInserter.html#a6a6f496617a54bf4d702eb50683416f9',1,'slog::RecordInserter']]]
+  ['write_0',['write',['../classslog_1_1RecordInserter.html#adc4d55c357a2ab24b44ebaf236d98ecb',1,'slog::RecordInserter']]],
+  ['writing_20your_20own_20sink_1',['Writing Your Own Sink',['../index.html#autotoc_md19',1,'']]]
 ];

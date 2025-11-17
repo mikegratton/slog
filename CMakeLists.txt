@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.16)
 project(slog 
-    VERSION 2.0.0.0
+    VERSION 2.0.0
     DESCRIPTION 
         "Asynchronous logging for C++"
 )
@@ -9,8 +9,9 @@ list(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 # Options
-option(SLOG_STREAM "Provide Slog() macros and include <iostream>" ON)
+option(SLOG_STREAM_LOG "Provide Slog() macros and include <iostream>" ON)
 option(SLOG_BINARY_LOG "Provide Blog() binary data logging macros" OFF)
+option(SLOG_FORMAT_LOG "Use std::format for Flog() instead of printf (Implies c++20)" OFF)
 option(SLOG_JOURNALD "Provide journald sink (requires systemd-dev to be installed)" ON)
 option(SLOG_LOG_TO_CONSOLE_WHEN_STOPPED "When slog is stopped, print messages to the console instead of suppressing them" OFF)
 option(SLOG_PRINT_ERROR "Print internal errors to stderr" ON)

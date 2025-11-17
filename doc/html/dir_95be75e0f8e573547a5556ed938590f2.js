@@ -4,6 +4,7 @@ var dir_95be75e0f8e573547a5556ed938590f2 =
     [ "ConsoleSink.hpp", "ConsoleSink_8hpp_source.html", null ],
     [ "FileSink.hpp", "FileSink_8hpp_source.html", null ],
     [ "JournaldSink.hpp", "JournaldSink_8hpp_source.html", null ],
+    [ "Locale.hpp", "Locale_8hpp_source.html", null ],
     [ "LogChannel.hpp", "LogChannel_8hpp_source.html", null ],
     [ "LoggerSingleton.hpp", "LoggerSingleton_8hpp_source.html", null ],
     [ "LogRecord.hpp", "LogRecord_8hpp_source.html", null ],

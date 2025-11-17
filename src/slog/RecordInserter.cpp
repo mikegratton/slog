@@ -1,8 +1,9 @@
 #include "RecordInserter.hpp"
-#include "LogConfig.hpp"
+#include "config.hpp"
 #include "LogRecord.hpp"
 #include "slogDetail.hpp"
 #include <cstring>
+#include <algorithm>
 
 namespace slog
 {
@@ -43,25 +44,23 @@ RecordInserter& RecordInserter::operator=(RecordInserter&& other) noexcept
     other.current_node = nullptr;
     other.cursor = nullptr;
     other.buffer_end = nullptr;
-    channel = DEFAULT_CHANNEL;
+    other.channel = DEFAULT_CHANNEL;
     return *this;
 }
 
-RecordInserter& RecordInserter::write(void const* bytes, long byte_count)
+long RecordInserter::write(void const* bytes, long byte_count)
 {
     long count = write_some(reinterpret_cast<char const*>(bytes), byte_count);
     while (count < byte_count) {
         LogRecord* extra = get_fresh_record(channel, nullptr, nullptr, -1, ~0, nullptr);
         if (nullptr == extra) {
-            return *this;
+            return count;
         }
         set_node(extra);
         count += write_some(reinterpret_cast<char const*>(bytes) + count, byte_count - count);
     }
-    return *this;
+    return count;
 }
-
-RecordInserter& RecordInserter::operator=(char c) { return write(&c, 1); }
 
 long RecordInserter::write_some(char const* source, long byte_count)
 {

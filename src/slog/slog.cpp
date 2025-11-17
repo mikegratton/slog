@@ -1,6 +1,9 @@
 #include "FileSink.hpp"
 #include "LoggerSingleton.hpp"
+#include "RecordInserter.hpp"
 #include <cstdarg>
+#include <cassert>
+#include "Locale.hpp"
 
 namespace slog
 {
@@ -57,3 +60,20 @@ LogRecord* capture_message(LogRecord* node, char const* format, ...)
 }
 
 } // namespace slog
+
+
+#if SLOG_FORMAT_LOG
+#include <format>
+namespace slog {
+
+/**
+ * @brief std::format log capture
+ */
+void format_log(LogRecord* rec, int channel, std::string_view format, std::format_args args)
+{
+    assert(rec);
+    RecordInserter inserter(rec, channel);
+    std::vformat_to<RecordInserterIterator>(RecordInserterIterator(&inserter), get_locale(), format, args);
+}
+} // namespace slog
+#endif

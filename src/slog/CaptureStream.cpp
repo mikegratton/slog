@@ -1,4 +1,7 @@
-#ifndef SLOG_NO_STREAM
+#include "config.hpp"
+#include "slog/Locale.hpp"
+
+#if SLOG_STREAM_LOG
 #include <ios>
 #include <cstring>
 #include <cassert>
@@ -26,16 +29,17 @@ class IntrusiveBuf : public std::streambuf
         inserter = inserter_;        
     }
 
-    void release_inserter() { inserter = nullptr; }
+    void release_inserter() 
+    { 
+        inserter = nullptr; 
+    }
 
   private:
     RecordInserter* inserter;
     
     std::streamsize xsputn(char const* s, std::streamsize length) override
     {
-        // FIXME detect errors somehow?
-        inserter->write(s, length);
-        return length;        
+        return inserter->write(s, length);        
     }
 
     std::streambuf::int_type overflow(std::streambuf::int_type ch) override
@@ -43,7 +47,7 @@ class IntrusiveBuf : public std::streambuf
         if (std::streambuf::traits_type::eq_int_type(ch, std::streambuf::traits_type::eof())) {
             return 1;
         }
-        *inserter = ch;
+        inserter->write(&ch, 1);        
         return ch;
     }
 };
@@ -92,30 +96,21 @@ class NullStream : public std::ostream
     } m_sb;
 };
 
-namespace
-{
-/// Global locale for slog
-std::locale s_locale;
-
-/// Tracking of the current locale
-int s_locale_version = 0;
-} // namespace
-
 /// A locale managing stream
 class StreamHolder
 {
   public:
     StreamHolder()
-        : m_locale_version(s_locale_version)
+        : m_locale_version(get_locale_version())
     {
-        m_stream.imbue(s_locale);
+        m_stream.imbue(get_locale());
     }
 
     IntrusiveStream& stream()
     {
-        if (m_locale_version < s_locale_version) {
-            m_stream.imbue(s_locale);
-            m_locale_version = s_locale_version;
+        if (m_locale_version < get_locale_version()) {
+            m_stream.imbue(get_locale());
+            m_locale_version = get_locale_version();
         }
         return m_stream;
     }
@@ -131,14 +126,6 @@ thread_local StreamHolder st_stream; // Each thread has its own stream
 NullStream s_null;                   // Since NullStream has no state, all threads share a copy
 
 } // namespace
-
-void set_locale(std::locale locale)
-{
-    s_locale = locale;
-    s_locale_version++;
-}
-
-void set_locale_to_global() { set_locale(std::locale()); }
 
 CaptureStream::CaptureStream(LogRecord* node, int channel)
 : inserter(node, channel)

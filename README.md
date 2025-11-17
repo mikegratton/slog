@@ -5,14 +5,11 @@ Slog: A C++ Logging Library for Robotic Systems
 * [Documentation](https://mikegratton.github.io/slog/)
 
 
-Slog is an asynchronous stream-based logger with a memory pool.  It is designed
-for applications where the business logic cannot wait for disk or network IO to
-complete recording a log record before continuing.  For many server and robotic
-programs, log traffic comes in bursts as sessions open, plans are formed, and so
-on.  Slog queues up messages during the busy times and catches up on IO during
-the lulls. For critical applications, Slog can guarantee it will not allocate
-memory beyond its initial pool. For "normal" applications, Slog will allocate
-more memory if you are logging faster than it can keep up.
+Slog is an asynchronous stream-based logger with a memory pool.  It moves IO
+operations to their own thread.  For many programs, log traffic comes in bursts.
+Slog queues up messages during the busy times and catches up on IO during the
+lulls. For critical applications, Slog can guarantee it will not allocate memory
+beyond its initial pool.
 
 ## Features:
 
@@ -47,6 +44,7 @@ inline void do_other_stuff()
 {
     Slog(DBUG) << "You can see this";
     Slog(INFO, "net") << "But not this";
+    Flog(NOTE)("Format logs are {}", "supported");
 }
 ```
 In the main.cpp, we can put some additional setup code
@@ -127,20 +125,23 @@ terminate before this queue is written to disk.  Slog ties into the signal and
 exit systems to ensure that the queue is processed before at exit in most cases.
 These cases include normal end of program (`return` from main), calls to
 `exit()` and the signals SIGINT, SIGABRT, and SIGTERM. Exiting using
-`quick_exit()` can still result in lost messages, however.
+`quick_exit()`, catching SIGKILL, or a sudden loss of power can still result in
+lost messages.
 
 ### Signal Handling
-Slog will only install a handler for SIGIN, SIGABRT, or SIGTERM if it discovers
+Slog will only install a handler for SIGINT, SIGABRT, or SIGTERM if it discovers
 the default handler in place. If you wish to ignore a signal, register SIG_IGN
 before calling `start_logger()`.  If you have your own handlers for these
 signals, you must call `slog_handle_signal(int signal_id)` from that handler.
-Note that `stop_logger()` is async signal safe.
+This is async signal safe. Slog restores the default handlers on `stop_logger()`.
+
 
 ## API
 
 Slog's API is split into two parts: a very lightweight general include for code
 that needs to write logs (`slog.hpp`), and a larger setup header that is used to
 configure the logger (`LogSetup.hpp`).
+
 
 ### Slog Concepts
 
@@ -168,6 +169,7 @@ the example, the value of `a` will be zero at the end.) Thresholds are set up in
 happening. You can check if a message would be logged by calling
 `slog::will_log(severity, tag, channel)`.
 
+
 #### Tags
 Each message may have an optional tag associated.  These are size-limited
 strings (the default limit is 15 characters) that can have custom log
@@ -181,6 +183,7 @@ Slog(INFO) << "Increment a: "<< a++;
 would log at most once, if we set the threshold for tag "noisy" to INFO or
 lower.
 
+
 #### Channels
 Slog can be configured to have multiple *channels*. A channel corresponds to an
 independent back-end, with its own worker thread, its own sink, and its own set
@@ -189,6 +192,7 @@ instance.  Note that a particular message can be sent to only one channel.
 Channels may have independent memory pools with different policies and sizes or
 they can share pools with other channels. Slog represents a channel by an
 integer, with the default channel being channel 0.
+
 
 ### General Use
 
@@ -202,13 +206,13 @@ default channel with no tag. This provides a `std::ostream` stream to log to.
 to the default channel with tag "tag".
 * `Slog(SEVERITY, "tag", 2) << "My message"` : Log "My message" at level
 SEVERITY to channel 2 with tag "tag".
-* `Flog(SEVERITY, "A good number is %d", 42)` : Log "A good number is 42" to the
-default channel with no tag. This uses printf-style formatting.
-* `Flogt(SEVERITY, "tag", "A good number is %d", 42)` : Log "A good number is
-42" to the default channel with tag "tag". This uses printf-style formatting.
-* `Flogtc(SEVERITY, "tag", 2, "A good number is %d", 42)` : Log "A good number
-is 42" to channel 2 with tag "tag". This uses printf-style formatting.
-* `Blog(SEVERITY, "tag", 2).record(my_bytes, my_byte_count).record(more_bytes,
+* `Flog(SEVERITY)("A good number is {}", 42)` : Log "A good number is 42" to the
+default channel with no tag. This uses std::format-style formatting.
+* `Flog(SEVERITY, "tag")("A good number is {}", 42)` : Log "A good number is
+42" to the default channel with tag "tag". This uses format-style formatting.
+* `Flog(SEVERITY, "tag", 2)("A good number is {}", 42)` : Log "A good number
+is 42" to channel 2 with tag "tag". This uses format-style formatting.
+* `Blog(SEVERITY, "tag", 2)(my_bytes, my_byte_count)(more_bytes,
 count2)` : Capture a binary log message in two parts with tag "tag" to channel
 two.
 
@@ -222,7 +226,7 @@ simply discard the log message. The default policy is to allocate.
 
 Slog uses a custom `std::ostream` class that avoids some of the inefficiencies
 of `std::stringstream`.  For the Flog family of macros, formatting is performed
-with `vsnprintf`.
+with `vformat_to`.
 
 For binary logging, it is usually a good idea to define your own macros of the
 form
@@ -233,7 +237,7 @@ so you can simply log with
 ```cpp
 Polygon myPolygon = ...;
 auto buffer = serialize(myPolygon);
-LogPoly.record(buffer, buffer.size()); 
+LogPoly(buffer, buffer.size()); 
 ```
 This enforces the correct channel and tag so the record can be deserialized
 later.
@@ -416,7 +420,23 @@ using Formatter = std::function<int (FILE* sink, LogRecord const& node)>;
 This should return the number of bytes written to the `sink`.  You can use a
 lambda in the setup to customize the format to your liking. Functions in
 `LogSink.hpp` provide date, severity, and code location format helpers that
-should make creating your own formatter easy.
+should make creating your own formatter easy.  The `write_message_to_file()`
+will insert just the message portion into the FILE stream, returning the number
+of bytes written.  Its companion `total_record_size()` just returns the total
+size of the record (including any `more()` data).
+
+For example, suppose we want to write records like "[1970-01-01T12:34:56.001]
+Important message". We could format these like
+```cpp
+int my_format(FILE* sink, LogRecord const& rec) {        
+    char time_str[32];    
+    format_time(time_str, rec.meta().time(), 3, true);
+    int count = fprintf(sink, "[%s] ", time_str);
+    count += write_message_to_file(sink, rec);    
+    return count;
+}
+```
+
 
 ### Writing Your Own Sink
 Log sinks derive from this abstract class defined in `LogSink.hpp`:
@@ -429,57 +449,35 @@ public:
     virtual void finalize() { }
 };
 ```
-As you can see, you can do what you like in `record`.  The `Formatter` functor
-provides a convenient way to allow users to customize the format, but you don't
-have to use it.
-
-An example formatter is
-```cpp
-int my_format(FILE* sink, LogRecord const& rec) {        
-    char time_str[32];    
-    format_time(time_str, rec.meta().time(), 3, true);
-    int count = fprintf(sink, "[%s] ", time_str);
-    // Note records aren't null terminated, but the byte count is recorded
-    count += fwrite(rec.message(), sizeof(char), rec.message_byte_count(), sink);
-    // Note handling of "jumbo" records
-    for (LogRecord const* more = rec.more(); more != nullptr; more = more->more()) {
-        count += fwrite(more->message(), sizeof(char), more->message_byte_count(), sink);
-    }
-    return count;
-}
-```
-Note that `rec.more()` is a pointer to more message data if the message exceeds
-the size available in a single record. The metadata for the `more` record is not
-meaningful.
-
+The `record` method provides you with control over how messages are recorded.
 The `LogRecord` contains
 ```cpp
     LogRecordMetadata const& meta();  //! Metadata about the record (see below)
-    uint32_t message_byte_count();    //! The number of bytes in message()
+    uint32_t size();                  //! The number of bytes in message()
     char const* message();            //! The message. Note: this is not null-terminated.
     LogRecord const* more();          //! When a log record is larger than one message can hold,
                                       //! multiple records will be joined into a "jumbo" record.
                                       //! more() will be null if there are no more bytes.
 ```
-The example above demonstrates handling the non-terminated `message()` and the
-`more()` parts of a record. The `LogRecordMetadata` contains the following:
-```cpp
-    char const* tag();         //! The tag (null terminated)
+Messages are not null terminated. Use `size()` to determine the end of the
+string. The `more()` pointer will be non-null when a message is large enough
+that it is split over multiple records. In these extra records, the metadata is
+not meaningful. The `LogRecordMetadata` contains the following:
+```cpp    
     char const* filename();    //! filename containing the function where this message was recorded
-    char const* function();    //! name of the function where this message was recorded    
-    uint64_t time();           //! ns since Unix epoch
+    char const* function();    //! name of the function where this message was recorded
+    int line();                //! program line number    
     unsigned long thread_id(); //! unique ID of the thread this message was recorded on
-    int line();                //! program line number
-    int severity();            //! Message importance. Lower numbers are more important    
+    uint64_t time();           //! ns since Unix epoch
+    int severity();            //! Message importance. Lower numbers are more important
+    char const* tag();         //! The tag (null terminated)
 ```
-As you can see, the default formatter doesn't include all of this information,
-but you can easily customize it.
 
 
 ### Locale Setting
 
 You may set a custom locale for a stream in Slog via the `set_locale()` method
-of `LogConfig`.
+of `LogSetup`.
 
 Slog uses static thread-local stream objects that are initialized in an
 undefined order (aka the "static initialization fiasco" of C++). As such, if you
@@ -487,33 +485,46 @@ change the global locale after starting the logger, the streams will not pick up
 on this by default.  You can force Slog to update all of the stream locales via
 `void set_locale(std::locale locale)` or `void set_locale_to_global()`.
 
+
 ## Building Slog
 
-Slog is written in C++11 and has no required dependencies.  You'll probably be
-happiest building it as part of a CMake super-build.  To do so, add this project
-as a subdirectory of your code and put
-```cpp
-add_subdirectory(slog)
-```
-in your `CMakeLists.txt` file.  This will give you the target `slog` that you
-can depend on.  Slog is a very small library and won't significantly impact
-compile times.
-
-Slog has an optional dependency on libsystemd for the journal sink.  To use
-this, you'll need to install the systemd development package for your OS.  In
-Debian or Ubuntu, you can do this via
+Slog is written in C++11 and has no required dependencies.  To use `Flog()`
+you'll need a C++20-capable compiler. To use the journald sink, you'll need to
+install the systemd development package for your OS.  In Debian or Ubuntu, you
+can do this via
 ```
 apt install libsystemd-dev
 ```
 Note that this doesn't add any *runtime* dependencies to your application, you
 just need the headers for building.
 
+Slog provides a CMake configure script that will be installed with the library.
+You can use 
+```cmake 
+find_package(slog)
+target_link_libraries(<your target> PRIVATE slog::slog)
+```
+to depend on Slog.  However, Slog is small enough that you can simply put the 
+source code in a subdirectory and
+```cpp
+add_subdirectory(slog)
+```
+in your `CMakeLists.txt` file.  This will give you the target `slog` that you
+can depend on.
+
+
 ## LogConfig
 
 The `LogConfig` object is declared in `LogSetup.hpp` and offers control over the
-logging process. You supply one LogConfig per channel you want to log (a
-`std::vector<LogConfig>`).  If you just need one channel, you can pass a bare
-`LogConfig`.
+logging process:
+```cpp
+slog::LogConfig config;
+config.set_default_threshold(slog::WARN);
+config.add_tag("net", slog::INFO);
+slog::start_logger(config);
+```
+If you are using more than one channel, supply one config per channel using 
+`std::vector<LogConfig>`.
 
 The setup methods are:
 
@@ -527,14 +538,15 @@ The setup methods are:
 
 * `set_pool(std::shared_ptr<LogRecordPool> pool_)`: Set the record pool.  The
 default pool is an allocating record pool that allocates memory according to the
-cmake variables below.
+CMake variables below.
+
 
 ### LogRecordPool
 
 The `LogRecordPool` constructor sets up the pool policies:
 ```cpp
-LogRecordPool(LogRecordPoolPolicy i_policy, long i_pool_alloc_size, long i_message_size,
-        long i_max_blocking_time_ms = 50);
+LogRecordPool(LogRecordPoolPolicy policy, long pool_alloc_size, long message_size,
+        long max_blocking_time_ms = 50);
 ```
 The available policies are
 * ALLOCATE: `malloc` more memory when the pool is empty
@@ -543,27 +555,32 @@ The available policies are
 * DISCARD: Discard the message in the Slog() call if no record is available
 
 The other parameters are
-* `i_pool_alloc_size` controls the size of each pool allocation. The default
+* `pool_alloc_size` controls the size of each pool allocation. The default
   pool uses a 1 MB allocation. The pool size is rounded up to contain at least
   16 records.
-* `i_message_size` controls the size of a single message. Longer messages are
+* `message_size` controls the size of a single message. Longer messages are
    formed using the "jumbo" pointer -- concatenating multiple records from the
    pool. Choosing this to be a bit longer than your typical message can give you
    good performance. The default pool uses 512 B messages, roughly five terminal
    lines of text.  Message sizes are bounded below by 64 B.
-* `i_max_blocking_time_ms` sets the maximum blocking time in milliseconds when
-   `i_policy` is `BLOCK`. It has no impact for ALLOCATE or DISCARD policies.
+* `max_blocking_time_ms` sets the maximum blocking time in milliseconds when
+   `policy` is `BLOCK`. It has no impact for ALLOCATE or DISCARD policies.
 
-The record pool is fully thread-safe, so sharing one pool `shared_ptr` between
-multiple channels works fine.
+The record pool is fully thread-safe, enabling one pool `shared_ptr` to be used
+by multiple channels.
+
 
 ## Compile-time Configuration
-Slog has four compile-time cmake configuration options:
+Slog has several compile-time cmake options:
 
 | Name                                |   Default  |    Notes                                                      |
 |-------------------------------------|------------|---------------------------------------------------------------|
 | `SLOG_LOG_TO_CONSOLE_WHEN_STOPPED`  |  OFF       | When the logger is stopped, dump records to the console       |
-| `SLOG_STREAM`                       |  ON        | Turn this off to avoid including <iostream> and Slog() macros |
+| `SLOG_STREAM_LOG`                   |  ON        | Turn this off to avoid including <iostream> and Slog() macros |
+| `SLOG_BINARY_LOG`                   |  OFF       | Turn on Blog() binary logging macro                           |
+| `SLOG_FORMAT_LOG`                   |  OFF       | Flog() uses std::format(). Implies c++20                      |
+| `SLOG_JOURNALD`                     |  OFF       | Build the Journald sink (requires libsystemd-dev)             |
+| `SLOG_PRINT_ERROR`                  |  ON        | Write system errors to stderr                                 |
 | `SLOG_DEFAULT_RECORD_SIZE`          |  512       | Default size of records                                       |
 | `SLOG_DEFAULT_POOL_RECORD_COUNT`    |  256       | Default number of records in the pool                         |
 | `SLOG_BUILD_TEST`                   |  OFF       | Build unit tests                                              |
@@ -576,14 +593,36 @@ SLOG_DEFAULT_RECORD_SIZE`.
 In addition, building with `-DSLOG_LOGGING_ENABLED=0` will suppress all logging
 in a translation unit.
 
+
+# Migrating from Version 1 to Version 2
+Slog 2 has some breaking changes with Slog 1. Here's what to expect when updating:
+* The `Slog()` macros are unchanged. If that's all you use, there should be no 
+  difficulty in upgrading.
+* The `Blog()` macros have gained a shorter form. You can now write
+  `Blog(INFO)(my_bytes, my_bytes_size)` in addition to the old `.record()`
+  method.
+* The `Flog()` macros have been completely revised. `Flog` is no longer enabled
+  by default. When it is enabled, it uses `std::format` rather than `printf`
+  style formatting. Using this feature requires c++20.
+* For custom `LogSinks` or `LogRecord` formatters:
+  * `LogSink()` has a new virtual method, `finalize()` that is called when a
+    channel is shutting down. The default implementation is a no-op.
+  * `LogRecord` is now a class. Old fields have become methods, so `message` is
+    now `message()`. The `message_byte_count` is now `size()`, and
+    `message_max_size` is now `capacity()`.
+  * The `message()` c string is no longer null terminated.
+  * Likewise, `LogRecordMetadata` is also now a class. The old fields are now methods.
+
+
 # Version History
 * *2.0.0*
+    * `Flog()` has changed to providing `std::format`-based logging.
     * *Breaking change:* LogRecord and LogRecordMetadata fields are now accessed
       by methods. Fields like `message` are now access via `message()`
+    * *Breaking change:* The `message_byte_size` is now `size()`.
+      `message_max_size` is now `capacity()`.
     * *Breaking change:* LogRecord `message` is no longer null terminated. You
-      must use the `m_message_byte_count` to determine the end of the message.
-      (This provides more uniformity in the handling of binary and text
-      messages.)
+      must use the `size()` to determine the end of the message.
     * Improved signal handlers to be async signal safe. 
     * `exit()` now causes Slog to flush its queue.
     * Add header/footer options for `FileSink` and `BinarySink` to add fixed
@@ -592,11 +631,11 @@ in a translation unit.
       if required. This is done recursively (i.e. in the manner of `mkdir -p`).
     * Bugs related to binary messages larger than one record size have been
       fixed.
-    * JournaldSink now respects the LineMax (maximum journal record size)
+    * JournaldSink now respects the LineMax (the maximum journal record size)
     * SyslogSink now attempts to reconnect a fixed number of times if the socket
       connection fails.    
     * The LogSink interface has a new optional method: `finalize()`. This method
-      is called by Slog when stopping a sink. The default implementation does
+      is called by Slog when stopping a channel. The default implementation does
       nothing.    
     * LogRecordPool has been refactored to use a more conventional memory
       allocation scheme.

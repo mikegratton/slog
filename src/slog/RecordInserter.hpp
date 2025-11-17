@@ -13,6 +13,9 @@ class LogRecord;
 class RecordInserter
 {
   public:
+
+    using difference_type = long;
+
     /// Construct a capture object with the given head node destined for
     /// the given channel
     RecordInserter(LogRecord* node, int channel);
@@ -20,9 +23,8 @@ class RecordInserter
     /// Push the record to the channel sink
     ~RecordInserter();
 
-    /// This is not copyable
-    RecordInserter(RecordInserter const&) = delete;
-    RecordInserter& operator=(RecordInserter const&) = delete;
+    RecordInserter(RecordInserter const&) = default;
+    RecordInserter& operator=(RecordInserter const&) = default;
     RecordInserter(RecordInserter&&) noexcept;
     RecordInserter& operator=(RecordInserter&&) noexcept;
 
@@ -31,19 +33,7 @@ class RecordInserter
      * @param bytes -- Byte array
      * @param byte_count -- Byte count to write from bytes
      */
-    RecordInserter& write(void const* bytes, long byte_count);
-
-    /**
-     * @brief Insert a character into the record. 
-     *
-     * This advances the cursor. It is less efficient than calls to write()
-     */ 
-    RecordInserter& operator=(char c);
-
-    // No-op operators to emulate a back insert iterator
-    RecordInserter& operator*() { return *this; }
-    RecordInserter& operator++() { return *this; }
-    RecordInserter& operator++(int) { return *this; }
+    long write(void const* bytes, long byte_count);
 
   private:
     /// Write bytes to the current node. This will not write beyond that node's remaining capacity
@@ -61,6 +51,32 @@ class RecordInserter
     char* cursor;
     char const* buffer_end;
     int channel;
+};
+
+struct RecordInserterIterator {
+    RecordInserter* inserter;
+    using difference_type = long;
+    
+    RecordInserterIterator(RecordInserter* intserter_)
+        : inserter(intserter_)
+    {
+    }
+
+    /**
+     * @brief Insert a character into the record.
+     *
+     * This advances the cursor. It is less efficient than calls to write()
+     */
+    RecordInserterIterator& operator=(char c)
+    {
+        inserter->write(&c, 1);
+        return *this;
+    }
+
+    // No-op operators required of back insert iterators
+    RecordInserterIterator& operator*() { return *this; }
+    RecordInserterIterator& operator++() { return *this; }
+    RecordInserterIterator& operator++(int) { return *this; }
 };
 
 } // namespace slog

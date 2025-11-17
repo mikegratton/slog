@@ -6,6 +6,7 @@
 #include "LogRecordPool.hpp"
 #include "LogSetup.hpp"
 #include "LogSink.hpp"
+#include <cstdlib>
 #if SLOG_LOG_TO_CONSOLE_WHEN_STOPPED
 #include "ConsoleSink.hpp"
 #endif

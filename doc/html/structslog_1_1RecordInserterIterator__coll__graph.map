@@ -1,0 +1,5 @@
+<map id="slog::RecordInserterIterator" name="slog::RecordInserterIterator">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,93,205,119"/>
+<area shape="rect" id="Node000002" href="$classslog_1_1RecordInserter.html" title="RecordInserter writes bytes into LogRecord nodes, handling allocating subsequent LogRecords to form j..." alt="" coords="29,5,181,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="108,45,108,93,103,93,103,45"/>
+</map>

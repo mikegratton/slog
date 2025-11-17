@@ -1,5 +1,5 @@
 var searchData=
 [
-  ['design_0',['Design',['../index.html#autotoc_md2',1,'']]],
-  ['disconnect_1',['disconnect',['../classslog_1_1SyslogSink.html#a11e08273fc663a0be75f36b054d791a2',1,'slog::SyslogSink']]]
+  ['binarysink_0',['binarysink',['../classslog_1_1BinarySink.html',1,'slog::BinarySink'],['../index.html#autotoc_md17',1,'BinarySink']]],
+  ['building_20slog_1',['Building Slog',['../index.html#autotoc_md21',1,'']]]
 ];

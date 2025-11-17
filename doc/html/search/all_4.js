@@ -1,13 +1,14 @@
 var searchData=
 [
-  ['features_3a_0',['Features:',['../index.html#autotoc_md0',1,'']]],
-  ['filename_1',['filename',['../classslog_1_1LogRecordMetadata.html#a00e1504aea5194bf32e424a5cd834bb1',1,'slog::LogRecordMetadata']]],
-  ['filesink_2',['filesink',['../classslog_1_1FileSink.html',1,'slog::FileSink'],['../index.html#autotoc_md14',1,'FileSink']]],
-  ['finalize_3',['finalize',['../classslog_1_1FileSink.html#a74a95c18b1d9f82205dc1ce9100c3020',1,'slog::FileSink::finalize()'],['../classslog_1_1LogSink.html#a2281fc9b3d810139c1d5f18e8a642581',1,'slog::LogSink::finalize()'],['../classslog_1_1SyslogSink.html#ac74381f9ab2e58325d38c6935a57a85c',1,'slog::SyslogSink::finalize()']]],
-  ['flatthresholdmap_4',['FlatThresholdMap',['../classslog_1_1FlatThresholdMap.html',1,'slog']]],
-  ['for_20robotic_20systems_5',['Slog: A C++ Logging Library for Robotic Systems',['../index.html',1,'']]],
-  ['format_6',['Tweaking the Format',['../index.html#autotoc_md18',1,'']]],
-  ['format_5fheader_7',['format_header',['../classslog_1_1SyslogSink.html#ac606ce1e43843aa8f02980d37d4448da',1,'slog::SyslogSink']]],
-  ['free_8',['free',['../classslog_1_1LogRecordPool.html#a064ed5ad5ece4996f9e2e041bc2661cd',1,'slog::LogRecordPool']]],
-  ['function_9',['function',['../classslog_1_1LogRecordMetadata.html#a3ed3c2dea8c35f485462266c29d1b3ca',1,'slog::LogRecordMetadata']]]
+  ['c_20logging_20library_20for_20robotic_20systems_0',['Slog: A C++ Logging Library for Robotic Systems',['../index.html',1,'']]],
+  ['capacity_1',['capacity',['../classslog_1_1LogRecord.html#ada5e15f15498ec4216815801a45c78f0',1,'slog::LogRecord']]],
+  ['capture_2',['capture',['../classslog_1_1LogRecordMetadata.html#a8df59259d9916e920b0462f2d43a8263',1,'slog::LogRecordMetadata']]],
+  ['channels_3',['Channels',['../index.html#autotoc_md9',1,'']]],
+  ['compile_20time_20configuration_4',['Compile-time Configuration',['../index.html#autotoc_md24',1,'']]],
+  ['concepts_5',['Slog Concepts',['../index.html#autotoc_md6',1,'']]],
+  ['configuration_6',['Compile-time Configuration',['../index.html#autotoc_md24',1,'']]],
+  ['connect_7',['connect',['../classslog_1_1SyslogSink.html#a048f874c800265308112a5fee7b443f3',1,'slog::SyslogSink']]],
+  ['connect_5fip_8',['connect_ip',['../classslog_1_1SyslogSink.html#a4991d912fcaf9afefb0515b5356a55b2',1,'slog::SyslogSink']]],
+  ['connect_5funix_9',['connect_unix',['../classslog_1_1SyslogSink.html#ae48979a25a232f19dde7765c0f3ac47a',1,'slog::SyslogSink']]],
+  ['consolesink_10',['consolesink',['../classslog_1_1ConsoleSink.html',1,'slog::ConsoleSink'],['../index.html#autotoc_md13',1,'ConsoleSink']]]
 ];

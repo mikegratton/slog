@@ -1,4 +1,3 @@
-#include "LogConfig.hpp"
 #include "doctest.h"
 #include "slog/slog.hpp"
 #include "testUtilities.hpp"

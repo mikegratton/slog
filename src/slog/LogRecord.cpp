@@ -1,5 +1,5 @@
 #include "LogRecord.hpp"
-#include "LogConfig.hpp"
+#include "config.hpp"
 
 #include <chrono>
 #include <cstring>

@@ -1,15 +1,16 @@
-#include "LogConfig.hpp"
 #include "doctest.h"
+#include <cmath>
+#include <cstring>
+#include <pthread.h>
+#include <unistd.h>
+
 #include "slog/FileSink.hpp"
 #include "slog/LogRecord.hpp"
 #include "slog/slog.hpp"
 #include "slog/LogSetup.hpp"
 #include "testUtilities.hpp"
 
-#include <cstring>
-#include <pthread.h>
-#include <unistd.h>
-
+#if SLOG_FORMAT_LOG
 TEST_CASE("Flog")
 {
     slog::LogConfig config;
@@ -19,13 +20,13 @@ TEST_CASE("Flog")
     config.set_sink(sink);
     config.set_default_threshold(slog::INFO);
 
-    Flog(ERRR, "This is before startup");
+    Flog(ERRR)("This is before startup");
     slog::start_logger(config);
-    Flog(DBUG, "Invisible");
-    Flog(INFO, "Info text %d", 7);
-    Flog(WARN, "Hello %s", "guv");
-    Flogt(INFO, "tag", "Tag message %d", 1);
-    Flogtc(INFO, "tag2", 0, "Channel message %d", 2);
+    Flog(DBUG)("Invisible");
+    Flog(INFO)("Info text {}", 7);
+    Flog(WARN)("Hello {}", "guv");
+    Flog(INFO, "tag")("Tag message {}", 1);
+    Flog(INFO, "tag2", 0)("Channel message {}", 2);
 
     slog::stop_logger();
     Flog(ERRR, "This is after shutdown");
@@ -64,3 +65,5 @@ TEST_CASE("Flog")
     fclose(f);
     unlink(sink->get_file_name());
 }
+
+#endif

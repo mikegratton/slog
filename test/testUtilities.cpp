@@ -1,5 +1,4 @@
 #include "testUtilities.hpp"
-#include "LogConfig.hpp"
 #include <cassert>
 #include <cmath>
 #include <cstdint>

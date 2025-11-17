@@ -5,6 +5,7 @@
 #include <ostream>
 #endif
 
+#include <locale>
 #include "LogRecordPool.hpp"
 #include "LogSink.hpp"
 #include "ThresholdMap.hpp"
@@ -51,11 +52,11 @@ void start_logger(LogConfig const& config);
  */
 void start_logger(std::vector<LogConfig> configs);
 
-#if SLOG_STREAM
+#if SLOG_STREAM_LOG
 /**
- * @brief Set the log stream locale
+ * @brief Set the log stream locale for all channels
  */
-void set_locale(std::locale locale);
+void set_locale(std::locale const& locale);
 void set_locale_to_global();
 #endif
 
@@ -118,18 +119,6 @@ class LogConfig
     std::shared_ptr<LogRecordPool> pool;
     std::shared_ptr<LogSink> sink;
     ThresholdMap threshold;
-
-#if SLOG_STREAM
-  public:
-    /// Set the locale for the stream
-    void set_locale(std::locale new_locale) { locale = new_locale; }
-
-    /// Get the locale stored here
-    std::locale const& get_locale() const { return locale; }
-
-  private:
-    std::locale locale;
-#endif
 };
 
 } // namespace slog

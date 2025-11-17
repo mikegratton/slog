@@ -122,7 +122,7 @@ void no_sink_bench(int howmany)
         config.set_default_threshold(slog::DBUG);
         auto elapsed_ms = run_test(config, [howmany]() {
             for (int i = 0; i < howmany; i++) {
-                Flog(NOTE, "Hello");
+                Flog(NOTE)("Hello");
             }
         });
         std::cout << "Null logged " << howmany << " records in " << elapsed_ms << " ms \n";
@@ -135,7 +135,7 @@ void no_sink_bench(int howmany)
         config.set_default_threshold(slog::ERRR);
         auto elapsed_ms = run_test(config, [howmany]() {
             for (int i = 0; i < howmany; i++) {
-                Flog(NOTE, "Hello");
+                Flog(NOTE)("Hello");
             }
         });
         std::cout << "Reject logged " << howmany << " records in " << elapsed_ms << " ms \n";
@@ -149,7 +149,7 @@ void no_sink_bench(int howmany)
         config.add_tag("moose", slog::INFO);
         auto elapsed_ms = run_test(config, [howmany]() {
             for (int i = 0; i < howmany; i++) {
-                Flogt(NOTE, "meep", "Hello");
+                Flog(NOTE, "meep")("Hello");
             }
         });       
         std::cout << "Reject tag logged " << howmany << " records in " << elapsed_ms << " ms \n";

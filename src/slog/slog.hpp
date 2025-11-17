@@ -1,9 +1,8 @@
 #pragma once
-#include "LogConfig.hpp"
+#include "config.hpp"
 #include "slogDetail.hpp"
 
-#if SLOG_STREAM
-
+#if SLOG_STREAM_LOG
 /**
  * This defines a set of macros that work like
  *
@@ -31,27 +30,31 @@
 
 #endif
 
+#if SLOG_FORMAT_LOG
 /**
- * printf-style macros. These take printf format string and variable argument
+ * std::format-style macros. These take format strings and variable argument
  * lists like
  * ```
- * Flog(INFO, "The answer is %d", 42);
+ * Flog(INFO, "The answer is {}", 42);
  * ```
- * Unlike Slog() and Blog(), Flog() macros can only log up to max_message_size_
- * bytes. The results will be silently truncated, if required.
+ * TODO Make a Flog object so these read Flog(severity, tag)("Hello {}", "world")
  */
-#define Flog(severity, ...) SLOG_FlogBase(slog::severity, "", slog::DEFAULT_CHANNEL, __VA_ARGS__)
-#define Flogt(severity, tag, ...) SLOG_FlogBase(slog::severity, (tag), slog::DEFAULT_CHANNEL, __VA_ARGS__)
-#define Flogtc(severity, tag, channel, ...) SLOG_FlogBase(slog::severity, (tag), (channel), __VA_ARGS__)
+#define SLOG_Flog(severity) SLOG_FlogBase(slog::severity, "", slog::DEFAULT_CHANNEL)
+#define SLOG_Flogt(severity, tag) SLOG_FlogBase(slog::severity, (tag), slog::DEFAULT_CHANNEL)
+#define SLOG_Flogtc(severity, tag, channel) SLOG_FlogBase(slog::severity, (tag), (channel))
+
+// Overload Flog() based on the argument count
+#define Flog(...) SLOG_GET_MACRO(__VA_ARGS__, SLOG_Flogtc, SLOG_Flogt, SLOG_Flog)(__VA_ARGS__)
+#endif
 
 #if SLOG_BINARY_LOG
 /**
  * This defines a set of macros that work like
  *
  * ```
- * Blog(INFO).record(my_bytes, my_byte_count);
- * Blog(WARN, "foo").record(my_other_bytes, count).record(even_more_bytes, count2);
- * Blog(DBUG, "", 1).record(son_of_more_bytes, count3);
+ * Blog(INFO)(my_bytes, my_byte_count);
+ * Blog(WARN, "foo")(my_other_bytes, count).record(even_more_bytes, count2);
+ * Blog(DBUG, "", 1)(son_of_more_bytes, count3);
  * ```
  *
  * These macros never trigger allocating memory.

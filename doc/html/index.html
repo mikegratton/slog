@@ -100,7 +100,7 @@ $(document).ready(function(){initNavTree('index.html',''); initResizable(); });
 <li><a href="https://github.com/mikegratton/slog">GitHub Repository</a></li>
 <li><a href="https://mikegratton.github.io/slog/">Documentation</a></li>
 </ul>
-<p>Slog is an asynchronous stream-based logger with a memory pool. It is designed for applications where the business logic cannot wait for disk or network IO to complete recording a log record before continuing. For many server and robotic programs, log traffic comes in bursts as sessions open, plans are formed, and so on. Slog queues up messages during the busy times and catches up on IO during the lulls. For critical applications, Slog can guarantee it will not allocate memory beyond its initial pool. For "normal" applications, Slog will allocate more memory if you are logging faster than it can keep up.</p>
+<p>Slog is an asynchronous stream-based logger with a memory pool. It moves IO operations to their own thread. For many programs, log traffic comes in bursts. Slog queues up messages during the busy times and catches up on IO during the lulls. For critical applications, Slog can guarantee it will not allocate memory beyond its initial pool.</p>
 <h1><a class="anchor" id="autotoc_md0"></a>
 Features:</h1>
 <ul>
@@ -123,6 +123,7 @@ Quickstart</h1>
 <div class="line">{</div>
 <div class="line">    Slog(DBUG) &lt;&lt; <span class="stringliteral">&quot;You can see this&quot;</span>;</div>
 <div class="line">    Slog(INFO, <span class="stringliteral">&quot;net&quot;</span>) &lt;&lt; <span class="stringliteral">&quot;But not this&quot;</span>;</div>
+<div class="line">    Flog(NOTE)(<span class="stringliteral">&quot;Format logs are {}&quot;</span>, <span class="stringliteral">&quot;supported&quot;</span>);</div>
 <div class="line">}</div>
 </div><!-- fragment --><p> In the main.cpp, we can put some additional setup code </p><div class="fragment"><div class="line"><span class="comment">/*** main.cpp ***/</span></div>
 <div class="line"><span class="preprocessor">#include &quot;slog/LogSetup.hpp&quot;</span> <span class="comment">// Required for advanced setup</span></div>
@@ -144,10 +145,10 @@ Quickstart</h1>
 <div class="line"> </div>
 <div class="line">    <span class="keywordflow">return</span> 0;</div>
 <div class="line">}</div>
-<div class="ttc" id="aclassslog_1_1LogConfig_html"><div class="ttname"><a href="classslog_1_1LogConfig.html">slog::LogConfig</a></div><div class="ttdef"><b>Definition</b> LogSetup.hpp:69</div></div>
-<div class="ttc" id="aclassslog_1_1LogConfig_html_a8cafc838a4c0a4d28aa68c61bc76b437"><div class="ttname"><a href="classslog_1_1LogConfig.html#a8cafc838a4c0a4d28aa68c61bc76b437">slog::LogConfig::set_default_threshold</a></div><div class="ttdeci">void set_default_threshold(int thr)</div><div class="ttdoc">Set the default threshold at which to accept records.</div><div class="ttdef"><b>Definition</b> LogSetup.hpp:83</div></div>
-<div class="ttc" id="aclassslog_1_1LogConfig_html_a8fed42621e9feb98871e1aadd1b2d16d"><div class="ttname"><a href="classslog_1_1LogConfig.html#a8fed42621e9feb98871e1aadd1b2d16d">slog::LogConfig::add_tag</a></div><div class="ttdeci">void add_tag(char const *tag, int thr)</div><div class="ttdoc">Add a custom threshold for a tag.</div><div class="ttdef"><b>Definition</b> LogSetup.hpp:91</div></div>
-<div class="ttc" id="aclassslog_1_1LogConfig_html_a9f4e0865405e139cc43688d76ded2c58"><div class="ttname"><a href="classslog_1_1LogConfig.html#a9f4e0865405e139cc43688d76ded2c58">slog::LogConfig::set_sink</a></div><div class="ttdeci">void set_sink(std::shared_ptr&lt; LogSink &gt; new_sink)</div><div class="ttdoc">Set the sink The sink saves log records. There are three sinks included: FileSink,...</div><div class="ttdef"><b>Definition</b> LogSetup.hpp:98</div></div>
+<div class="ttc" id="aclassslog_1_1LogConfig_html"><div class="ttname"><a href="classslog_1_1LogConfig.html">slog::LogConfig</a></div><div class="ttdef"><b>Definition</b> LogSetup.hpp:70</div></div>
+<div class="ttc" id="aclassslog_1_1LogConfig_html_a8cafc838a4c0a4d28aa68c61bc76b437"><div class="ttname"><a href="classslog_1_1LogConfig.html#a8cafc838a4c0a4d28aa68c61bc76b437">slog::LogConfig::set_default_threshold</a></div><div class="ttdeci">void set_default_threshold(int thr)</div><div class="ttdoc">Set the default threshold at which to accept records.</div><div class="ttdef"><b>Definition</b> LogSetup.hpp:84</div></div>
+<div class="ttc" id="aclassslog_1_1LogConfig_html_a8fed42621e9feb98871e1aadd1b2d16d"><div class="ttname"><a href="classslog_1_1LogConfig.html#a8fed42621e9feb98871e1aadd1b2d16d">slog::LogConfig::add_tag</a></div><div class="ttdeci">void add_tag(char const *tag, int thr)</div><div class="ttdoc">Add a custom threshold for a tag.</div><div class="ttdef"><b>Definition</b> LogSetup.hpp:92</div></div>
+<div class="ttc" id="aclassslog_1_1LogConfig_html_a9f4e0865405e139cc43688d76ded2c58"><div class="ttname"><a href="classslog_1_1LogConfig.html#a9f4e0865405e139cc43688d76ded2c58">slog::LogConfig::set_sink</a></div><div class="ttdeci">void set_sink(std::shared_ptr&lt; LogSink &gt; new_sink)</div><div class="ttdoc">Set the sink The sink saves log records. There are three sinks included: FileSink,...</div><div class="ttdef"><b>Definition</b> LogSetup.hpp:99</div></div>
 </div><!-- fragment --><p> The <code>LogConfig</code> object contains the configuration for the logger. See the example project in <code>example</code> for a basic setup.</p>
 <h1><a class="anchor" id="autotoc_md2"></a>
 Design</h1>
@@ -167,10 +168,10 @@ Design</h1>
 </ol>
 <h1><a class="anchor" id="autotoc_md3"></a>
 Asynchronous Logging</h1>
-<p>Slog is an <em>asynchronous</em> logger, meaning log records are written to sinks (files, sockets, etc.) on dedicated worker threads. "Logging" on a business thread captures the message to an internal buffer. This is then pushed into a thread-safe queue where a worker thread pops the message and performs the (blocking) IO call. This design minimizes blocking calls that are made on the business thread. The risk with asynchronous logging is that the program may terminate before this queue is written to disk. Slog ties into the signal and exit systems to ensure that the queue is processed before at exit in most cases. These cases include normal end of program (<code>return</code> from main), calls to <code>exit()</code> and the signals SIGINT, SIGABRT, and SIGTERM. Exiting using <code>quick_exit()</code> can still result in lost messages, however.</p>
+<p>Slog is an <em>asynchronous</em> logger, meaning log records are written to sinks (files, sockets, etc.) on dedicated worker threads. "Logging" on a business thread captures the message to an internal buffer. This is then pushed into a thread-safe queue where a worker thread pops the message and performs the (blocking) IO call. This design minimizes blocking calls that are made on the business thread. The risk with asynchronous logging is that the program may terminate before this queue is written to disk. Slog ties into the signal and exit systems to ensure that the queue is processed before at exit in most cases. These cases include normal end of program (<code>return</code> from main), calls to <code>exit()</code> and the signals SIGINT, SIGABRT, and SIGTERM. Exiting using <code>quick_exit()</code>, catching SIGKILL, or a sudden loss of power can still result in lost messages.</p>
 <h2><a class="anchor" id="autotoc_md4"></a>
 Signal Handling</h2>
-<p>Slog will only install a handler for SIGIN, SIGABRT, or SIGTERM if it discovers the default handler in place. If you wish to ignore a signal, register SIG_IGN before calling <code>start_logger()</code>. If you have your own handlers for these signals, you must call <code>slog_handle_signal(int signal_id)</code> from that handler. Note that <code>stop_logger()</code> is async signal safe.</p>
+<p>Slog will only install a handler for SIGINT, SIGABRT, or SIGTERM if it discovers the default handler in place. If you wish to ignore a signal, register SIG_IGN before calling <code>start_logger()</code>. If you have your own handlers for these signals, you must call <code>slog_handle_signal(int signal_id)</code> from that handler. This is async signal safe. Slog restores the default handlers on <code>stop_logger()</code>.</p>
 <h1><a class="anchor" id="autotoc_md5"></a>
 API</h1>
 <p>Slog's API is split into two parts: a very lightweight general include for code that needs to write logs (<code><a class="el" href="slog_8hpp_source.html">slog.hpp</a></code>), and a larger setup header that is used to configure the logger (<code><a class="el" href="LogSetup_8hpp_source.html">LogSetup.hpp</a></code>).</p>
@@ -199,20 +200,19 @@ General Use</h2>
 <li><code>Slog(SEVERITY) &lt;&lt; "My message"</code> : Log "My message" at level SEVERITY to the default channel with no tag. This provides a <code>std::ostream</code> stream to log to.</li>
 <li><code>Slog(SEVERITY, "tag") &lt;&lt; "My message"</code> : Log "My message" at level SEVERITY to the default channel with tag "tag".</li>
 <li><code>Slog(SEVERITY, "tag", 2) &lt;&lt; "My message"</code> : Log "My message" at level SEVERITY to channel 2 with tag "tag".</li>
-<li><code>Flog(SEVERITY, "A good number is %d", 42)</code> : Log "A good number is 42" to the default channel with no tag. This uses printf-style formatting.</li>
-<li><code>Flogt(SEVERITY, "tag", "A good number is %d", 42)</code> : Log "A good number is
-42" to the default channel with tag "tag". This uses printf-style formatting.</li>
-<li><code>Flogtc(SEVERITY, "tag", 2, "A good number is %d", 42)</code> : Log "A good number
-is 42" to channel 2 with tag "tag". This uses printf-style formatting.</li>
-<li><code>Blog(SEVERITY, "tag", 2).record(my_bytes, my_byte_count).record(more_bytes,
-count2)</code> : Capture a binary log message in two parts with tag "tag" to channel two.</li>
+<li><code>Flog(SEVERITY)("A good number is {}", 42)</code> : Log "A good number is 42" to the default channel with no tag. This uses std::format-style formatting.</li>
+<li><code>Flog(SEVERITY, "tag")("A good number is {}", 42)</code> : Log "A good number is
+42" to the default channel with tag "tag". This uses format-style formatting.</li>
+<li><code>Flog(SEVERITY, "tag", 2)("A good number is {}", 42)</code> : Log "A good number
+is 42" to channel 2 with tag "tag". This uses format-style formatting.</li>
+<li><code>Blog(SEVERITY, "tag", 2)(my_bytes, my_byte_count)(more_bytes, count2)</code> : Capture a binary log message in two parts with tag "tag" to channel two.</li>
 </ul>
 <p>All of these macros first check if the message will be logged given the current severity threshold for the tag and channel. If the message won't be logged, the code afterwards <em>will not be executed</em>. That is, no strings are formatted, no work is done. Moreover, depending on the pool policy, if the message pool is empty, these macros may (a) allocate, causing a delay (b) block for a configurable amount of time waiting for a free record to become available or (c) simply discard the log message. The default policy is to allocate.</p>
-<p>Slog uses a custom <code>std::ostream</code> class that avoids some of the inefficiencies of <code>std::stringstream</code>. For the Flog family of macros, formatting is performed with <code>vsnprintf</code>.</p>
+<p>Slog uses a custom <code>std::ostream</code> class that avoids some of the inefficiencies of <code>std::stringstream</code>. For the Flog family of macros, formatting is performed with <code>vformat_to</code>.</p>
 <p>For binary logging, it is usually a good idea to define your own macros of the form </p><div class="fragment"><div class="line"><span class="preprocessor">#define LogPoly Blog(NOTE, &quot;poly&quot;, 2)</span></div>
 </div><!-- fragment --><p> so you can simply log with </p><div class="fragment"><div class="line">Polygon myPolygon = ...;</div>
 <div class="line"><span class="keyword">auto</span> buffer = serialize(myPolygon);</div>
-<div class="line">LogPoly.record(buffer, buffer.size()); </div>
+<div class="line">LogPoly(buffer, buffer.size()); </div>
 </div><!-- fragment --><p> This enforces the correct channel and tag so the record can be deserialized later.</p>
 <h2><a class="anchor" id="autotoc_md11"></a>
 Setup</h2>
@@ -297,8 +297,16 @@ BinarySink</h3>
 <h2><a class="anchor" id="autotoc_md18"></a>
 Tweaking the Format</h2>
 <p>The built-in sinks all use the <code>Formatter</code> functor defined in <code><a class="el" href="LogSink_8hpp_source.html">LogSink.hpp</a></code> to format messages: </p><div class="fragment"><div class="line"><span class="keyword">using </span>Formatter = std::function&lt;int (FILE* sink, LogRecord <span class="keyword">const</span>&amp; node)&gt;;</div>
-</div><!-- fragment --><p> This should return the number of bytes written to the <code>sink</code>. You can use a lambda in the setup to customize the format to your liking. Functions in <code><a class="el" href="LogSink_8hpp_source.html">LogSink.hpp</a></code> provide date, severity, and code location format helpers that should make creating your own formatter easy.</p>
-<h2><a class="anchor" id="autotoc_md19"></a>
+</div><!-- fragment --><p> This should return the number of bytes written to the <code>sink</code>. You can use a lambda in the setup to customize the format to your liking. Functions in <code><a class="el" href="LogSink_8hpp_source.html">LogSink.hpp</a></code> provide date, severity, and code location format helpers that should make creating your own formatter easy. The <code>write_message_to_file()</code> will insert just the message portion into the FILE stream, returning the number of bytes written. Its companion <code>total_record_size()</code> just returns the total size of the record (including any <code>more()</code> data).</p>
+<p>For example, suppose we want to write records like "[1970-01-01T12:34:56.001]
+Important message". We could format these like </p><div class="fragment"><div class="line"><span class="keywordtype">int</span> my_format(FILE* sink, LogRecord <span class="keyword">const</span>&amp; rec) {        </div>
+<div class="line">    <span class="keywordtype">char</span> time_str[32];    </div>
+<div class="line">    format_time(time_str, rec.meta().time(), 3, <span class="keyword">true</span>);</div>
+<div class="line">    <span class="keywordtype">int</span> count = fprintf(sink, <span class="stringliteral">&quot;[%s] &quot;</span>, time_str);</div>
+<div class="line">    count += write_message_to_file(sink, rec);    </div>
+<div class="line">    <span class="keywordflow">return</span> count;</div>
+<div class="line">}</div>
+</div><!-- fragment --><h2><a class="anchor" id="autotoc_md19"></a>
 Writing Your Own Sink</h2>
 <p>Log sinks derive from this abstract class defined in <code><a class="el" href="LogSink_8hpp_source.html">LogSink.hpp</a></code>: </p><div class="fragment"><div class="line"><span class="keyword">class </span>LogSink</div>
 <div class="line">{</div>
@@ -307,78 +315,77 @@ Writing Your Own Sink</h2>
 <div class="line">    <span class="keyword">virtual</span> <span class="keywordtype">void</span> record(LogRecord <span class="keyword">const</span>&amp; record) = 0;</div>
 <div class="line">    <span class="keyword">virtual</span> <span class="keywordtype">void</span> finalize() { }</div>
 <div class="line">};</div>
-</div><!-- fragment --><p> As you can see, you can do what you like in <code>record</code>. The <code>Formatter</code> functor provides a convenient way to allow users to customize the format, but you don't have to use it.</p>
-<p>An example formatter is </p><div class="fragment"><div class="line"><span class="keywordtype">int</span> my_format(FILE* sink, LogRecord <span class="keyword">const</span>&amp; rec) {        </div>
-<div class="line">    <span class="keywordtype">char</span> time_str[32];    </div>
-<div class="line">    format_time(time_str, rec.meta().time(), 3, <span class="keyword">true</span>);</div>
-<div class="line">    <span class="keywordtype">int</span> count = fprintf(sink, <span class="stringliteral">&quot;[%s] &quot;</span>, time_str);</div>
-<div class="line">    <span class="comment">// Note records aren&#39;t null terminated, but the byte count is recorded</span></div>
-<div class="line">    count += fwrite(rec.message(), <span class="keyword">sizeof</span>(<span class="keywordtype">char</span>), rec.message_byte_count(), sink);</div>
-<div class="line">    <span class="comment">// Note handling of &quot;jumbo&quot; records</span></div>
-<div class="line">    <span class="keywordflow">for</span> (LogRecord <span class="keyword">const</span>* more = rec.more(); more != <span class="keyword">nullptr</span>; more = more-&gt;more()) {</div>
-<div class="line">        count += fwrite(more-&gt;message(), <span class="keyword">sizeof</span>(<span class="keywordtype">char</span>), more-&gt;message_byte_count(), sink);</div>
-<div class="line">    }</div>
-<div class="line">    <span class="keywordflow">return</span> count;</div>
-<div class="line">}</div>
-</div><!-- fragment --><p> Note that <code>rec.more()</code> is a pointer to more message data if the message exceeds the size available in a single record. The metadata for the <code>more</code> record is not meaningful.</p>
-<p>The <code>LogRecord</code> contains </p><div class="fragment"><div class="line">LogRecordMetadata <span class="keyword">const</span>&amp; meta();  </div>
-<div class="line">uint32_t message_byte_count();    </div>
+</div><!-- fragment --><p> The <code>record</code> method provides you with control over how messages are recorded. The <code>LogRecord</code> contains </p><div class="fragment"><div class="line">LogRecordMetadata <span class="keyword">const</span>&amp; meta();  </div>
+<div class="line">uint32_t size();                  </div>
 <div class="line"><span class="keywordtype">char</span> <span class="keyword">const</span>* message();            </div>
 <div class="line">LogRecord <span class="keyword">const</span>* more();          </div>
 <div class="line"> </div>
-</div><!-- fragment --><p> The example above demonstrates handling the non-terminated <code>message()</code> and the <code>more()</code> parts of a record. The <code>LogRecordMetadata</code> contains the following: </p><div class="fragment"><div class="line"><span class="keywordtype">char</span> <span class="keyword">const</span>* tag();         </div>
-<div class="line"><span class="keywordtype">char</span> <span class="keyword">const</span>* filename();    </div>
+</div><!-- fragment --><p> Messages are not null terminated. Use <code>size()</code> to determine the end of the string. The <code>more()</code> pointer will be non-null when a message is large enough that it is split over multiple records. In these extra records, the metadata is not meaningful. The <code>LogRecordMetadata</code> contains the following: </p><div class="fragment"><div class="line"><span class="keywordtype">char</span> <span class="keyword">const</span>* filename();    </div>
 <div class="line"><span class="keywordtype">char</span> <span class="keyword">const</span>* function();    </div>
-<div class="line">uint64_t time();           </div>
-<div class="line"><span class="keywordtype">unsigned</span> <span class="keywordtype">long</span> thread_id(); </div>
 <div class="line"><span class="keywordtype">int</span> line();                </div>
+<div class="line"><span class="keywordtype">unsigned</span> <span class="keywordtype">long</span> thread_id(); </div>
+<div class="line">uint64_t time();           </div>
 <div class="line"><span class="keywordtype">int</span> severity();            </div>
-</div><!-- fragment --><p> As you can see, the default formatter doesn't include all of this information, but you can easily customize it.</p>
-<h2><a class="anchor" id="autotoc_md20"></a>
+<div class="line"><span class="keywordtype">char</span> <span class="keyword">const</span>* tag();         </div>
+</div><!-- fragment --><h2><a class="anchor" id="autotoc_md20"></a>
 Locale Setting</h2>
-<p>You may set a custom locale for a stream in Slog via the <code>set_locale()</code> method of <code>LogConfig</code>.</p>
+<p>You may set a custom locale for a stream in Slog via the <code>set_locale()</code> method of <code>LogSetup</code>.</p>
 <p>Slog uses static thread-local stream objects that are initialized in an undefined order (aka the "static initialization fiasco" of C++). As such, if you change the global locale after starting the logger, the streams will not pick up on this by default. You can force Slog to update all of the stream locales via <code>void set_locale(std::locale locale)</code> or <code>void set_locale_to_global()</code>.</p>
 <h1><a class="anchor" id="autotoc_md21"></a>
 Building Slog</h1>
-<p>Slog is written in C++11 and has no required dependencies. You'll probably be happiest building it as part of a CMake super-build. To do so, add this project as a subdirectory of your code and put </p><div class="fragment"><div class="line">add_subdirectory(slog)</div>
-</div><!-- fragment --><p> in your <code>CMakeLists.txt</code> file. This will give you the target <code>slog</code> that you can depend on. Slog is a very small library and won't significantly impact compile times.</p>
-<p>Slog has an optional dependency on libsystemd for the journal sink. To use this, you'll need to install the systemd development package for your OS. In Debian or Ubuntu, you can do this via </p><div class="fragment"><div class="line">apt install libsystemd-dev</div>
+<p>Slog is written in C++11 and has no required dependencies. To use <code>Flog()</code> you'll need a C++20-capable compiler. To use the journald sink, you'll need to install the systemd development package for your OS. In Debian or Ubuntu, you can do this via </p><div class="fragment"><div class="line">apt install libsystemd-dev</div>
 </div><!-- fragment --><p> Note that this doesn't add any <em>runtime</em> dependencies to your application, you just need the headers for building.</p>
+<p>Slog provides a CMake configure script that will be installed with the library. You can use </p><div class="fragment"><div class="line">find_package(slog)</div>
+<div class="line">target_link_libraries(&lt;your target&gt; PRIVATE slog::slog)</div>
+</div><!-- fragment --><p> to depend on Slog. However, Slog is small enough that you can simply put the source code in a subdirectory and </p><div class="fragment"><div class="line">add_subdirectory(slog)</div>
+</div><!-- fragment --><p> in your <code>CMakeLists.txt</code> file. This will give you the target <code>slog</code> that you can depend on.</p>
 <h1><a class="anchor" id="autotoc_md22"></a>
 LogConfig</h1>
-<p>The <code>LogConfig</code> object is declared in <code><a class="el" href="LogSetup_8hpp_source.html">LogSetup.hpp</a></code> and offers control over the logging process. You supply one LogConfig per channel you want to log (a <code>std::vector&lt;LogConfig&gt;</code>). If you just need one channel, you can pass a bare <code>LogConfig</code>.</p>
+<p>The <code>LogConfig</code> object is declared in <code><a class="el" href="LogSetup_8hpp_source.html">LogSetup.hpp</a></code> and offers control over the logging process: </p><div class="fragment"><div class="line"><a class="code hl_class" href="classslog_1_1LogConfig.html">slog::LogConfig</a> config;</div>
+<div class="line">config.<a class="code hl_function" href="classslog_1_1LogConfig.html#a8cafc838a4c0a4d28aa68c61bc76b437">set_default_threshold</a>(slog::WARN);</div>
+<div class="line">config.<a class="code hl_function" href="classslog_1_1LogConfig.html#a8fed42621e9feb98871e1aadd1b2d16d">add_tag</a>(<span class="stringliteral">&quot;net&quot;</span>, slog::INFO);</div>
+<div class="line">slog::start_logger(config);</div>
+</div><!-- fragment --><p> If you are using more than one channel, supply one config per channel using <code>std::vector&lt;LogConfig&gt;</code>.</p>
 <p>The setup methods are:</p>
 <ul>
 <li><code>set_default_threshold(int thr)</code>: Set the default severity threshold for logging. Default is <code>slog::INFO</code></li>
 <li><code>add_tag(const char* tag, int thr)</code>: Set a special threshold for the given tag</li>
 <li><code>set_sink(std::shared_ptr&lt;LogSink&gt; sink_)</code>: Set the sink you'd like to use (FileSink, JournaldSink, etc.). The default sink is the FileSink.</li>
-<li><code>set_pool(std::shared_ptr&lt;LogRecordPool&gt; pool_)</code>: Set the record pool. The default pool is an allocating record pool that allocates memory according to the cmake variables below.</li>
+<li><code>set_pool(std::shared_ptr&lt;LogRecordPool&gt; pool_)</code>: Set the record pool. The default pool is an allocating record pool that allocates memory according to the CMake variables below.</li>
 </ul>
 <h2><a class="anchor" id="autotoc_md23"></a>
 LogRecordPool</h2>
-<p>The <code>LogRecordPool</code> constructor sets up the pool policies: </p><div class="fragment"><div class="line">LogRecordPool(LogRecordPoolPolicy i_policy, <span class="keywordtype">long</span> i_pool_alloc_size, <span class="keywordtype">long</span> i_message_size,</div>
-<div class="line">        <span class="keywordtype">long</span> i_max_blocking_time_ms = 50);</div>
+<p>The <code>LogRecordPool</code> constructor sets up the pool policies: </p><div class="fragment"><div class="line">LogRecordPool(LogRecordPoolPolicy policy, <span class="keywordtype">long</span> pool_alloc_size, <span class="keywordtype">long</span> message_size,</div>
+<div class="line">        <span class="keywordtype">long</span> max_blocking_time_ms = 50);</div>
 </div><!-- fragment --><p> The available policies are</p><ul>
 <li>ALLOCATE: <code>malloc</code> more memory when the pool is empty</li>
 <li>BLOCK: block the business thread in the Slog() call until a record is available</li>
 <li>DISCARD: Discard the message in the Slog() call if no record is available</li>
 </ul>
 <p>The other parameters are</p><ul>
-<li><code>i_pool_alloc_size</code> controls the size of each pool allocation. The default pool uses a 1 MB allocation. The pool size is rounded up to contain at least 16 records.</li>
-<li><code>i_message_size</code> controls the size of a single message. Longer messages are formed using the "jumbo" pointer &ndash; concatenating multiple records from the pool. Choosing this to be a bit longer than your typical message can give you good performance. The default pool uses 512 B messages, roughly five terminal lines of text. Message sizes are bounded below by 64 B.</li>
-<li><code>i_max_blocking_time_ms</code> sets the maximum blocking time in milliseconds when <code>i_policy</code> is <code>BLOCK</code>. It has no impact for ALLOCATE or DISCARD policies.</li>
+<li><code>pool_alloc_size</code> controls the size of each pool allocation. The default pool uses a 1 MB allocation. The pool size is rounded up to contain at least 16 records.</li>
+<li><code>message_size</code> controls the size of a single message. Longer messages are formed using the "jumbo" pointer &ndash; concatenating multiple records from the pool. Choosing this to be a bit longer than your typical message can give you good performance. The default pool uses 512 B messages, roughly five terminal lines of text. Message sizes are bounded below by 64 B.</li>
+<li><code>max_blocking_time_ms</code> sets the maximum blocking time in milliseconds when <code>policy</code> is <code>BLOCK</code>. It has no impact for ALLOCATE or DISCARD policies.</li>
 </ul>
-<p>The record pool is fully thread-safe, so sharing one pool <code>shared_ptr</code> between multiple channels works fine.</p>
+<p>The record pool is fully thread-safe, enabling one pool <code>shared_ptr</code> to be used by multiple channels.</p>
 <h1><a class="anchor" id="autotoc_md24"></a>
 Compile-time Configuration</h1>
-<p>Slog has four compile-time cmake configuration options:</p>
+<p>Slog has several compile-time cmake options:</p>
 <table class="markdownTable">
 <tr class="markdownTableHead">
 <th class="markdownTableHeadNone">Name   </th><th class="markdownTableHeadNone">Default   </th><th class="markdownTableHeadNone">Notes    </th></tr>
 <tr class="markdownTableRowOdd">
 <td class="markdownTableBodyNone"><code>SLOG_LOG_TO_CONSOLE_WHEN_STOPPED</code>   </td><td class="markdownTableBodyNone">OFF   </td><td class="markdownTableBodyNone">When the logger is stopped, dump records to the console    </td></tr>
 <tr class="markdownTableRowEven">
-<td class="markdownTableBodyNone"><code>SLOG_STREAM</code>   </td><td class="markdownTableBodyNone">ON   </td><td class="markdownTableBodyNone">Turn this off to avoid including &lt;iostream&gt; and Slog() macros    </td></tr>
+<td class="markdownTableBodyNone"><code>SLOG_STREAM_LOG</code>   </td><td class="markdownTableBodyNone">ON   </td><td class="markdownTableBodyNone">Turn this off to avoid including &lt;iostream&gt; and Slog() macros    </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone"><code>SLOG_BINARY_LOG</code>   </td><td class="markdownTableBodyNone">OFF   </td><td class="markdownTableBodyNone">Turn on Blog() binary logging macro    </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone"><code>SLOG_FORMAT_LOG</code>   </td><td class="markdownTableBodyNone">OFF   </td><td class="markdownTableBodyNone">Flog() uses std::format(). Implies c++20    </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone"><code>SLOG_JOURNALD</code>   </td><td class="markdownTableBodyNone">OFF   </td><td class="markdownTableBodyNone">Build the Journald sink (requires libsystemd-dev)    </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone"><code>SLOG_PRINT_ERROR</code>   </td><td class="markdownTableBodyNone">ON   </td><td class="markdownTableBodyNone">Write system errors to stderr    </td></tr>
 <tr class="markdownTableRowOdd">
 <td class="markdownTableBodyNone"><code>SLOG_DEFAULT_RECORD_SIZE</code>   </td><td class="markdownTableBodyNone">512   </td><td class="markdownTableBodyNone">Default size of records    </td></tr>
 <tr class="markdownTableRowEven">
@@ -393,20 +400,36 @@ Compile-time Configuration</h1>
 <p>Note the total memory allocation will be <code>SLOG_DEFAULT_POOL_RECORD_COUNT * SLOG_DEFAULT_RECORD_SIZE</code>.</p>
 <p>In addition, building with <code>-DSLOG_LOGGING_ENABLED=0</code> will suppress all logging in a translation unit.</p>
 <h1><a class="anchor" id="autotoc_md25"></a>
+Migrating from Version 1 to Version 2</h1>
+<p>Slog 2 has some breaking changes with Slog 1. Here's what to expect when updating:</p><ul>
+<li>The <code>Slog()</code> macros are unchanged. If that's all you use, there should be no difficulty in upgrading.</li>
+<li>The <code>Blog()</code> macros have gained a shorter form. You can now write <code>Blog(INFO)(my_bytes, my_bytes_size)</code> in addition to the old <code>.record()</code> method.</li>
+<li>The <code>Flog()</code> macros have been completely revised. <code>Flog</code> is no longer enabled by default. When it is enabled, it uses <code>std::format</code> rather than <code>printf</code> style formatting. Using this feature requires c++20.</li>
+<li>For custom <code>LogSinks</code> or <code>LogRecord</code> formatters:<ul>
+<li><code>LogSink()</code> has a new virtual method, <code>finalize()</code> that is called when a channel is shutting down. The default implementation is a no-op.</li>
+<li><code>LogRecord</code> is now a class. Old fields have become methods, so <code>message</code> is now <code>message()</code>. The <code>message_byte_count</code> is now <code>size()</code>, and <code>message_max_size</code> is now <code>capacity()</code>.</li>
+<li>The <code>message()</code> c string is no longer null terminated.</li>
+<li>Likewise, <code>LogRecordMetadata</code> is also now a class. The old fields are now methods.</li>
+</ul>
+</li>
+</ul>
+<h1><a class="anchor" id="autotoc_md26"></a>
 Version History</h1>
 <ul>
 <li><em>2.0.0</em><ul>
+<li><code>Flog()</code> has changed to providing <code>std::format</code>-based logging.</li>
 <li><em>Breaking change:</em> LogRecord and LogRecordMetadata fields are now accessed by methods. Fields like <code>message</code> are now access via <code>message()</code></li>
-<li><em>Breaking change:</em> LogRecord <code>message</code> is no longer null terminated. You must use the <code>m_message_byte_count</code> to determine the end of the message. (This provides more uniformity in the handling of binary and text messages.)</li>
+<li><em>Breaking change:</em> The <code>message_byte_size</code> is now <code>size()</code>. <code>message_max_size</code> is now <code>capacity()</code>.</li>
+<li><em>Breaking change:</em> LogRecord <code>message</code> is no longer null terminated. You must use the <code>size()</code> to determine the end of the message.</li>
 <li>Improved signal handlers to be async signal safe.</li>
 <li><code>exit()</code> now causes Slog to flush its queue.</li>
 <li>Add header/footer options for <code>FileSink</code> and <code>BinarySink</code> to add fixed file contents when a file is opened or closed.</li>
 <li><code>FileSink</code> and <code>BinarySink</code> will now attempt to create missing directories if required. This is done recursively (i.e. in the manner of <code>mkdir -p</code>).</li>
 <li>Bugs related to binary messages larger than one record size have been fixed.</li>
-<li>JournaldSink now respects the LineMax (maximum journal record size)</li>
+<li>JournaldSink now respects the LineMax (the maximum journal record size)</li>
 <li>SyslogSink now attempts to reconnect a fixed number of times if the socket connection fails. <br  />
 </li>
-<li>The LogSink interface has a new optional method: <code>finalize()</code>. This method is called by Slog when stopping a sink. The default implementation does nothing. <br  />
+<li>The LogSink interface has a new optional method: <code>finalize()</code>. This method is called by Slog when stopping a channel. The default implementation does nothing. <br  />
 </li>
 <li>LogRecordPool has been refactored to use a more conventional memory allocation scheme.</li>
 <li>The unit test suite has been expanded and automated.</li>

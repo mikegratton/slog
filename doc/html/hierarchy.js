@@ -1,6 +1,5 @@
 var hierarchy =
 [
-    [ "slog::CaptureBinary", "classslog_1_1CaptureBinary.html", null ],
     [ "slog::FlatThresholdMap", "classslog_1_1FlatThresholdMap.html", null ],
     [ "slog::LogChannel", "classslog_1_1LogChannel.html", null ],
     [ "slog::LogConfig", "classslog_1_1LogConfig.html", null ],
@@ -19,5 +18,6 @@ var hierarchy =
     ] ],
     [ "slog::PoolMemory", "classslog_1_1PoolMemory.html", null ],
     [ "slog::RecordInserter", "classslog_1_1RecordInserter.html", null ],
+    [ "slog::RecordInserterIterator", "structslog_1_1RecordInserterIterator.html", null ],
     [ "slog::FlatThresholdMap::Threshold", "structslog_1_1FlatThresholdMap_1_1Threshold.html", null ]
 ];

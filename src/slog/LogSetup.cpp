@@ -23,11 +23,6 @@ void start_logger(std::vector<LogConfig> config)
         return;
     }
     Logger::setup_channels(config);
-#if SLOG_STREAM
-    if (config.size() > 0) {
-        set_locale(config.front().get_locale());
-    }
-#endif
     Logger::start_all_channels();
 }
 

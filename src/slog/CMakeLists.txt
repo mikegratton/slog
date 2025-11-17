@@ -1,9 +1,10 @@
-configure_file(LogConfig.hpp.in LogConfig.hpp)
+configure_file(config.hpp.in config.hpp)
 
 set(SLOG_SOURCE
     BinarySink.cpp    
     CaptureStream.cpp
     FileSink.cpp
+    Locale.cpp
     LogChannel.cpp
     LoggerSingleton.cpp
     LogRecord.cpp
@@ -84,11 +85,16 @@ endif()
 # Slog library
 
 add_library(slog ${SLOG_SOURCE})
-set_target_properties(slog PROPERTIES CXX_STANDARD 11)
 target_include_directories(slog PUBLIC
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/..>
     $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>    
 )
+
+if (SLOG_FORMAT_LOG)
+    set_target_properties(slog PROPERTIES CXX_STANDARD 20)
+else()
+    set_target_properties(slog PROPERTIES CXX_STANDARD 11)
+endif()
 
 find_package(Threads REQUIRED)
 target_link_libraries(slog PUBLIC Threads::Threads)
@@ -122,7 +128,7 @@ set(PACKAGE_VERSION ${PROJECT_VERSION})
 # Public headers
 install(
     FILES
-        ${CMAKE_CURRENT_BINARY_DIR}/LogConfig.hpp
+        ${CMAKE_CURRENT_BINARY_DIR}/config.hpp
         ${SLOG_PUBLIC_HEADERS}
     DESTINATION 
         ${SLOG_INCLUDE_INSTALL_DIR}

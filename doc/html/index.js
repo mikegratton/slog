@@ -30,5 +30,6 @@ var index =
       [ "LogRecordPool", "index.html#autotoc_md23", null ]
     ] ],
     [ "Compile-time Configuration", "index.html#autotoc_md24", null ],
-    [ "Version History", "index.html#autotoc_md25", null ]
+    [ "Migrating from Version 1 to Version 2", "index.html#autotoc_md25", null ],
+    [ "Version History", "index.html#autotoc_md26", null ]
 ];
