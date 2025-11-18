@@ -1,0 +1,11 @@
+<map id="slog::LogChannel" name="slog::LogChannel">
+<area shape="rect" id="Node000001" title="Principle worker of the slog system." alt="" coords="149,211,282,236"/>
+<area shape="rect" id="Node000002" href="$classslog_1_1LogChannel_1_1LogQueue.html" title=" " alt="" coords="5,123,212,148"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="135,155,203,208,199,212,132,159"/>
+<area shape="rect" id="Node000003" href="$classslog_1_1LogRecord.html" title="A LogRecord is a message string combined with the associated metadata." alt="" coords="46,13,171,38"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="111,52,111,122,106,122,106,52"/>
+<area shape="rect" id="Node000004" href="$classslog_1_1FlatThresholdMap.html" title="A char const* to int map with a default value for missing/empty/null keys." alt="" coords="236,123,411,148"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="300,159,232,212,228,208,296,155"/>
+<area shape="rect" id="Node000005" href="$structslog_1_1FlatThresholdMap_1_1Threshold.html" title=" " alt="" coords="236,5,411,45"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="326,59,326,122,321,122,321,59"/>
+</map>

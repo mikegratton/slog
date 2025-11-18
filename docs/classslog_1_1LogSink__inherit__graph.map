@@ -1,0 +1,15 @@
+<map id="slog::LogSink" name="slog::LogSink">
+<area shape="rect" id="Node000001" title="Base class for all log sinks." alt="" coords="315,5,423,31"/>
+<area shape="rect" id="Node000002" href="$classslog_1_1ConsoleSink.html" title="A simple sink that writes messages to stdout. Messages are guarateed to end in &#39; &#39;." alt="" coords="5,79,143,104"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="309,36,122,81,121,76,308,31"/>
+<area shape="rect" id="Node000003" href="$classslog_1_1FileSink.html" title="Simple file storage for log records FileSink writes records to conventional files...." alt="" coords="167,79,275,104"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="334,39,246,81,244,76,332,34"/>
+<area shape="rect" id="Node000005" href="$classslog_1_1JournaldSink.html" title="Log using the systemd journal." alt="" coords="299,79,438,104"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="371,44,371,79,366,79,366,44"/>
+<area shape="rect" id="Node000006" href="$classslog_1_1NullSink.html" title="A sink that discards messages." alt="" coords="463,79,573,104"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="406,34,495,76,492,81,404,39"/>
+<area shape="rect" id="Node000007" href="$classslog_1_1SyslogSink.html" title="A log sink compatible with syslog. Messages are sent over unix sockets or internet sockets." alt="" coords="598,79,726,104"/>
+<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="429,31,615,76,614,81,428,36"/>
+<area shape="rect" id="Node000004" href="$classslog_1_1BinarySink.html" title="Basic logging of binary data to files using the C api." alt="" coords="157,152,284,177"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="223,118,223,152,218,152,218,118"/>
+</map>

@@ -1,0 +1,5 @@
+<map id="slog::SyslogSink" name="slog::SyslogSink">
+<area shape="rect" id="Node000001" title="A log sink compatible with syslog. Messages are sent over unix sockets or internet sockets." alt="" coords="5,79,133,104"/>
+<area shape="rect" id="Node000002" href="$classslog_1_1LogSink.html" title="Base class for all log sinks." alt="" coords="15,5,123,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="72,44,72,79,67,79,67,44"/>
+</map>

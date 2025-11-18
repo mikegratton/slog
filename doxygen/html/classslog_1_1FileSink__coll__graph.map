@@ -1,0 +1,5 @@
+<map id="slog::FileSink" name="slog::FileSink">
+<area shape="rect" id="Node000001" title="Simple file storage for log records FileSink writes records to conventional files...." alt="" coords="5,79,113,104"/>
+<area shape="rect" id="Node000002" href="$classslog_1_1LogSink.html" title="Base class for all log sinks." alt="" coords="5,5,113,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="62,44,62,79,57,79,57,44"/>
+</map>

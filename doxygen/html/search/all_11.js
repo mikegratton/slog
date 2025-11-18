@@ -1,0 +1,7 @@
+var searchData=
+[
+  ['record_0',['record',['../classslog_1_1BinarySink.html#a3290e1bfa15b96a0a5ed8a4bb5c0960c',1,'slog::BinarySink::record()'],['../classslog_1_1ConsoleSink.html#a928fddf21a0117cfd161afdd0def7eec',1,'slog::ConsoleSink::record()'],['../classslog_1_1FileSink.html#a3b2d7814a8051fcc18ebb7a651e79b91',1,'slog::FileSink::record()'],['../classslog_1_1JournaldSink.html#a8d352927b667a7ce01718646b086df1f',1,'slog::JournaldSink::record()'],['../classslog_1_1LogSink.html#a1801fe16cd221cf4f79bf204a41e40b6',1,'slog::LogSink::record()'],['../classslog_1_1NullSink.html#ad6253ff0774b530204e122625478ec1a',1,'slog::NullSink::record()'],['../classslog_1_1SyslogSink.html#a41698e89dd71676873db094e4ee928ad',1,'slog::SyslogSink::record()']]],
+  ['recordinserter_1',['recordinserter',['../classslog_1_1RecordInserter.html',1,'slog::RecordInserter'],['../classslog_1_1RecordInserter.html#a5ba5f405e00b776f2a7edd27a70803ef',1,'slog::RecordInserter::RecordInserter()']]],
+  ['recordinserteriterator_2',['RecordInserterIterator',['../structslog_1_1RecordInserterIterator.html',1,'slog']]],
+  ['robotic_20systems_3',['Slog: A C++ Logging Library for Robotic Systems',['../index.html',1,'']]]
+];
