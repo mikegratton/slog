@@ -1,0 +1,5 @@
+<map id="slog::JournaldSink" name="slog::JournaldSink">
+<area shape="rect" id="Node000001" title="Log using the systemd journal." alt="" coords="5,79,144,104"/>
+<area shape="rect" id="Node000002" href="$classslog_1_1LogSink.html" title="Base class for all log sinks." alt="" coords="21,5,129,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="77,44,77,79,72,79,72,44"/>
+</map>
