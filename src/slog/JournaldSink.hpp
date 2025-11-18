@@ -2,6 +2,7 @@
 #include <cstdio>
 
 #include "LogSink.hpp"
+#include "LogRecord.hpp"
 
 namespace slog {
 
@@ -20,12 +21,17 @@ namespace slog {
  * - THREAD    The thread id for the thread where the record originated
  * - TIMESTAMP ISO8601 formatted time of record
  * - PRIORITY  Syslog-compatible log severity
+ * - TAG       The tag supplied with the record
  *
  */
 class JournaldSink : public LogSink {
    public:
-    JournaldSink() : mformat(default_format), mecho(false) {}
-    ~JournaldSink() = default;
+    JournaldSink();
+    ~JournaldSink();
+    JournaldSink(JournaldSink const&) = delete;
+    JournaldSink& operator=(JournaldSink const&) = delete;
+    JournaldSink(JournaldSink&&) noexcept = default;
+    JournaldSink& operator=(JournaldSink&&) noexcept = default;
 
     /// Write a record to the journal
     void record(LogRecord const& rec) final;
@@ -36,14 +42,35 @@ class JournaldSink : public LogSink {
      * This only applies to console echo. Structured logging is
      * used in the journal call
      */
-    void set_formatter(Formatter format) { mformat = format; }
+    void set_formatter(Formatter format) { format = format; }
 
-    /// Turn on/off echo to console
-    void set_echo(bool doit = true) { mecho = doit; }
+    /**
+     * @brief Turn on echoing to the console
+     */
+    void set_echo(bool doit = true) { echo = doit; }
 
-   protected:
-    Formatter mformat;
-    bool mecho;
+    /**
+    * @brief Determine the maximum line length in journald. @note This has to open
+    * two child processes to get this info.
+    */
+    static long line_max();
+
+   private:
+    /// Write the current buffer to the journal
+    void write_to_journal(LogRecord const& rec) const;
+
+    // Max record size we can submit to the journal
+    long buffer_size;
+    // Current buffer fill
+    long buffer_used;
+    // LINE_MAX buffer for journal
+    char* message_buffer;
+    // Time of the current record
+    char misotime[32];
+    // For echoing to the console, this formats the messages
+    Formatter formatter;
+    // Do we echo to the console.
+    bool echo;
 };
 
 }  // namespace slog

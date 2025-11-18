@@ -1,150 +1,141 @@
 #include "LogRecordPool.hpp"
+#include "LogRecord.hpp"
 
 #include <cassert>
+#include <cstdint>
 #include <cstdlib>
-#include <new>
 #include <vector>
 
-namespace slog {
-
-NodePtr toNodePtr(LogRecord const* i_rec)
+namespace slog
 {
-    constexpr std::ptrdiff_t OFFSET = sizeof(NodePtr);
-    if (i_rec) {
-        // This is some ugly pointer math.
-        char* rec = reinterpret_cast<char*>(const_cast<LogRecord*>(i_rec));
-        return reinterpret_cast<NodePtr>(rec - OFFSET);
-    }
-    return nullptr;
-}
 
-void attach(NodePtr io_rec, NodePtr i_jumbo)
+/**
+ * This holds all allocations from the heap that are in use by the
+ * LogRecordPool. Each request for more memory is served by two allocations: one
+ * for the records and one for the message storage in the record.
+ *
+ * For BLOCK or DISCARD pools, there will only ever be one allocation. For
+ * ALLOCATE pools, additional allocations can occur when the LogRecordPool is
+ * exhausted.
+ */
+class PoolMemory
 {
-    if (io_rec && i_jumbo) { io_rec->rec.more = &i_jumbo->rec; }
-}
-
-class PoolMemory {
-   public:
+  public:
     ~PoolMemory()
     {
-        for (char* ptr : allocations) {
-            if (ptr) { free(ptr); }
+        for (auto& item : allocations) {
+            delete[] item.first;
+            delete[] item.second;
         }
     }
 
-    char* allocate(uint64_t size)
+    std::pair<LogRecord*, char*>& allocate(uint64_t count, uint64_t message_size)
     {
-        allocations.push_back((char*)malloc(size));
+        allocations.emplace_back(new LogRecord[count], new char[message_size * count]);
         return allocations.back();
     }
 
-   private:
-    std::vector<char*> allocations;
+  private:
+    std::vector<std::pair<LogRecord*, char*>> allocations;
 };
 
 void LogRecordPool::acquire_blank_records()
 {
-    long record_size = sizeof(RecordNode);
-    long message_size = m_chunkSize - record_size;
-    char* pool = m_pool->allocate(m_chunkSize * m_chunks);
-    if (nullptr == pool) {  // Memory exhausted
+    if (chunks == 0) { return; }
+    
+    auto& allocation = pool->allocate(chunks, message_size);
+    if (nullptr == allocation.first || nullptr == allocation.second) { // Memory exhausted
         return;
     }
-    RecordNode* here = nullptr;
-    RecordNode* next = nullptr;
-    // Link nodes, invoking the LogRecord constructor via placement new
-    for (long i = m_chunks - 1; i >= 0; i--) {
-        here = reinterpret_cast<RecordNode*>(pool + i * m_chunkSize);
-        char* message = pool + i * m_chunkSize + record_size;
-        new (&here->rec) LogRecord(message, message_size);
-        here->next = next;
+    LogRecord* here = nullptr;
+    LogRecord* next = head;
+    // Link nodes and insert message memory
+    for (long i = chunks - 1; i >= 0; i--) {
+        here = &allocation.first[i];
+        here->m_message = allocation.second + i * message_size;
+        here->m_message_max_size = message_size;
+        here->m_next = next;
         next = here;
     }
-
-    if (m_cursor) {
-        // put existing records at end of new stack
-        RecordNode* bottom = reinterpret_cast<RecordNode*>(pool + (m_chunks - 1) * m_chunkSize);
-        bottom->next = m_cursor;
-    }
-    m_cursor = here;
+    head = here;
 }
 
-LogRecordPool::LogRecordPool(LogRecordPoolPolicy i_policy, long i_alloc_size, long i_message_size,
-                             long i_max_blocking_time_ms)
+LogRecordPool::LogRecordPool(LogRecordPoolPolicy new_policy, long new_alloc_size, long new_message_size,
+                             long new_max_blocking_time_ms)
+    : policy(new_policy),
+      max_blocking_time_ms(new_max_blocking_time_ms),
+      message_size(std::max<long>(sizeof(LogRecord), new_message_size)),
+      chunks(std::max<long>(16L, new_alloc_size / (sizeof(LogRecord) + message_size))),
+      head(nullptr),
+      pool(new PoolMemory)
 {
-    m_policy = i_policy;
-    m_max_blocking_time_ms = i_max_blocking_time_ms;
-    m_pool = new PoolMemory;
-    m_cursor = nullptr;
-    long record_size = sizeof(RecordNode);
-    m_chunkSize = record_size + i_message_size;
-    m_chunks = i_alloc_size / m_chunkSize;
-    if (m_chunks < 1) { m_chunks = 1; }
-
     acquire_blank_records();
 }
 
-LogRecordPool::~LogRecordPool()
-{
-    delete m_pool;
-}
+LogRecordPool::~LogRecordPool() { delete pool; }
 
-RecordNode* LogRecordPool::allocate()
+LogRecord* LogRecordPool::allocate()
 {
     NodePtr allocated = nullptr;
-    switch (m_policy) {
-        case ALLOCATE: {
-            std::unique_lock<std::mutex> guard(m_lock);
-            if (nullptr == m_cursor) {
-                acquire_blank_records();
-                assert(m_cursor);
-            }
-            allocated = m_cursor;
-            m_cursor = m_cursor->next;
-            break;
+    switch (policy) {
+    case ALLOCATE: {
+        std::unique_lock<std::mutex> guard(lock);
+        if (nullptr == head) {
+            acquire_blank_records();
+            assert(head);
         }
-        case BLOCK: {
-            std::chrono::milliseconds wait{m_max_blocking_time_ms};
-            std::unique_lock<std::mutex> guard(m_lock);
-            if (m_nonempty.wait_for(guard, wait, [this]() -> bool { return m_cursor != nullptr; })) {
-                allocated = m_cursor;
-                m_cursor = m_cursor->next;
-            }
-            break;
+        allocated = head;
+        head = head->m_next;
+        break;
+    }
+    case BLOCK: {
+        std::chrono::milliseconds wait{max_blocking_time_ms};
+        std::unique_lock<std::mutex> guard(lock);
+        if (nonempty.wait_for(guard, wait, [this]() -> bool { return head != nullptr; })) {
+            allocated = head;
+            head = head->m_next;
         }
-        case DISCARD:
-        default: {
-            std::unique_lock<std::mutex> guard(m_lock);
-            allocated = m_cursor;
-            if (m_cursor) { m_cursor = m_cursor->next; }
-            break;
+        break;
+    }
+    case DISCARD:
+    default: {
+        std::unique_lock<std::mutex> guard(lock);
+        allocated = head;
+        if (head) {
+            head = head->m_next;
         }
+        break;
+    }
     }
     return allocated;
 }
 
-void LogRecordPool::free(RecordNode* node)
+void LogRecordPool::free(LogRecord* node)
 {
     if (node) {
-        if (node->rec.more) { free(toNodePtr(node->rec.more)); }
-        node->rec.reset();
-        std::unique_lock<std::mutex> guard(m_lock);
-        node->next = m_cursor;
-        m_cursor = node;
+        if (node->m_more) {
+            free(node->m_more);
+        }
+        node->reset();
+        std::unique_lock<std::mutex> guard(lock);
+        node->m_next = head;
+        head = node;
         guard.unlock();
-        if (m_policy == BLOCK) { m_nonempty.notify_one(); }
+        if (policy == BLOCK) {
+            nonempty.notify_one();
+        }
     }
 }
 
 long LogRecordPool::count() const
 {
-    std::unique_lock<std::mutex> guard(m_lock);
+    std::unique_lock<std::mutex> guard(lock);
     long c = 0;
-    NodePtr cursor = m_cursor;
+    NodePtr cursor = head;
     while (cursor) {
         c++;
-        cursor = cursor->next;
+        cursor = cursor->m_next;
     }
     return c;
 }
-}  // namespace slog
+} // namespace slog

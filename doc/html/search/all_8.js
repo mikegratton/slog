@@ -1,4 +1,5 @@
 var searchData=
 [
-  ['nullsink_29',['NullSink',['../classslog_1_1NullSink.html',1,'slog']]]
+  ['handling_0',['Signal Handling',['../index.html#autotoc_md4',1,'']]],
+  ['history_1',['Version History',['../index.html#autotoc_md26',1,'']]]
 ];

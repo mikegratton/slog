@@ -1,7 +1,8 @@
 #pragma once
-#include "LogConfig.hpp"
+#include "config.hpp"
 #include "slogDetail.hpp"
 
+#if SLOG_STREAM_LOG
 /**
  * This defines a set of macros that work like
  *
@@ -11,17 +12,14 @@
  * Slog(DBUG, "", 1) << "Log with no tag to channel 1 at level DBUG";
  * ```
  *
- * These macros never trigger allocating memory.
- *
- * The macros are built such that if logging is suppressed for the combo of severity
- * level/tag/channel, then the rest of the line IS NOT EXECUTED. Any formatting implied
- * is just skipped. The log stream is derived from std::ostream, but writes to a fixed-
- * size internal buffer.
+ * The macros are built such that if logging is suppressed for the combo of
+ * severity level/tag/channel, then the rest of the line IS NOT EXECUTED. Any
+ * formatting implied is just skipped. The log stream is derived from
+ * std::ostream, but writes to a fixed-size internal buffer. If the record is
+ * longer than one node can hold, extra nodes are allocated automatically and
+ * chained together to form a "jumbo" record.
  *
  */
-
-#if SLOG_STREAM
-
 // Overloads for Slog() used below
 #define SLOG_Logs(severity) SLOG_LogStreamBase(slog::severity, "", slog::DEFAULT_CHANNEL)
 #define SLOG_Logst(severity, tag) SLOG_LogStreamBase(slog::severity, (tag), slog::DEFAULT_CHANNEL)
@@ -32,32 +30,44 @@
 
 #endif
 
+#if SLOG_FORMAT_LOG
 /**
- * printf-style macros. These take printf format string and variable argument lists like
+ * std::format-style macros. These take format strings and variable argument
+ * lists like
  * ```
- * Flog(INFO, "The answer is %d", 42);
+ * Flog(INFO, "The answer is {}", 42);
  * ```
- * Unlike Slog() and Blog(), Flog() macros can only log up to max_message_size_ bytes.
+ * TODO Make a Flog object so these read Flog(severity, tag)("Hello {}", "world")
  */
-#define Flog(severity, ...) SLOG_FlogBase(slog::severity, "", slog::DEFAULT_CHANNEL, __VA_ARGS__)
-#define Flogt(severity, tag, ...) SLOG_FlogBase(slog::severity, (tag), slog::DEFAULT_CHANNEL, __VA_ARGS__)
-#define Flogtc(severity, tag, channel, ...) SLOG_FlogBase(slog::severity, (tag), (channel), __VA_ARGS__)
+#define SLOG_Flog(severity) SLOG_FlogBase(slog::severity, "", slog::DEFAULT_CHANNEL)
+#define SLOG_Flogt(severity, tag) SLOG_FlogBase(slog::severity, (tag), slog::DEFAULT_CHANNEL)
+#define SLOG_Flogtc(severity, tag, channel) SLOG_FlogBase(slog::severity, (tag), (channel))
+
+// Overload Flog() based on the argument count
+#define Flog(...) SLOG_GET_MACRO(__VA_ARGS__, SLOG_Flogtc, SLOG_Flogt, SLOG_Flog)(__VA_ARGS__)
+#endif
 
 #if SLOG_BINARY_LOG
 /**
  * This defines a set of macros that work like
  *
  * ```
- * Blog(INFO).record(my_bytes, my_byte_count);
- * Blog(WARN, "foo").record(my_other_bytes, count).record(even_more_bytes, count2);
- * Blog(DBUG, "", 1).record(son_of_more_bytes, count3);
+ * Blog(INFO)(my_bytes, my_byte_count);
+ * Blog(WARN, "foo")(my_other_bytes, count).record(even_more_bytes, count2);
+ * Blog(DBUG, "", 1)(son_of_more_bytes, count3);
  * ```
  *
  * These macros never trigger allocating memory.
  *
- * The macros are built such that if logging is suppressed for the combo of severity
- * level/tag/channel, then the record() calls ARE NOT EXECUTED.
+ * The macros are built such that if logging is suppressed for the combo of
+ * severity level/tag/channel, then the record() calls ARE NOT EXECUTED. If the
+ * record is longer than one node can hold, extra nodes are allocated
+ * automatically and chained together to form a "jumbo" record.
  *
+ * @note The default binary sink formatter presents the tag as a way to
+ * distinguish the binary blob when parsing the log file. If you are logging
+ * without a tag, you should ensure you have a mechanism to determine the
+ * message format.
  */
 #define SLOG_Blogs(severity) SLOG_BlogBase(slog::severity, "", slog::DEFAULT_CHANNEL)
 #define SLOG_Blogst(severity, tag) SLOG_BlogBase(slog::severity, (tag), slog::DEFAULT_CHANNEL)
@@ -65,11 +75,19 @@
 #define Blog(...) SLOG_GET_MACRO(__VA_ARGS__, SLOG_Blosgstc, SLOG_Blogst, SLOG_Blogs)(__VA_ARGS__)
 #endif
 
-namespace slog {
+namespace slog
+{
 /**
  * @brief Basic startup function.  For configuration options, see LogSetup.hpp
  */
 void start_logger(int severity = INFO);
+
+/**
+ * @brief Stop all channels, draining the queue into the sinks.
+ *
+ * Note: this prevents further messages from being logged.
+ */
+void stop_logger();
 
 /**
  * @brief Check if the current setup will log at the given severity (and optional tag and channel).
@@ -77,4 +95,22 @@ void start_logger(int severity = INFO);
  */
 bool will_log(int severity, char const* tag = "", int channel = DEFAULT_CHANNEL);
 
-}  // namespace slog
+/**
+ * @brief Obtain the number of free record in the pool for the given channel.
+ *
+ * This can be used to tune the pool parameters. Using an ALLOCATE policy with a
+ * small number of records per allocation, run the program periodically logging
+ * free_record_count(). From this, you can determine an acceptable pool size to
+ * use with the BLOCK policy.
+ */
+long free_record_count(int channel = DEFAULT_CHANNEL);
+
+} // namespace slog
+
+/**
+ * @brief Async-signal-safe signal handler
+ *
+ * If you are handling a signal and want Slog to stop, this is the function to
+ * call. It will block until the log queues are drained.
+ */
+extern "C" void slog_handle_signal(int signal_id);

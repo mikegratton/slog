@@ -1,54 +1,77 @@
 #include "LogRecord.hpp"
+#include "config.hpp"
 
 #include <chrono>
 #include <cstring>
-#include <iostream>
+#include <limits>
 #include <thread>
 
-namespace slog {
+namespace slog
+{
 
 constexpr int NO_LINE = -1;
 
-LogRecordMetadata::LogRecordMetadata()
-{
-    reset();
-}
+LogRecordMetadata::LogRecordMetadata() { reset(); }
 
 void LogRecordMetadata::reset()
 {
-    filename = "";
-    function = "";
-    line = NO_LINE;
-    severity = 2 >> 31;
-    memset(tag, 0, sizeof(tag));
+    m_filename = "";
+    m_function = "";
+    m_line = NO_LINE;
+    m_severity = std::numeric_limits<int>::max();    
+    memset(m_tag, 0, TAG_SIZE);
 }
 
 void LogRecordMetadata::capture(char const* filename_, char const* function_, int line_, int severity_,
-                                const char* tag_)
-{
-    filename = filename_;
-    function = function_;
-    line = line_;
-    time = std::chrono::system_clock::now().time_since_epoch().count();
-    severity = severity_;
-    thread_id = std::hash<std::thread::id>{}(std::this_thread::get_id());
-    if (tag_) { strncpy(tag, tag_, sizeof(tag) - 1); }
+                                char const* tag_)
+{    
+    m_filename = filename_;
+    m_function = function_;
+    m_line = line_;
+    m_severity = severity_;
+    if (m_line >= 0) {
+        // Because we might be attaching a record to another record to form a
+        // "jumbo" record, sometimes the metadata isn't meaningful. We avoid
+        // system calls in these cases.
+        m_time = std::chrono::system_clock::now().time_since_epoch().count();
+        m_thread_id = std::hash<std::thread::id>{}(std::this_thread::get_id());
+    }
+    if (tag_) {
+        strncpy(m_tag, tag_, TAG_SIZE - 1);
+    }
 }
 
-LogRecord::LogRecord(char* message_, long max_message_size_)
+void LogRecordMetadata::set_data(char const* filename, char const* function, int line, int severity, char const* tag,
+                                 uint64_t time, unsigned long threadh_id)
 {
-    message_max_size = max_message_size_;
-    message_byte_count = 0L;
-    message = message_;
-    reset();
+    m_filename = filename;
+    m_function = function;
+    m_line = line;
+    m_severity = severity;
+    m_time = time;
+    m_thread_id = threadh_id;
+    if (tag) {
+        strncpy(m_tag, tag, TAG_SIZE - 1);
+    }
+}
+
+LogRecord::LogRecord()
+: m_message_max_size(0)
+, m_message_byte_count(0)
+, m_message(nullptr)
+, m_more(nullptr)
+, m_next(nullptr)
+{
+    m_meta.reset();
 }
 
 void LogRecord::reset()
 {
-    meta.reset();
-    more = nullptr;
-    message[0] = '\0';
-    message_byte_count = 0L;
+    m_meta.reset();    
+    m_message_byte_count = 0L;
+    m_message[0] = '\0';
+    m_more = nullptr;
+    m_next = nullptr;
 }
 
-}  // namespace slog
+} // namespace slog

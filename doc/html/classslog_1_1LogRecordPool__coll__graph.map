@@ -1,7 +1,7 @@
 <map id="slog::LogRecordPool" name="slog::LogRecordPool">
-<area shape="rect" id="node1" title="A memory pool for unused log records." alt="" coords="59,273,213,300"/>
-<area shape="rect" id="node2" href="$classslog_1_1PoolMemory.html" title=" " alt="" coords="5,184,144,211"/>
-<area shape="rect" id="node3" href="$structslog_1_1RecordNode.html" title=" " alt="" coords="168,184,304,211"/>
-<area shape="rect" id="node4" href="$structslog_1_1LogRecord.html" title="A LogRecord is a message string combined with the associated metadata." alt="" coords="173,95,299,121"/>
-<area shape="rect" id="node5" href="$structslog_1_1LogRecordMetadata.html" title="Metadata associated with every log message." alt="" coords="143,5,329,32"/>
+<area shape="rect" id="Node000001" title="A memory pool for unused log records." alt="" coords="69,93,222,119"/>
+<area shape="rect" id="Node000002" href="$classslog_1_1LogRecord.html" title="A LogRecord is a message string combined with the associated metadata." alt="" coords="5,5,131,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="90,39,137,91,133,95,86,43"/>
+<area shape="rect" id="Node000003" href="$classslog_1_1PoolMemory.html" title=" " alt="" coords="155,5,293,31"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="206,43,158,95,154,91,202,39"/>
 </map>

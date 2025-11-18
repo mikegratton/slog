@@ -4,18 +4,18 @@ var annotated_dup =
       [ "BinarySink", "classslog_1_1BinarySink.html", "classslog_1_1BinarySink" ],
       [ "ConsoleSink", "classslog_1_1ConsoleSink.html", "classslog_1_1ConsoleSink" ],
       [ "FileSink", "classslog_1_1FileSink.html", "classslog_1_1FileSink" ],
+      [ "FlatThresholdMap", "classslog_1_1FlatThresholdMap.html", "classslog_1_1FlatThresholdMap" ],
       [ "JournaldSink", "classslog_1_1JournaldSink.html", "classslog_1_1JournaldSink" ],
       [ "LogChannel", "classslog_1_1LogChannel.html", "classslog_1_1LogChannel" ],
-      [ "LogRecordMetadata", "structslog_1_1LogRecordMetadata.html", "structslog_1_1LogRecordMetadata" ],
-      [ "LogRecord", "structslog_1_1LogRecord.html", "structslog_1_1LogRecord" ],
-      [ "PoolMemory", "classslog_1_1PoolMemory.html", "classslog_1_1PoolMemory" ],
-      [ "RecordNode", "structslog_1_1RecordNode.html", "structslog_1_1RecordNode" ],
-      [ "LogRecordPool", "classslog_1_1LogRecordPool.html", "classslog_1_1LogRecordPool" ],
       [ "LogConfig", "classslog_1_1LogConfig.html", "classslog_1_1LogConfig" ],
+      [ "LogRecord", "classslog_1_1LogRecord.html", "classslog_1_1LogRecord" ],
+      [ "LogRecordMetadata", "classslog_1_1LogRecordMetadata.html", "classslog_1_1LogRecordMetadata" ],
+      [ "LogRecordPool", "classslog_1_1LogRecordPool.html", "classslog_1_1LogRecordPool" ],
       [ "LogSink", "classslog_1_1LogSink.html", "classslog_1_1LogSink" ],
       [ "NullSink", "classslog_1_1NullSink.html", "classslog_1_1NullSink" ],
-      [ "CaptureBinary", "classslog_1_1CaptureBinary.html", "classslog_1_1CaptureBinary" ],
-      [ "SyslogSink", "classslog_1_1SyslogSink.html", "classslog_1_1SyslogSink" ],
-      [ "FlatThresholdMap", "classslog_1_1FlatThresholdMap.html", "classslog_1_1FlatThresholdMap" ]
+      [ "PoolMemory", "classslog_1_1PoolMemory.html", null ],
+      [ "RecordInserter", "classslog_1_1RecordInserter.html", "classslog_1_1RecordInserter" ],
+      [ "RecordInserterIterator", "structslog_1_1RecordInserterIterator.html", "structslog_1_1RecordInserterIterator" ],
+      [ "SyslogSink", "classslog_1_1SyslogSink.html", "classslog_1_1SyslogSink" ]
     ] ]
 ];

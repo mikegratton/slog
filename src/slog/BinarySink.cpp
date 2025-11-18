@@ -1,28 +1,17 @@
 #include "BinarySink.hpp"
-
-#include <cerrno>
-#include <chrono>
-#include <cstdint>
-#include <cstring>
-#include <limits>
-
-#include "slog/FileSink.hpp"
-#include "slog/LogRecord.hpp"
-#include "slog/LogSink.hpp"
+#include "LogRecord.hpp"
+#include "LogSink.hpp"
 
 namespace slog {
 
 BinarySink::BinarySink() : FileSink()
 {
-    mformat = default_binary_format;
-    mheader = default_binary_header_furniture;
-    mfooter = no_op_furniture;
+    set_formatter(default_binary_format);
+    set_file_header_format(default_binary_header_furniture);
+    set_file_footer_format(no_op_furniture);
 }
 
-BinarySink::~BinarySink()
-{
-    // Nothing extra here
-}
+BinarySink::~BinarySink() = default;
 
 void BinarySink::record(LogRecord const& rec)
 {

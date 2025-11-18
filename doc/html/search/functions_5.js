@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['operator_5b_5d_86',['operator[]',['../classslog_1_1FlatThresholdMap.html#ad28e8c3c77a568f78daeceaf1d6c521b',1,'slog::FlatThresholdMap']]]
+  ['is_5fconnected_0',['is_connected',['../classslog_1_1SyslogSink.html#abcd1793208cd065c5ee41d12a3f082bb',1,'slog::SyslogSink']]]
 ];

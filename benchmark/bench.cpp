@@ -4,8 +4,7 @@
 //
 // Modified for slog by M.B. Gratton
 
-#include <atomic>
-#include <cstdlib>  // EXIT_FAILURE
+#include <cstdlib> // EXIT_FAILURE
 #include <iostream>
 #include <memory>
 #include <string>
@@ -26,8 +25,8 @@ void bench_threaded_logging(size_t threads, int iters)
     std::cout << "Threads: " << threads << ", messages: " << iters << "\n";
     std::cout << "**************************************************************\n";
 
-    const long messageSize = 256;
-    const long poolSize = (messageSize + sizeof(slog::RecordNode)) * iters * threads;
+    long const messageSize = 256;
+    long const poolSize = (messageSize + sizeof(slog::LogRecord)) * iters * threads;
     auto start = high_resolution_clock::now();
     auto pool = std::make_shared<slog::LogRecordPool>(slog::DISCARD, poolSize, messageSize);
 
@@ -46,6 +45,7 @@ void bench_threaded_logging(size_t threads, int iters)
         config.set_sink(sink);
         bench_mt(iters, config, threads);
         std::cout << "Pool count: " << pool->count() << "\n";
+        std::remove(sink->get_file_name());
     }
 
     {
@@ -83,15 +83,128 @@ void bench_mt(int howmany, slog::LogConfig& config, size_t thread_count)
         });
     }
 
-    for (auto& t : threads) { t.join(); };
+    for (auto& t : threads) {
+        t.join();
+    };
     auto delta_pre = high_resolution_clock::now() - start;
     auto delta_pre_d = duration_cast<duration<double>>(delta_pre).count();
-    slog::stop_logger();  // Force backend to drain queue
+    slog::stop_logger(); // Force backend to drain queue
     auto delta = high_resolution_clock::now() - start;
     auto delta_d = duration_cast<duration<double>>(delta).count();
-    howmany *= thread_count;  // Actual number logged
+    howmany *= thread_count; // Actual number logged
     std::cout << "Elapsed: " << delta_d << " secs " << int(howmany / delta_d) << " msg/sec, business: " << delta_pre_d
               << " sec, " << int(howmany / delta_pre_d) << " msg/sec\n";
+}
+
+double run_test(slog::LogConfig config, std::function<void(void)> test)
+{ 
+        slog::start_logger(config);
+        auto start_time = std::chrono::system_clock::now();
+        test();        
+        auto stop_time = std::chrono::system_clock::now();
+        std::chrono::duration<double, std::milli> elapsed = stop_time - start_time;
+        slog::stop_logger();
+        return elapsed.count();        
+}
+
+// Test the performance exclusive of the work of the sink. This checks the load
+// on the business thread for record allocation and checking if a log message
+// should be rejected. (Flog version)
+void no_sink_bench(int howmany)
+{
+    std::cout << "**************************************************************\n";
+    std::cout << "Flog() performance (excluding sink)" << ", messages: " << howmany << "\n";
+    std::cout << "**************************************************************\n";
+
+    {
+        slog::LogConfig config;
+        config.set_sink(std::make_shared<slog::NullSink>());
+        config.set_default_threshold(slog::DBUG);
+        auto elapsed_ms = run_test(config, [howmany]() {
+            for (int i = 0; i < howmany; i++) {
+                Flog(NOTE)("Hello");
+            }
+        });
+        std::cout << "Null logged " << howmany << " records in " << elapsed_ms << " ms \n";
+        std::cout << "\tPer log: " << (elapsed_ms / howmany) << " ms/log\n";
+    }
+
+    {
+        slog::LogConfig config;
+        config.set_sink(std::make_shared<slog::NullSink>());
+        config.set_default_threshold(slog::ERRR);
+        auto elapsed_ms = run_test(config, [howmany]() {
+            for (int i = 0; i < howmany; i++) {
+                Flog(NOTE)("Hello");
+            }
+        });
+        std::cout << "Reject logged " << howmany << " records in " << elapsed_ms << " ms \n";
+        std::cout << "\tPer log: " << (elapsed_ms / howmany) << " ms/log\n";
+    }
+
+    {
+        slog::LogConfig config;
+        config.set_sink(std::make_shared<slog::NullSink>());
+        config.set_default_threshold(slog::ERRR);
+        config.add_tag("moose", slog::INFO);
+        auto elapsed_ms = run_test(config, [howmany]() {
+            for (int i = 0; i < howmany; i++) {
+                Flog(NOTE, "meep")("Hello");
+            }
+        });       
+        std::cout << "Reject tag logged " << howmany << " records in " << elapsed_ms << " ms \n";
+        std::cout << "\tPer log: " << (elapsed_ms / howmany) << " ms/log\n";        
+    }
+}
+
+// Test the performance exclusive of the work of the sink. This checks the load
+// on the business thread for record allocation and checking if a log message
+// should be rejected. (Slog version)
+void no_sink_stream_bench(int howmany)
+{
+    std::cout << "**************************************************************\n";
+    std::cout << "Slog() performance (excluding sink)" << ", messages: " << howmany << "\n";
+    std::cout << "**************************************************************\n";
+
+    {
+        slog::LogConfig config;
+        config.set_sink(std::make_shared<slog::NullSink>());
+        config.set_default_threshold(slog::DBUG);
+        auto elapsed_ms = run_test(config, [howmany]() {
+            for (int i = 0; i < howmany; i++) {
+                Slog(NOTE) << "Hello";
+            }
+        });
+        std::cout << "Null logged " << howmany << " records in " << elapsed_ms << " ms \n";
+        std::cout << "\tPer log: " << (elapsed_ms/ howmany) << " ms/log\n";
+    }
+
+    {
+        slog::LogConfig config;
+        config.set_sink(std::make_shared<slog::NullSink>());
+        config.set_default_threshold(slog::ERRR);
+        auto elapsed_ms = run_test(config, [howmany]() {
+            for (int i = 0; i < howmany; i++) {
+                Slog(NOTE) << "Hello";
+            }
+        });
+        std::cout << "Reject logged " << howmany << " records in " << elapsed_ms << " ms \n";
+        std::cout << "\tPer log: " << (elapsed_ms/ howmany) << " ms/log\n";
+    }
+
+    {
+        slog::LogConfig config;
+        config.set_sink(std::make_shared<slog::NullSink>());
+        config.set_default_threshold(slog::ERRR);
+        config.add_tag("moose", slog::INFO);
+        auto elapsed_ms = run_test(config, [howmany]() {
+            for (int i = 0; i < howmany; i++) {
+                Slog(NOTE, "meep") << "Hello";
+            }
+        });
+        std::cout << "Reject tag logged " << howmany << " records in " << elapsed_ms << " ms \n";
+        std::cout << "\tPer log: " << (elapsed_ms/ howmany) << " ms/log\n";
+    }
 }
 
 int main(int argc, char* argv[])
@@ -99,11 +212,17 @@ int main(int argc, char* argv[])
     int iters = 250000;
     size_t threads = 4;
 
-    if (argc > 1) { iters = std::stoi(argv[1]); }
-    if (argc > 2) { threads = std::stoul(argv[2]); }
+    if (argc > 1) {
+        iters = std::stoi(argv[1]);
+    }
+    if (argc > 2) {
+        threads = std::stoul(argv[2]);
+    }
 
     bench_threaded_logging(1, iters);
     bench_threaded_logging(threads, iters);
+    no_sink_bench(iters);
+    no_sink_stream_bench(iters);
 
     return 0;
 }

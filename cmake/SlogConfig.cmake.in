@@ -1,0 +1,10 @@
+set(SLOG_VERSION @PACKAGE_VERSION@)
+@PACKAGE_INIT@
+set_and_check(SLOG_INCLUDE_DIR "@PACKAGE_SLOG_INCLUDE_INSTALL_DIR@")
+set_and_check(SLOG_LIB_DIR "@PACKAGE_SLOG_LIB_INSTALL_DIR@")
+if (@SLOG_JOURNALD@)
+    find_package(Journald REQUIRED)
+endif()
+find_package(Threads REQUIRED)
+include(SlogTargets)
+check_required_components(slog)

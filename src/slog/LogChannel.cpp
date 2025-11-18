@@ -1,9 +1,12 @@
 #include "LogChannel.hpp"
-#include <cstdlib>
+#include "Signal.hpp"
+#include "SlogError.hpp"
 #include <cassert>
 #include <chrono>
+#include <cstdlib>
 
-namespace slog {
+namespace slog
+{
 
 // This controls how fast the worker thread loop responds
 // to signals to shut down.  50 ms is generally too short
@@ -12,98 +15,111 @@ constexpr std::chrono::milliseconds WAIT{50};
 
 LogChannel::LogChannel(std::shared_ptr<LogSink> sink_, ThresholdMap const& threshold_,
                        std::shared_ptr<LogRecordPool> pool_)
-    : pool(pool_), thresholdMap(threshold_), sink(sink_), keepalive(false)
+    : pool(pool_),
+      threshold_map(threshold_),
+      sink(sink_)
 {
 }
 
-LogChannel::~LogChannel()
-{
-    stop();
-}
+LogChannel::~LogChannel() { stop(); }
 
-LogChannel::LogChannel(LogChannel const& i_rhs) : LogChannel(i_rhs.sink, i_rhs.thresholdMap, i_rhs.pool)
-{
-}
 
-void LogChannel::push(RecordNode* node)
+void LogChannel::push(LogRecord* node)
 {
     if (node) {
-        int level = node->rec.meta.severity;
+        int level = node->meta().severity();
         queue.push(node);
-        if (level <= FATL) { abort(); }
+        if (level <= FATL) {
+            std::abort();
+        }
     }
 }
 
 void LogChannel::start()
 {
-    stop();
-    keepalive = true;
-    workThread = std::thread([this]() { this->logging_loop(); });
+    if (get_signal_state() != SLOG_ACTIVE) {
+        slog_error("Tried to start channel in STOPPED state\n");
+    }
+    work_thread = std::thread([this]() { this->logging_loop(); });
 }
 
 void LogChannel::stop()
 {
-    keepalive = false;
-    if (workThread.joinable()) { workThread.join(); }
+    if (get_signal_state() == SLOG_ACTIVE) {
+        set_signal_state(SLOG_STOPPED);
+    }
+    if (work_thread.joinable()) {
+        work_thread.join();
+    }
 }
 
 void LogChannel::logging_loop()
 {
     assert(sink);
     assert(pool);
-    while (keepalive) {
-        RecordNode* node = queue.pop(WAIT);
+    while (logger_state() == RUN) {
+        LogRecord* node = queue.pop(WAIT);
         if (node) {
-            sink->record(node->rec);
+            sink->record(*node);
             pool->free(node);
         }
     }
+
     // Shutdown. Drain the queue.
-    RecordNode* head = queue.pop_all();
+    LogRecord* head = queue.pop_all();
     while (head) {
-        sink->record(head->rec);
-        RecordNode* cursor = head->next;
+        sink->record(*head);
+        LogRecord* cursor = head->m_next;
         pool->free(head);
         head = cursor;
     }
+    sink->finalize();
+    notify_channel_done();
 }
 
-RecordNode* LogChannel::LogQueue::pop_all()
+LogRecord* LogChannel::LogQueue::pop_all()
 {
     std::unique_lock<std::mutex> guard(lock);
-    RecordNode* popped = mhead;
-    mhead = mtail = nullptr;
+    LogRecord* popped = head;
+    head = tail = nullptr;
     return popped;
 }
 
-void LogChannel::LogQueue::push(RecordNode* node)
+void LogChannel::LogQueue::push(LogRecord* node)
 {
     assert(node);
-    node->next = nullptr;
+    node->m_next = nullptr;
     std::unique_lock<std::mutex> guard(lock);
-    if (mtail) {
-        mtail->next = node;
-        mtail = node;
+    if (tail) {
+        tail->m_next = node;
+        tail = node;
     } else {
-        mtail = mhead = node;
+        tail = head = node;
     }
     guard.unlock();
     pending.notify_one();
 }
 
-RecordNode* LogChannel::LogQueue::pop(std::chrono::milliseconds wait)
+LogRecord* LogChannel::LogQueue::pop(std::chrono::milliseconds wait)
 {
-    auto condition = [this]() -> bool { return mhead != nullptr; };
-    RecordNode* popped = nullptr;
+    auto condition = [this]() -> bool { return head != nullptr; };
+    LogRecord* popped = nullptr;
 
     std::unique_lock<std::mutex> guard(lock);
     if (pending.wait_for(guard, wait, condition)) {
-        popped = mhead;
-        mhead = mhead->next;
-        if (nullptr == mhead) { mtail = nullptr; }
-        popped->next = nullptr;
+        popped = head;
+        head = head->m_next;
+        if (nullptr == head) {
+            tail = nullptr;
+        }
+        popped->m_next = nullptr;
     }
     return popped;
 }
 
-}  // namespace slog
+LogChannel::State LogChannel::logger_state() 
+{ 
+    return (get_signal_state() == SLOG_ACTIVE ? RUN : SETUP); 
+}
+
+} // namespace slog
