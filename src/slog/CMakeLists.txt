@@ -29,7 +29,8 @@ set(SLOG_PUBLIC_HEADERS
     LogRecord.hpp
     LogRecordPool.hpp
     LogSink.hpp
-    ThresholdMap.hpp    
+    RecordInserter.hpp
+    ThresholdMap.hpp
 )
 
 
@@ -150,7 +151,7 @@ install(
 configure_package_config_file(
     ${PROJECT_SOURCE_DIR}/cmake/SlogConfig.cmake.in
     ${CMAKE_CURRENT_BINARY_DIR}/SlogConfig.cmake
-    INSTALL_DESTINATION 
+    INSTALL_DESTINATION
         ${SLOG_CONFIG_INSTALL_DIR}
     PATH_VARS 
         SLOG_INCLUDE_INSTALL_DIR
