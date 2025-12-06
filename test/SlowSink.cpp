@@ -1,5 +1,6 @@
 #include "SlowSink.hpp"
 #include <mutex>
+#include <cassert>
 
 SlowSink::SlowSink() { mwait_for_end.lock(); }
 
@@ -22,5 +23,10 @@ void SlowSink::finalize()
 void SlowSink::record(slog::LogRecord const& rec)
 {
     std::lock_guard<std::mutex> guard(mwait_for_end);
-    mcontents.push_back(rec.message());    
+    std::string message(rec.message(), rec.message() + rec.size());
+    for (auto const* cursor = rec.more(); cursor != nullptr; cursor = cursor->more()) {
+        std::string nextPart(cursor->message(), cursor->message() + cursor->size());
+        message += nextPart;
+    }
+    mcontents.push_back(message);
 }

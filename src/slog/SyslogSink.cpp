@@ -145,7 +145,10 @@ bool SyslogSink::connect_unix()
     // Bind to a temp address
     sockaddr_un address{};
     make_unix_socket();
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wstringop-truncation"
     strncpy(address.sun_path, unix_socket, sizeof(address.sun_path) - 1);
+#pragma GCC diagnostic pop
     address.sun_family = AF_UNIX;
     auto* caddress = reinterpret_cast<sockaddr*>(&address);
     auto address_size = sizeof(sockaddr_un);
@@ -158,7 +161,10 @@ bool SyslogSink::connect_unix()
     }
 
     // Connect to server's socket
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wstringop-truncation"
     strncpy(address.sun_path, destination, sizeof(address.sun_path) - 1);
+#pragma GCC diagnostic pop
     address.sun_family = AF_UNIX;
     caddress = reinterpret_cast<sockaddr*>(&address);
     address_size = sizeof(sockaddr_un);

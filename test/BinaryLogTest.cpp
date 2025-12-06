@@ -43,40 +43,40 @@ TEST_CASE("BinaryishLog")
     CHECK(buffer[7] == 0);
 
     // The records
-    fread(buffer, 1, 32, f);
+    CHECK(fread(buffer, 1, 32, f));
     CHECK(*reinterpret_cast<uint32_t*>(buffer) == 7);
     CHECK(*reinterpret_cast<int32_t*>(buffer + 4) == 600);    
     CHECK(*reinterpret_cast<uint64_t*>(buffer + 8) > time - std::chrono::nanoseconds(100000000).count());
     CHECK(*reinterpret_cast<uint64_t*>(buffer + 8) < time);
     CHECK(strncmp(buffer + 16, "", 16) == 0);
-    fread(buffer, 1, 7, f);
+    CHECK(fread(buffer, 1, 7, f));
     CHECK(strncmp(buffer, "hello!", 7) == 0);
 
-    fread(buffer, 1, 32, f);
+    CHECK(fread(buffer, 1, 32, f));
     CHECK(*reinterpret_cast<uint32_t*>(buffer) == 7);
     CHECK(*reinterpret_cast<int32_t*>(buffer + 4) == 600);    
     CHECK(*reinterpret_cast<uint64_t*>(buffer + 8) > time - std::chrono::nanoseconds(100000000).count());
     CHECK(*reinterpret_cast<uint64_t*>(buffer + 8) < time);
     CHECK(strncmp(buffer + 16, "tag", 16) == 0);
-    fread(buffer, 1, 7, f);
+    CHECK(fread(buffer, 1, 7, f));
     CHECK(strncmp(buffer, "tagged", 7) == 0);
 
-    fread(buffer, 1, 32, f);
+    CHECK(fread(buffer, 1, 32, f));
     CHECK(*reinterpret_cast<uint32_t*>(buffer) == 5);
     CHECK(*reinterpret_cast<int32_t*>(buffer + 4) == 600);    
     CHECK(*reinterpret_cast<uint64_t*>(buffer + 8) > time - std::chrono::nanoseconds(100000000).count());
     CHECK(*reinterpret_cast<uint64_t*>(buffer + 8) < time);
     CHECK(strncmp(buffer + 16, "moof", 16) == 0);
-    fread(buffer, 1, 5, f);
+    CHECK(fread(buffer, 1, 5, f));
     CHECK(strncmp(buffer, "moof", 5) == 0);
 
-    fread(buffer, 1, 32, f);
+    CHECK(fread(buffer, 1, 32, f));
     CHECK(*reinterpret_cast<uint32_t*>(buffer) == 5);
     CHECK(*reinterpret_cast<int32_t*>(buffer + 4) == 500);    
     CHECK(*reinterpret_cast<uint64_t*>(buffer + 8) > time - std::chrono::nanoseconds(100000000).count());
     CHECK(*reinterpret_cast<uint64_t*>(buffer + 8) < time);
     CHECK(strncmp(buffer + 16, "fizzbuzz", 16) == 0);
-    fread(buffer, 1, 5, f);
+    CHECK(fread(buffer, 1, 5, f));
     CHECK(strncmp(buffer, "moof", 5) == 0);
 
     fclose(f);
@@ -190,13 +190,13 @@ TEST_CASE("Binary.jumbo")
     CHECK(buffer[7] == 0);
 
     // The records
-    fread(buffer, 1, 32, f);
+    CHECK(fread(buffer, 1, 32, f));
     CHECK(*reinterpret_cast<uint32_t*>(buffer) == strlen(message));
     CHECK(*reinterpret_cast<int32_t*>(buffer + 4) == slog::NOTE);    
     CHECK(*reinterpret_cast<uint64_t*>(buffer + 8) > time - std::chrono::nanoseconds(100000000).count());
     CHECK(*reinterpret_cast<uint64_t*>(buffer + 8) < time);
     CHECK(strncmp(buffer + 16, "tag", 16) == 0);
-    fread(buffer, 1, 60, f);
+    CHECK(fread(buffer, 1, 60, f));
     CHECK(strncmp(buffer, message, strlen(message)) == 0);
 
     fclose(f);

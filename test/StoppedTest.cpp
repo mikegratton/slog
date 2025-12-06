@@ -4,7 +4,7 @@
 #include <cstring>
 #include <thread>
 
-#ifdef SLOG_LOG_TO_CONSOLE_WHEN_STOPPED
+#if SLOG_LOG_TO_CONSOLE_WHEN_STOPPED
 TEST_CASE("StoppedLogToConsole")
 {
     char const* test_file = "stdout.txt";

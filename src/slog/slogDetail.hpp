@@ -137,7 +137,7 @@ class CaptureStream
 #include <source_location>
 
 #define SLOG_FlogBase(severity, tag, channel)                                                                          \
-    if ((!SLOG_LOGGING_ENABLED && will_log((severity), (tag), (channel)))) {                                           \
+    if (!(SLOG_LOGGING_ENABLED && will_log((severity), (tag), (channel)))) {                                           \
     } else                                                                                                             \
         slog::CaptureFlog((severity), (tag), (channel))
 
