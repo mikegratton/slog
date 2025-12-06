@@ -223,7 +223,7 @@ TEST_CASE("StartStop")
     FILE* f = fopen(SlowSink::file_name(), "r");    
     REQUIRE(f);
     char buffer[1024];
-    fgets(buffer, sizeof(buffer), f);
+    CHECK(fgets(buffer, sizeof(buffer), f));
     CHECK_MESSAGE(strncmp(buffer, "Test record\n", 64) == 0, "Read \"", buffer, "\", but expected \"Test record\n\"");
     fclose(f);        
     std::remove(SlowSink::file_name());

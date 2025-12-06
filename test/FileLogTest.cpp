@@ -39,7 +39,7 @@ TEST_CASE("FileLog.basic")
     // The records
     char buffer[1024];
     slog::TestLogRecord record;
-    fgets(buffer, sizeof(buffer), f);
+    CHECK(fgets(buffer, sizeof(buffer), f));
     parse_log_record(record, buffer);
     CHECK(record.meta.severity() == slog::INFO);
     CHECK(record.meta.time() < time);
@@ -47,7 +47,7 @@ TEST_CASE("FileLog.basic")
     CHECK(strcmp(record.meta.tag(), "012345678901234") == 0);
     CHECK(strcmp(record.message, "hello\n") == 0);
 
-    fgets(buffer, sizeof(buffer), f);
+    CHECK(fgets(buffer, sizeof(buffer), f));
     parse_log_record(record, buffer);
     CHECK(record.meta.severity() == slog::NOTE);
     CHECK(record.meta.time() < time);
@@ -148,7 +148,7 @@ TEST_CASE("FileLog.rotation")
     FILE* f = fopen(secondName.c_str(), "r");
     REQUIRE(f);
     char buffer[1024];
-    fgets(buffer, sizeof(buffer), f);    
+    CHECK(fgets(buffer, sizeof(buffer), f));
     CHECK(strncmp(buffer, "012345678901234567890\n", sizeof(buffer)) == 0);
 
     std::remove(secondName.c_str());

@@ -1,21 +1,20 @@
+#include "SlowSink.hpp"
 #include "doctest.h"
 #include "slog/LogSetup.hpp"
 #include "slog/slog.hpp"
-#include "SlowSink.hpp"
 #include "testUtilities.hpp"
 #include <csignal>
 #include <cstdlib>
 #include <cstring>
 #include <memory>
+#include <signal.h>
 #include <sys/wait.h>
 #include <unistd.h>
-#include <signal.h>
-
 
 static int run_test(char const* name)
 {
     printf("----------------Child Process Output-----------------------\n");
-    // call signalTest/HandlerProgram & get pid    
+    // call signalTest/HandlerProgram & get pid
     std::string command = slog::get_path_to_test() + "/HandlerProgram " + name;
     int pid;
     auto p = slog::popen2(command.c_str(), "r", &pid);
@@ -24,21 +23,20 @@ static int run_test(char const* name)
     pclose(p);
     printf("-----------------------------------------------------------\n");
     return exit_code;
-} 
+}
 
 TEST_CASE("ExitTest")
-{    
+{
     int exit_code = run_test("exit");
-    CHECK(exit_code == 0);        
-    FILE* f = fopen(SlowSink::file_name(), "r");       
+    CHECK(exit_code == 0);
+    FILE* f = fopen(SlowSink::file_name(), "r");
     REQUIRE(f);
     char buffer[1024];
-    fgets(buffer, sizeof(buffer), f);
+    CHECK(fgets(buffer, sizeof(buffer), f));
     CHECK(strncmp(buffer, "Test record\n", 64) == 0);
     fclose(f);
     std::remove(SlowSink::file_name());
 }
-
 
 TEST_CASE("FatalTest")
 {
@@ -47,7 +45,7 @@ TEST_CASE("FatalTest")
     FILE* f = fopen(SlowSink::file_name(), "r");
     REQUIRE(f);
     char buffer[1024];
-    fgets(buffer, sizeof(buffer), f);
+    CHECK(fgets(buffer, sizeof(buffer), f));
     CHECK(strncmp(buffer, "Test record\n", 64) == 0);
 
     fclose(f);
@@ -61,7 +59,7 @@ TEST_CASE("AbortTest")
     FILE* f = fopen(SlowSink::file_name(), "r");
     REQUIRE(f);
     char buffer[1024];
-    fgets(buffer, sizeof(buffer), f);
+    CHECK(fgets(buffer, sizeof(buffer), f));
     CHECK(strncmp(buffer, "Test record\n", 64) == 0);
 
     fclose(f);
@@ -75,7 +73,7 @@ TEST_CASE("InterruptTest")
     FILE* f = fopen(SlowSink::file_name(), "r");
     REQUIRE(f);
     char buffer[1024];
-    fgets(buffer, sizeof(buffer), f);
+    CHECK(fgets(buffer, sizeof(buffer), f));
     CHECK(strncmp(buffer, "Test record\n", 64) == 0);
 
     fclose(f);
@@ -89,7 +87,7 @@ TEST_CASE("TermTest")
     FILE* f = fopen(SlowSink::file_name(), "r");
     REQUIRE(f);
     char buffer[1024];
-    fgets(buffer, sizeof(buffer), f);
+    CHECK(fgets(buffer, sizeof(buffer), f));
     CHECK(strncmp(buffer, "Test record\n", 64) == 0);
 
     fclose(f);

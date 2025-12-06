@@ -38,7 +38,7 @@ TEST_CASE("Jumbo.Record")
 
     auto N = long_text.size() * 4;
     char* buffer = new char[N];
-    fgets(buffer, N, f);
+    CHECK(fgets(buffer, N, f));
     std::string bstring(buffer);
     CHECK(bstring.back() == '\n');
     bstring.pop_back(); // remove the newline
