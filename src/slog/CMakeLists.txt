@@ -1,4 +1,4 @@
-configure_file(config.hpp.in config.hpp)
+configure_file(SlogConfig.hpp.in SlogConfig.hpp)
 
 set(SLOG_SOURCE
     BinarySink.cpp    

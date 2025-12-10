@@ -1,7 +1,7 @@
 #pragma once
 #include <condition_variable>
 #include <mutex>
-#include "config.hpp"
+#include "SlogConfig.hpp"
 #include "LogRecord.hpp"
 
 namespace slog

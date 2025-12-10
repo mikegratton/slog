@@ -1,5 +1,5 @@
 #pragma once
-#include "config.hpp"
+#include "SlogConfig.hpp"
 #include "RecordInserter.hpp"
 
 #define SLOG_GET_MACRO(_1, _2, _3, NAME, ...) NAME

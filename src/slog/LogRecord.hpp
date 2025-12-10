@@ -1,5 +1,5 @@
 #pragma once
-#include "config.hpp"
+#include "SlogConfig.hpp"
 #include <cstdint>
 
 namespace slog
