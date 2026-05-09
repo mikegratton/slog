@@ -7,11 +7,10 @@ TEST_CASE("MultiChannel")
 {
     std::vector<slog::LogConfig> configs(2);
     auto sink1 = std::make_shared<InMemorySink>();
-    sink1->unlock();
     configs[0].set_sink(sink1);
+    configs[0].set_default_threshold(slog::INFO);
     auto sink2 = std::make_shared<InMemorySink>();
-    sink2->unlock();
-    configs[1].set_sink(sink1);
+    configs[1].set_sink(sink2);
     configs[1].set_default_threshold(slog::NOTE);
 
     slog::start_logger(configs);
