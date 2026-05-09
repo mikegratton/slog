@@ -120,9 +120,9 @@ uint32_t total_record_size(LogRecord const& rec)
     return total_size;
 }
 
-uint32_t write_message_to_file(FILE* sink, LogRecord const& rec)
+long write_message_to_file(FILE* sink, LogRecord const& rec)
 {
-    uint32_t count = 0;
+    long count = 0;
     count += fwrite(rec.message(), sizeof(char), rec.size(), sink);
     for (LogRecord const* more = rec.more(); more != nullptr; more = more->more()) {
         count += fwrite(more->message(), sizeof(char), more->size(), sink);
@@ -131,11 +131,11 @@ uint32_t write_message_to_file(FILE* sink, LogRecord const& rec)
 }
 
 
-uint32_t default_format(FILE* sink, LogRecord const& rec)
+long default_format(FILE* sink, LogRecord const& rec)
 {
     char time_str[32];
     format_time(time_str, rec.meta().time(), 3, FULL_T);
-    int write_count = 0;
+    long write_count = 0;
     fputc('[', sink);
     write_count++;
     write_count += fwrite(severity_string(rec.meta().severity()), sizeof(char), 4, sink);
@@ -152,16 +152,16 @@ uint32_t default_format(FILE* sink, LogRecord const& rec)
     return write_count;
 }
 
-uint32_t no_meta_format(FILE* sink, LogRecord const& rec)
+long no_meta_format(FILE* sink, LogRecord const& rec)
 {
     return write_message_to_file(sink, rec);
 }
 
 
-uint32_t long_binary_format(FILE* sink, LogRecord const& rec)
+long long_binary_format(FILE* sink, LogRecord const& rec)
 {
     // Write the record leader
-    uint32_t total_bytes = 0;
+    long total_bytes = 0;
     uint32_t record_size = static_cast<uint32_t>(total_record_size(rec));
     int32_t reduced_severity = static_cast<int32_t>(rec.meta().severity());
     total_bytes += fwrite(&record_size, sizeof(uint32_t), 1, sink);
@@ -175,10 +175,10 @@ uint32_t long_binary_format(FILE* sink, LogRecord const& rec)
     return total_bytes;
 }
 
-uint32_t default_binary_format(FILE* sink, LogRecord const& rec)
+long default_binary_format(FILE* sink, LogRecord const& rec)
 {
     // Write the record leader
-    uint32_t total_bytes = 0;
+    long total_bytes = 0;
     uint32_t record_size = total_record_size(rec);
     total_bytes += fwrite(&record_size, sizeof(uint32_t), 1, sink);
     total_bytes += fwrite(rec.meta().tag(), sizeof(char), 4, sink);
@@ -188,12 +188,12 @@ uint32_t default_binary_format(FILE* sink, LogRecord const& rec)
     return total_bytes;
 }
 
-uint32_t default_binary_header_furniture(FILE* sink, int sequence, uint64_t /*time*/)
+long default_binary_header_furniture(FILE* sink, int sequence, uint64_t /*time*/)
 {
     char const* MAGIC = "SLOG";
     uint16_t const BOM = 0xfeff;
     uint16_t const short_sequence = static_cast<uint16_t>(sequence);
-    uint32_t count = 0;
+    long count = 0;
     count += fwrite(MAGIC, sizeof(char), 4, sink);
     count += fwrite(&BOM, sizeof(uint16_t), 1, sink);
     count += fwrite(&short_sequence, sizeof(uint16_t), 1, sink);
