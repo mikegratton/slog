@@ -59,6 +59,12 @@ LogRecord* capture_message(LogRecord* node, char const* format, ...)
     return node;
 }
 
+bool is_channel_active(int channel)
+{
+    int channel_count = Logger::channel_count();
+    return (channel >= 0 && channel < channel_count);
+}
+
 } // namespace slog
 
 

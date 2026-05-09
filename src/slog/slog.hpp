@@ -105,6 +105,11 @@ bool will_log(int severity, char const* tag = "", int channel = DEFAULT_CHANNEL)
  */
 long free_record_count(int channel = DEFAULT_CHANNEL);
 
+/**
+ * @brief True if channel is in use for logging messages
+ */
+bool is_channel_active(int channel);
+
 } // namespace slog
 
 /**
