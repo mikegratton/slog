@@ -73,7 +73,7 @@ long write_message_to_file(FILE* sink, LogRecord const& rec)
 long default_format(FILE* sink, LogRecord const& rec)
 {
     char time_str[32];
-    rec.meta().time().format_time(time_str, 3, Timestamp::FULL_T);    
+    rec.meta().timestamp().format_time(time_str, 3, Timestamp::FULL_T);    
     long write_count = 0;
     fputc('[', sink);
     write_count++;

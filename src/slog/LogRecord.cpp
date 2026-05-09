@@ -41,7 +41,7 @@ void LogRecordMetadata::capture(char const* filename_, char const* function_, in
 }
 
 void LogRecordMetadata::set_data(char const* filename, char const* function, int line, int severity, char const* tag,
-                                 uint64_t time, unsigned long threadh_id)
+                                 Timestamp time, unsigned long threadh_id)
 {
     m_filename = filename;
     m_function = function;

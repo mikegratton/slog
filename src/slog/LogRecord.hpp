@@ -34,7 +34,10 @@ class LogRecordMetadata {
     char const* function() const { return m_function; }
 
     /// Get the time when the record was recorded
-    Timestamp time() const { return m_time; }
+    Timestamp timestamp() const { return m_time; }
+
+    /// Get the time when the record was recorded
+    uint64_t time() const { return m_time.nanoseconds_since_epoch(); }
 
     /// Get a thread id for the thread where the record was recorded.
     unsigned long thread_id() const { return m_thread_id; }
@@ -46,7 +49,7 @@ class LogRecordMetadata {
     int severity() const { return m_severity; }
 
     /// Set all fields in the metdata
-    void set_data(char const* filename, char const* function, int line, int severity, char const* tag, uint64_t time,
+    void set_data(char const* filename, char const* function, int line, int severity, char const* tag, Timestamp time,
                   unsigned long threadh_id);
 
   private:

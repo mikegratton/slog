@@ -4,11 +4,11 @@
 #include "slog/LogSink.hpp"
 #include "slog/Timestamp.hpp"
 #include "slog/slog.hpp"
-#include <chrono>
 #include <cstdint>
 #include <cstdio>
 #include <cstring>
 #include <memory>
+#include <iostream>
 #include "testUtilities.hpp"
 
 TEST_CASE("FileLog.basic")
@@ -16,9 +16,9 @@ TEST_CASE("FileLog.basic")
     slog::LogConfig config;
     auto sink = std::make_shared<slog::FileSink>();
     sink->set_echo(false);        
-
+std::cout << "Test file name: " << sink->get_file_name() << "\n";
     CHECK( strncmp(sink->get_file_name(), "./slogTest_", 11) == 0);
-    CHECK( strncmp(sink->get_file_name() + 30, ".log", 4) == 0);
+    CHECK( strncmp(sink->get_file_name() + 31, ".log", 4) == 0);
 
     config.set_sink(sink);
     config.set_default_threshold(slog::INFO);
@@ -43,16 +43,16 @@ TEST_CASE("FileLog.basic")
     CHECK(fgets(buffer, sizeof(buffer), f));
     parse_log_record(record, buffer);
     CHECK(record.meta.severity() == slog::INFO);
-    CHECK(record.meta.time().nanoseconds_since_epoch() < time.nanoseconds_since_epoch());
-    CHECK(record.meta.time().nanoseconds_since_epoch() > time.nanoseconds_since_epoch() - 100000000UL);
+    CHECK(record.meta.time() < time.nanoseconds_since_epoch());
+    CHECK(record.meta.time() > time.nanoseconds_since_epoch() - 100000000UL);
     CHECK(strcmp(record.meta.tag(), "012345678901234") == 0);
     CHECK(strcmp(record.message, "hello\n") == 0);
 
     CHECK(fgets(buffer, sizeof(buffer), f));
     parse_log_record(record, buffer);
     CHECK(record.meta.severity() == slog::NOTE);
-    CHECK(record.meta.time().nanoseconds_since_epoch() < time.nanoseconds_since_epoch());
-    CHECK(record.meta.time().nanoseconds_since_epoch() > time.nanoseconds_since_epoch() - 100000000UL);
+    CHECK(record.meta.time() < time.nanoseconds_since_epoch());
+    CHECK(record.meta.time() > time.nanoseconds_since_epoch() - 100000000UL);
     CHECK(strcmp(record.meta.tag(), "") == 0);
     CHECK(strcmp(record.message, "goodbye\n") == 0);
 

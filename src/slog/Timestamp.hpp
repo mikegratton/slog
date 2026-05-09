@@ -17,7 +17,7 @@ class Timestamp
     };
 
     /// Make a timestamp with a given offset from the epoch
-    constexpr Timestamp(uint64_t i_nanosecondsSinceEpoch = 0)
+    constexpr explicit Timestamp(uint64_t i_nanosecondsSinceEpoch = 0)
         : m_nanosSinceEpoch(i_nanosecondsSinceEpoch)
     {
     }

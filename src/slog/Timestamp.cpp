@@ -6,7 +6,7 @@
 namespace slog
 {
 
-Timestamp Timestamp::now() { return {(uint64_t)std::chrono::system_clock::now().time_since_epoch().count()}; }
+Timestamp Timestamp::now() { return Timestamp{(uint64_t)std::chrono::system_clock::now().time_since_epoch().count()}; }
 
 /*
  * Low-level int to string function. Print value with the given number of digits,
