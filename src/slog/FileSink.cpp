@@ -8,6 +8,7 @@
 
 #include "LogSink.hpp"
 #include "PlatformUtilities.hpp"
+#include "slog/Timestamp.hpp"
 
 namespace slog {
 
@@ -16,14 +17,14 @@ FileSink::FileSink()
 , mformat(default_format)
 , mheader(no_op_furniture)
 , mfooter(no_op_furniture)
-, msessionStartTime(std::chrono::system_clock::now().time_since_epoch().count())
+, msessionStartTime(Timestamp::now())
 , msequence(0)
 , mbytesWritten(0)
 , mmaxBytes(std::numeric_limits<long>::max())
 , mecho(true) 
 , mfullLogName{""}   
 {        
-    format_time(msessionStartTimeStr, msessionStartTime, 0, COMPACT);
+    msessionStartTime.format_time(msessionStartTimeStr, 0, Timestamp::COMPACT);
     set_max_file_size(std::numeric_limits<long>::max() - 2048);    
     set_file(".", ::slog::program_short_name());    
 }

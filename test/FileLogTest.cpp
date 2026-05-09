@@ -2,6 +2,7 @@
 #include "slog/FileSink.hpp"
 #include "slog/LogSetup.hpp"
 #include "slog/LogSink.hpp"
+#include "slog/Timestamp.hpp"
 #include "slog/slog.hpp"
 #include <chrono>
 #include <cstdint>
@@ -29,7 +30,7 @@ TEST_CASE("FileLog.basic")
     Slog(INFO, "01234567890123456789") << "hello";
     Slog(NOTE) << "goodbye";    
     slog::stop_logger();
-    auto time = std::chrono::system_clock::now().time_since_epoch().count();
+    auto time = slog::Timestamp::now();
 
     // Read the results
     char const* logname = sink->get_file_name();    
@@ -42,16 +43,16 @@ TEST_CASE("FileLog.basic")
     CHECK(fgets(buffer, sizeof(buffer), f));
     parse_log_record(record, buffer);
     CHECK(record.meta.severity() == slog::INFO);
-    CHECK(record.meta.time() < time);
-    CHECK(record.meta.time() > time - 100000000UL);
+    CHECK(record.meta.time().nanoseconds_since_epoch() < time.nanoseconds_since_epoch());
+    CHECK(record.meta.time().nanoseconds_since_epoch() > time.nanoseconds_since_epoch() - 100000000UL);
     CHECK(strcmp(record.meta.tag(), "012345678901234") == 0);
     CHECK(strcmp(record.message, "hello\n") == 0);
 
     CHECK(fgets(buffer, sizeof(buffer), f));
     parse_log_record(record, buffer);
     CHECK(record.meta.severity() == slog::NOTE);
-    CHECK(record.meta.time() < time);
-    CHECK(record.meta.time() > time - 100000000UL);
+    CHECK(record.meta.time().nanoseconds_since_epoch() < time.nanoseconds_since_epoch());
+    CHECK(record.meta.time().nanoseconds_since_epoch() > time.nanoseconds_since_epoch() - 100000000UL);
     CHECK(strcmp(record.meta.tag(), "") == 0);
     CHECK(strcmp(record.message, "goodbye\n") == 0);
 

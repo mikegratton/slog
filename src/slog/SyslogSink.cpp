@@ -295,10 +295,10 @@ int SyslogSink::format_header(LogRecord const& node)
     if (unix_socket) {
         headerOffset = fprintf(buffer_stream, "<%d> %s: ", priority, application_name);
     } else if (use_rfc3164) {
-        format_time(timestamp, node.meta().time(), 3, FULL_T);
+        node.meta().time().format_time(timestamp);
         headerOffset = fprintf(buffer_stream, "<%d> %s %s %s: ", priority, timestamp, hostname, application_name);
     } else {
-        format_time(timestamp, node.meta().time(), 3, FULL_T);
+        node.meta().time().format_time(timestamp);
         headerOffset = fprintf(buffer_stream, "<%d>1 %s %s %s - %s - ", priority, timestamp, hostname, application_name,
                                (node.meta().tag()[0] ? node.meta().tag() : "-"));
     }

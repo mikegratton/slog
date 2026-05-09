@@ -8,6 +8,7 @@
 #include "ConsoleSink.hpp"
 #include "SlogConfig.hpp"
 #include "PlatformUtilities.hpp"
+#include "slog/Timestamp.hpp"
 
 namespace slog
 {
@@ -41,68 +42,6 @@ void format_severity(char* severity_str, int severity)
     strncpy(severity_str, severity_const_string, 5);
 }
 
-/*
- * Low-level int to string function. Print value with the given number of digits,
- * including leading zeros.
- *
- * cursor -- a char buffer with at least digits+1 space
- * value -- integer to format
- * scale -- defined so that 0 <= value/scale <= 9
- * digits -- log10(scale) + 1
- */
-static char* put_int(char* cursor, long value, long scale, int digits)
-{
-    for (int i = 0; i < digits; i++) {
-        long digit = value / scale;
-        value -= digit * scale;
-        scale /= 10;
-        *cursor++ = static_cast<char>(digit) + '0';
-    }
-    *cursor = 0;
-    return cursor;
-}
-
-void format_time(char* time_str, uint64_t nanoseconds, int seconds_precision, TimeFormatMode format)
-{
-    constexpr uint64_t NANOS_PER_SEC = 1000000000ULL;
-    if (seconds_precision < 0) {
-        seconds_precision = 0;
-    } else if (seconds_precision > 9) {
-        seconds_precision = 9;
-    }
-
-    time_t seconds_since_epoch = nanoseconds / NANOS_PER_SEC;
-    uint64_t nano_remainder = nanoseconds - seconds_since_epoch * NANOS_PER_SEC;
-
-    tm time_count;
-    ::slog::zulu_time_r(&time_count, &seconds_since_epoch);
-    char* cursor = time_str;
-
-    cursor = put_int(cursor, 1900 + time_count.tm_year, 1000, 4);
-    if (format != COMPACT) {
-        *cursor++ = '-';
-    }
-    cursor = put_int(cursor, 1 + time_count.tm_mon, 10, 2);
-    if (format != COMPACT) {
-        *cursor++ = '-';
-    }
-    cursor = put_int(cursor, time_count.tm_mday, 10, 2);
-    *cursor++ = (format == FULL_SPACE ? ' ' : 'T');
-    cursor = put_int(cursor, time_count.tm_hour, 10, 2);
-    if (format != COMPACT) {
-        *cursor++ = ':';
-    }
-    cursor = put_int(cursor, time_count.tm_min, 10, 2);
-    if (format != COMPACT) {
-        *cursor++ = ':';
-    }
-    cursor = put_int(cursor, time_count.tm_sec, 10, 2);
-    if (seconds_precision > 0) {
-        *cursor++ = '.';
-        put_int(cursor, nano_remainder, 100000000, seconds_precision);
-    }
-}
-
 void format_location(char* location_str, char const* file_name, int line_number)
 {
     snprintf(location_str, 63, "%s@%d", basename(file_name), line_number);
@@ -134,7 +73,7 @@ long write_message_to_file(FILE* sink, LogRecord const& rec)
 long default_format(FILE* sink, LogRecord const& rec)
 {
     char time_str[32];
-    format_time(time_str, rec.meta().time(), 3, FULL_T);
+    rec.meta().time().format_time(time_str, 3, Timestamp::FULL_T);    
     long write_count = 0;
     fputc('[', sink);
     write_count++;

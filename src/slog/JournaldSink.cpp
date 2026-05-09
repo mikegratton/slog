@@ -41,7 +41,7 @@ void JournaldSink::write_to_journal(LogRecord const& rec) const
 
 void JournaldSink::record(LogRecord const& rec) 
 {
-    format_time(misotime, rec.meta().time());
+    rec.meta().time().format_time(misotime);    
     if (echo) {
         formatter(stdout, rec);
         fputc('\n', stdout);

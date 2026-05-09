@@ -17,6 +17,7 @@ set(SLOG_SOURCE
     SlogError.cpp
     SyslogSink.cpp
     ThresholdMap.cpp
+    Timestamp.cpp
 )
 
 set(SLOG_PUBLIC_HEADERS
@@ -31,6 +32,7 @@ set(SLOG_PUBLIC_HEADERS
     LogSink.hpp
     RecordInserter.hpp
     ThresholdMap.hpp
+    Timestamp.hpp
 )
 
 

@@ -56,25 +56,6 @@ void format_severity(char* severity_str, int severity);
  */
 char const* severity_string(int severity);
 
-enum TimeFormatMode {
-    FULL_SPACE, // YYYY-MM-DD hh:mm:ss.fZ
-    COMPACT,    // YYYYMMDDThhmmss.fZ
-    FULL_T      // YYYY-MM-DDThh:mm:ss.fZ
-};
-
-/**
- * @brief Write an ISO 8601 timestamp to a string
- *
- * Format the time in ISO 8601/RFC 3339 format YYYY-MM-DD hh:mm:ss.fZ
- * where
- *  (1) The timezone is always UTC
- *  (2) The number of fractional second digits f is controlled by
- *      seconds_decimal_precision
- * @note The string should be at least 21 characters long for zero fractional seconds.
- * For the default form, 25 characters are required.
- */
-void format_time(char* time_str, uint64_t time, int seconds_decimal_precision = 3, TimeFormatMode format = FULL_SPACE);
-
 /**
  * @brief Makes a code location string.
  *
