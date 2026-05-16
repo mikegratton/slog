@@ -35,9 +35,8 @@
  * std::format-style macros. These take format strings and variable argument
  * lists like
  * ```
- * Flog(INFO, "The answer is {}", 42);
- * ```
- * TODO Make a Flog object so these read Flog(severity, tag)("Hello {}", "world")
+ * Flog(INFO)("The answer is {}", 42);
+ * ``` 
  */
 #define SLOG_Flog(severity) SLOG_FlogBase(slog::severity, "", slog::DEFAULT_CHANNEL)
 #define SLOG_Flogt(severity, tag) SLOG_FlogBase(slog::severity, (tag), slog::DEFAULT_CHANNEL)
@@ -73,6 +72,20 @@
 #define SLOG_Blogst(severity, tag) SLOG_BlogBase(slog::severity, (tag), slog::DEFAULT_CHANNEL)
 #define SLOG_Blosgstc(severity, tag, channel) SLOG_BlogBase(slog::severity, (tag), (channel))
 #define Blog(...) SLOG_GET_MACRO(__VA_ARGS__, SLOG_Blosgstc, SLOG_Blogst, SLOG_Blogs)(__VA_ARGS__)
+#endif
+
+#if SLOG_PRINTF_LOG
+/**
+ * printf-style macros, e.g.
+ * ```
+ * Plog(INFO, "The answer is %d", 42);
+ * ```
+ * @warning These macros truncate log messages larger than a single record.  If std::format
+ * support is available, prefer the Flog() macro.
+ */
+#define Plog(severity, ...) SLOG_FlogBase((slog::severity), "", slog::DEFAULT_CHANNEL, __VA_ARGS__)
+#define Plogt(severity, tag, ...) SLOG_FlogBase((slog::severity), (tag), slog::DEFAULT_CHANNEL, __VA_ARGS__)
+#define Plogtc(severity, tag, channel, ...) SLOG_FlogBase((slog::severity), (tag), (channel), __VA_ARGS__)
 #endif
 
 namespace slog
