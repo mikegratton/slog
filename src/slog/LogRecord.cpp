@@ -9,6 +9,7 @@ namespace slog
 {
 
 constexpr int NO_LINE = -1;
+constexpr int NO_CHANNEL = -1;
 
 LogRecordMetadata::LogRecordMetadata() { reset(); }
 
@@ -19,10 +20,11 @@ void LogRecordMetadata::reset()
     m_line = NO_LINE;
     m_severity = std::numeric_limits<int>::max();    
     memset(m_tag, 0, TAG_SIZE);
+    m_channelId = NO_CHANNEL;
 }
 
 void LogRecordMetadata::capture(char const* filename_, char const* function_, int line_, int severity_,
-                                char const* tag_)
+                                char const* tag_, int channel_)
 {    
     m_filename = filename_;
     m_function = function_;
@@ -38,20 +40,22 @@ void LogRecordMetadata::capture(char const* filename_, char const* function_, in
     if (tag_) {
         strncpy(m_tag, tag_, TAG_SIZE - 1);
     }
+    m_channelId = channel_;
 }
 
 void LogRecordMetadata::set_data(char const* filename, char const* function, int line, int severity, char const* tag,
-                                 Timestamp time, unsigned long threadh_id)
+                                 Timestamp time, unsigned long thread_id, int channel)
 {
     m_filename = filename;
     m_function = function;
     m_line = line;
     m_severity = severity;
     m_time = time;
-    m_thread_id = threadh_id;
+    m_thread_id = thread_id;    
     if (tag) {
         strncpy(m_tag, tag, TAG_SIZE - 1);
     }
+    m_channelId = channel;
 }
 
 LogRecord::LogRecord()

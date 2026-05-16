@@ -92,7 +92,7 @@ void parse_log_record(TestLogRecord& o_record, char const* recordString)
     time = Timestamp(raw_time);
     recordString += 24;
     assert(recordString[0] == ']');
-    o_record.meta.set_data("", "", 1, severity, tag, time, -1L);
+    o_record.meta.set_data("", "", 1, severity, tag, time, -1L, -1L);
     strncpy(o_record.message, recordString + 2, sizeof(o_record.message));
     o_record.message_byte_count = strlen(o_record.message) - 1; // exclude newline
 }

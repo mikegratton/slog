@@ -11,17 +11,23 @@ std::array<int, 3> extern const HANDLED_SIGNALS;
 /// below if nothing is being handled
 int get_signal_state();
 
-/// Start handling the given signal. If this isn't SLOG_ACTIVE, the log channels
+/// Start handling the given signal. If this isn't SLOG_ACTIVE, the log workers
 /// will flush, and the logging threads will joint.
 void set_signal_state(int signal_id);
 
-/// Channels call this when they join their log threads
-void notify_channel_done();
+/// Workers call this when they join their log threads
+void notify_worker_stopping();
 
-/// Block until all channels have called notify_channel_done(). If get_signal_state()
+/// Workers call this when they start their log threads
+void notify_worker_starting();
+
+/// Reset the started/stopped counts
+void reset_worker_counts();
+
+/// Block until all workers have called notify_worker_done(). If get_signal_state()
 /// has one of HANDLED_SIGNALS, then the we will re-raise the signal with the default
 /// handler in place.
-void block_until_all_channels_done();
+void block_until_all_workers_done();
 
 /// Extra "signal" codes that are special to slog
 enum signal_state : int {

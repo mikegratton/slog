@@ -11,6 +11,7 @@ set(SLOG_SOURCE
     LogRecordPool.cpp
     LogSetup.cpp
     LogSink.cpp
+    LogWorker.cpp
     RecordInserter.cpp
     Signal.cpp
     slog.cpp

@@ -3,7 +3,6 @@
 #include "RecordInserter.hpp"
 #include <cstdarg>
 #include <cassert>
-#include "Locale.hpp"
 
 namespace slog
 {
@@ -20,7 +19,7 @@ void start_logger(int severity)
 
 void stop_logger()
 {
-    Logger::stop_all_channels();
+    Logger::stop();
 }
 
 bool will_log(int severity, char const* tag, int channel)
@@ -33,14 +32,17 @@ long free_record_count(int channel)
     return Logger::get_channel(channel).pool_free_count();
 }
 
-void push_to_sink(LogRecord* node, int channel) { Logger::get_channel(channel).push(node); }
+void push_to_sink(LogRecord* node) 
+{ 
+    Logger::push_to_sink(node);
+}
 
 LogRecord* get_fresh_record(int channel, char const* file, char const* function, int line, int severity,
                             char const* tag)
 {
     LogRecord* node = Logger::get_channel(channel).get_fresh_record();
     if (node) {
-        node->meta().capture(file, function, line, severity, tag);
+        node->meta().capture(file, function, line, severity, tag, channel);
     }
     return node;
 }

@@ -8,12 +8,11 @@
 namespace slog
 {
 
-RecordInserter::RecordInserter(LogRecord* i_node, int i_channel)
+RecordInserter::RecordInserter(LogRecord* i_node)
     : head_node(i_node),
       current_node(nullptr),
       cursor(nullptr),
-      buffer_end(nullptr),
-      channel(i_channel)
+      buffer_end(nullptr)
 {
     set_node(i_node);
 }
@@ -22,7 +21,7 @@ RecordInserter::~RecordInserter()
 {
     if (head_node) {
         set_byte_count();
-        slog::push_to_sink(head_node, channel);
+        slog::push_to_sink(head_node);
     }
 }
 
@@ -36,15 +35,13 @@ RecordInserter& RecordInserter::operator=(RecordInserter&& other) noexcept
     head_node = other.head_node;
     current_node = other.current_node;
     cursor = other.cursor;
-    buffer_end = other.buffer_end;
-    channel = other.channel;
+    buffer_end = other.buffer_end;    
 
     // Guard against double submission
     other.head_node = nullptr;
     other.current_node = nullptr;
     other.cursor = nullptr;
     other.buffer_end = nullptr;
-    other.channel = DEFAULT_CHANNEL;
     return *this;
 }
 
@@ -52,7 +49,7 @@ long RecordInserter::write(void const* bytes, long byte_count)
 {
     long count = write_some(reinterpret_cast<char const*>(bytes), byte_count);
     while (count < byte_count) {
-        LogRecord* extra = get_fresh_record(channel, nullptr, nullptr, -1, ~0, nullptr);
+        LogRecord* extra = get_fresh_record(head_node->meta().channel(), nullptr, nullptr, -1, ~0, nullptr);
         if (nullptr == extra) {
             return count;
         }
