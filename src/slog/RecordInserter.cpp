@@ -1,5 +1,5 @@
 #include "RecordInserter.hpp"
-#include "config.hpp"
+#include "SlogConfig.hpp"
 #include "LogRecord.hpp"
 #include "slogDetail.hpp"
 #include <cstring>

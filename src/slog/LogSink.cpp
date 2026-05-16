@@ -6,7 +6,7 @@
 #include <ctime>
 
 #include "ConsoleSink.hpp"
-#include "config.hpp"
+#include "SlogConfig.hpp"
 #include "PlatformUtilities.hpp"
 
 namespace slog

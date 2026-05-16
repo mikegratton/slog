@@ -1,5 +1,5 @@
 #pragma once
-#include "config.hpp"
+#include "SlogConfig.hpp"
 #include "slogDetail.hpp"
 
 #if SLOG_STREAM_LOG

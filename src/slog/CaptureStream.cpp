@@ -1,4 +1,4 @@
-#include "config.hpp"
+#include "SlogConfig.hpp"
 #include "slog/Locale.hpp"
 
 #if SLOG_STREAM_LOG

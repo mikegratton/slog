@@ -1,5 +1,5 @@
 #include "ThresholdMap.hpp"
-#include "config.hpp"
+#include "SlogConfig.hpp"
 #include <cstdlib>
 #include <cstring>
 
