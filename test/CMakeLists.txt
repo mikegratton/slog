@@ -7,9 +7,11 @@ file(GLOB source CONFIGURE_DEPENDS *.cpp)
 set(source
     Basics.cpp
     BinaryLogTest.cpp
+    ChannelTest.cpp
     FileLogTest.cpp
     FlogTest.cpp
     HandlerTest.cpp
+    InMemorySink.cpp
     JumboTest.cpp
     main.cpp
     PlatformUtilitiesTest.cpp
