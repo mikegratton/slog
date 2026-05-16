@@ -1,7 +1,6 @@
 #include "LogRecord.hpp"
 #include "SlogConfig.hpp"
 
-#include <chrono>
 #include <cstring>
 #include <limits>
 #include <thread>
@@ -33,7 +32,7 @@ void LogRecordMetadata::capture(char const* filename_, char const* function_, in
         // Because we might be attaching a record to another record to form a
         // "jumbo" record, sometimes the metadata isn't meaningful. We avoid
         // system calls in these cases.
-        m_time = std::chrono::system_clock::now().time_since_epoch().count();
+        m_time = Timestamp::now();
         m_thread_id = std::hash<std::thread::id>{}(std::this_thread::get_id());
     }
     if (tag_) {
@@ -42,7 +41,7 @@ void LogRecordMetadata::capture(char const* filename_, char const* function_, in
 }
 
 void LogRecordMetadata::set_data(char const* filename, char const* function, int line, int severity, char const* tag,
-                                 uint64_t time, unsigned long threadh_id)
+                                 Timestamp time, unsigned long threadh_id)
 {
     m_filename = filename;
     m_function = function;

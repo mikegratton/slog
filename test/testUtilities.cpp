@@ -73,13 +73,13 @@ void parse_log_record(TestLogRecord& o_record, char const* recordString)
 {
     int severity = 0;
     char tag[TAG_SIZE]{};
-    uint64_t time = 0;
+    Timestamp time(0);
 
     assert(recordString[0] == '[');
     recordString++;
     severity = severity_from_string(recordString);
     recordString += 5;
-    if (recordString[23] != ']') { // There's a tag
+    if (recordString[24] != ']') { // There's a tag
         char* cursor = tag;
         while (*recordString != ' ' && *recordString) {
             *cursor++ = *recordString++;
@@ -87,8 +87,10 @@ void parse_log_record(TestLogRecord& o_record, char const* recordString)
         *cursor++ = '\0';
         recordString++;
     }
-    parse_time(time, recordString);
-    recordString += 23;
+    uint64_t raw_time;
+    parse_time(raw_time, recordString);
+    time = Timestamp(raw_time);
+    recordString += 24;
     assert(recordString[0] == ']');
     o_record.meta.set_data("", "", 1, severity, tag, time, -1L);
     strncpy(o_record.message, recordString + 2, sizeof(o_record.message));

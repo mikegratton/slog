@@ -1,5 +1,6 @@
 #pragma once
 #include "SlogConfig.hpp"
+#include "Timestamp.hpp"
 #include <cstdint>
 
 namespace slog
@@ -32,8 +33,11 @@ class LogRecordMetadata {
     /// Inspect the function where the record was recorded
     char const* function() const { return m_function; }
 
-    /// Get the nanoseconds since unix epoch when the record was recorded
-    uint64_t time() const { return m_time; }
+    /// Get the time when the record was recorded
+    Timestamp timestamp() const { return m_time; }
+
+    /// Get the time when the record was recorded
+    uint64_t time() const { return m_time.nanoseconds_since_epoch(); }
 
     /// Get a thread id for the thread where the record was recorded.
     unsigned long thread_id() const { return m_thread_id; }
@@ -45,7 +49,7 @@ class LogRecordMetadata {
     int severity() const { return m_severity; }
 
     /// Set all fields in the metdata
-    void set_data(char const* filename, char const* function, int line, int severity, char const* tag, uint64_t time,
+    void set_data(char const* filename, char const* function, int line, int severity, char const* tag, Timestamp time,
                   unsigned long threadh_id);
 
   private:
@@ -58,8 +62,8 @@ class LogRecordMetadata {
     //! name of the function where this message was recorded
     char const* m_function;
 
-    //! ns since Unix epoch
-    uint64_t m_time;
+    //! Time the record was recorded
+    Timestamp m_time;
 
     //! unique ID of the thread this message was recorded on
     unsigned long m_thread_id;
