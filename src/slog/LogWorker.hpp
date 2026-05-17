@@ -40,17 +40,22 @@ class LogWorker
 
     /**
      * Number of channels. Only thread safe in running state.
-     * @note This is an O(N) operation
+     * @note This is an O(N) operation.
      */
     int channel_count() const;
 
     /**
-     * Start the worker. If already started, this has no effect
+     * Start the worker. If already started, this has no effect. This does not
+     * change the signal state to SLOG_ACTIVE. If the state isn't SLOG_ACTIVE,
+     * the work loop will run once and the std::thread entrance function will 
+     * exit, leaving the work thread in an immediately joinable state.
      */
     void start();
 
     /**
-     * Drain any queued messages.  Joint the work thread. Delete all channels.
+     * Drain any queued messages.  Join the work thread. Delete all channels.
+     * @note Because all work loops are looking at the same atomic stop condition,
+     * this will stop *all* workers.
      */
     void stop();
 

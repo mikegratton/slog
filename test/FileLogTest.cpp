@@ -8,7 +8,6 @@
 #include <cstdio>
 #include <cstring>
 #include <memory>
-#include <iostream>
 #include "testUtilities.hpp"
 
 TEST_CASE("FileLog.basic")
@@ -16,7 +15,7 @@ TEST_CASE("FileLog.basic")
     slog::LogConfig config;
     auto sink = std::make_shared<slog::FileSink>();
     sink->set_echo(false);        
-std::cout << "Test file name: " << sink->get_file_name() << "\n";
+
     CHECK( strncmp(sink->get_file_name(), "./slogTest_", 11) == 0);
     CHECK( strncmp(sink->get_file_name() + 31, ".log", 4) == 0);
 
@@ -62,7 +61,7 @@ std::cout << "Test file name: " << sink->get_file_name() << "\n";
     fclose(f);
 
     // Remove the file
-    //std::remove(logname);
+    std::remove(logname);
 }
 
 static uint32_t fancyFurniture(FILE* sink, int sequence, unsigned long time)

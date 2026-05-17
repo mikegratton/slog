@@ -18,13 +18,14 @@ LogWorker::~LogWorker() { stop(); }
 void LogWorker::stop()
 {
     if (!worker.joinable()) {
+        channel_list.clear();
         return;
     }
     if (get_signal_state() == SLOG_ACTIVE) {
         set_signal_state(SLOG_STOPPED);
     }    
     worker.join();    
-    channel_list.clear();    
+    channel_list.clear();
 }
 
 void LogWorker::add_channel(int channel_id, std::shared_ptr<LogChannel> channel)
