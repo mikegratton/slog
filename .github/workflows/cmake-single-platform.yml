@@ -22,7 +22,7 @@ jobs:
         sudo apt-get install libsystemd-dev
 
     - name: Configure CMake      
-      run: cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DSLOG_BUILD_TEST=ON -DSLOG_FORMAT_LOG=ON -DSLOG_BINARY_LOG=ON -DSLOG_JOURNALD=ON
+      run: cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DSLOG_BUILD_TEST=ON -DSLOG_FORMAT_LOG=ON -DSLOG_BINARY_LOG=ON -DSLOG_PRINTF_LOG=ON -DSLOG_JOURNALD=ON
 
     - name: Build
       run: cmake --build ${{github.workspace}}/build --config ${{env.BUILD_TYPE}}
