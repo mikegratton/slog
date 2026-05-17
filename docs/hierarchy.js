@@ -3,7 +3,6 @@ var hierarchy =
     [ "slog::FlatThresholdMap", "classslog_1_1FlatThresholdMap.html", null ],
     [ "slog::LogChannel", "classslog_1_1LogChannel.html", null ],
     [ "slog::LogConfig", "classslog_1_1LogConfig.html", null ],
-    [ "slog::LogChannel::LogQueue", "classslog_1_1LogChannel_1_1LogQueue.html", null ],
     [ "slog::LogRecord", "classslog_1_1LogRecord.html", null ],
     [ "slog::LogRecordMetadata", "classslog_1_1LogRecordMetadata.html", null ],
     [ "slog::LogRecordPool", "classslog_1_1LogRecordPool.html", null ],
@@ -16,8 +15,10 @@ var hierarchy =
       [ "slog::NullSink", "classslog_1_1NullSink.html", null ],
       [ "slog::SyslogSink", "classslog_1_1SyslogSink.html", null ]
     ] ],
+    [ "slog::LogWorker", "classslog_1_1LogWorker.html", null ],
     [ "slog::PoolMemory", "classslog_1_1PoolMemory.html", null ],
     [ "slog::RecordInserter", "classslog_1_1RecordInserter.html", null ],
     [ "slog::RecordInserterIterator", "structslog_1_1RecordInserterIterator.html", null ],
-    [ "slog::FlatThresholdMap::Threshold", "structslog_1_1FlatThresholdMap_1_1Threshold.html", null ]
+    [ "slog::FlatThresholdMap::Threshold", "structslog_1_1FlatThresholdMap_1_1Threshold.html", null ],
+    [ "slog::Timestamp", "classslog_1_1Timestamp.html", null ]
 ];

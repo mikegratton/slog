@@ -27,7 +27,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">Slog<span id="projectnumber">&#160;1.0</span>
+   <div id="projectname">Slog<span id="projectnumber">&#160;2.1</span>
    </div>
    <div id="projectbrief">Stream-oriented logging</div>
   </td>
@@ -130,42 +130,34 @@ $(document).ready(function(){initNavTree('LogSink_8hpp_source.html',''); initRes
 <div class="line"><a id="l00035" name="l00035"></a><span class="lineno">   35</span>};</div>
 </div>
 <div class="line"><a id="l00036" name="l00036"></a><span class="lineno">   36</span> </div>
-<div class="line"><a id="l00042" name="l00042"></a><span class="lineno">   42</span><span class="keyword">using </span>Formatter = std::function&lt;uint32_t(FILE* sink, LogRecord <span class="keyword">const</span>&amp; node)&gt;;</div>
+<div class="line"><a id="l00042" name="l00042"></a><span class="lineno">   42</span><span class="keyword">using </span>Formatter = std::function&lt;long(FILE* sink, LogRecord <span class="keyword">const</span>&amp; node)&gt;;</div>
 <div class="line"><a id="l00043" name="l00043"></a><span class="lineno">   43</span> </div>
-<div class="line"><a id="l00047" name="l00047"></a><span class="lineno">   47</span><span class="keyword">using </span>LogFileFurniture = std::function&lt;int(FILE* sink, <span class="keywordtype">int</span> sequence, uint64_t time)&gt;;</div>
+<div class="line"><a id="l00047" name="l00047"></a><span class="lineno">   47</span><span class="keyword">using </span>LogFileFurniture = std::function&lt;long(FILE* sink, <span class="keywordtype">int</span> sequence, uint64_t time)&gt;;</div>
 <div class="line"><a id="l00048" name="l00048"></a><span class="lineno">   48</span> </div>
 <div class="line"><a id="l00052" name="l00052"></a><span class="lineno">   52</span><span class="keywordtype">void</span> format_severity(<span class="keywordtype">char</span>* severity_str, <span class="keywordtype">int</span> severity);</div>
 <div class="line"><a id="l00053" name="l00053"></a><span class="lineno">   53</span> </div>
 <div class="line"><a id="l00057" name="l00057"></a><span class="lineno">   57</span><span class="keywordtype">char</span> <span class="keyword">const</span>* severity_string(<span class="keywordtype">int</span> severity);</div>
 <div class="line"><a id="l00058" name="l00058"></a><span class="lineno">   58</span> </div>
-<div class="line"><a id="l00059" name="l00059"></a><span class="lineno">   59</span><span class="keyword">enum</span> TimeFormatMode {</div>
-<div class="line"><a id="l00060" name="l00060"></a><span class="lineno">   60</span>    FULL_SPACE, <span class="comment">// YYYY-MM-DD hh:mm:ss.fZ</span></div>
-<div class="line"><a id="l00061" name="l00061"></a><span class="lineno">   61</span>    COMPACT,    <span class="comment">// YYYYMMDDThhmmss.fZ</span></div>
-<div class="line"><a id="l00062" name="l00062"></a><span class="lineno">   62</span>    FULL_T      <span class="comment">// YYYY-MM-DDThh:mm:ss.fZ</span></div>
-<div class="line"><a id="l00063" name="l00063"></a><span class="lineno">   63</span>};</div>
-<div class="line"><a id="l00064" name="l00064"></a><span class="lineno">   64</span> </div>
-<div class="line"><a id="l00076" name="l00076"></a><span class="lineno">   76</span><span class="keywordtype">void</span> format_time(<span class="keywordtype">char</span>* time_str, uint64_t time, <span class="keywordtype">int</span> seconds_decimal_precision = 3, TimeFormatMode format = FULL_SPACE);</div>
-<div class="line"><a id="l00077" name="l00077"></a><span class="lineno">   77</span> </div>
-<div class="line"><a id="l00086" name="l00086"></a><span class="lineno">   86</span><span class="keywordtype">void</span> format_location(<span class="keywordtype">char</span>* location_str, <span class="keywordtype">char</span> <span class="keyword">const</span>* file_name, <span class="keywordtype">int</span> line_number);</div>
-<div class="line"><a id="l00087" name="l00087"></a><span class="lineno">   87</span> </div>
-<div class="line"><a id="l00092" name="l00092"></a><span class="lineno">   92</span>uint32_t total_record_size(LogRecord <span class="keyword">const</span>&amp; node);</div>
-<div class="line"><a id="l00093" name="l00093"></a><span class="lineno">   93</span> </div>
-<div class="line"><a id="l00102" name="l00102"></a><span class="lineno">  102</span>uint32_t write_message_to_file(FILE* sink, LogRecord <span class="keyword">const</span>&amp; rec);</div>
-<div class="line"><a id="l00103" name="l00103"></a><span class="lineno">  103</span> </div>
-<div class="line"><a id="l00110" name="l00110"></a><span class="lineno">  110</span>uint32_t default_format(FILE* sink, LogRecord <span class="keyword">const</span>&amp; node);</div>
-<div class="line"><a id="l00111" name="l00111"></a><span class="lineno">  111</span> </div>
-<div class="line"><a id="l00115" name="l00115"></a><span class="lineno">  115</span>uint32_t no_meta_format(FILE* sink, LogRecord <span class="keyword">const</span>&amp; node);</div>
-<div class="line"><a id="l00116" name="l00116"></a><span class="lineno">  116</span> </div>
-<div class="line"><a id="l00127" name="l00127"></a><span class="lineno">  127</span>uint32_t default_binary_format(FILE* sink, LogRecord <span class="keyword">const</span>&amp; node);</div>
-<div class="line"><a id="l00128" name="l00128"></a><span class="lineno">  128</span> </div>
-<div class="line"><a id="l00142" name="l00142"></a><span class="lineno">  142</span>uint32_t long_binary_format(FILE* sink, LogRecord <span class="keyword">const</span>&amp; node);</div>
-<div class="line"><a id="l00143" name="l00143"></a><span class="lineno">  143</span> </div>
-<div class="line"><a id="l00149" name="l00149"></a><span class="lineno">  149</span>uint32_t default_binary_header_furniture(FILE* sink, <span class="keywordtype">int</span> sequence, uint64_t time);</div>
-<div class="line"><a id="l00150" name="l00150"></a><span class="lineno">  150</span> </div>
-<div class="line"><a id="l00154" name="l00154"></a><span class="lineno">  154</span><span class="keyword">inline</span> uint32_t no_op_furniture(FILE*, <span class="keywordtype">int</span>, uint64_t) { <span class="keywordflow">return</span> 0; }</div>
-<div class="line"><a id="l00155" name="l00155"></a><span class="lineno">  155</span> </div>
-<div class="line"><a id="l00156" name="l00156"></a><span class="lineno">  156</span>} <span class="comment">// namespace slog</span></div>
-<div class="ttc" id="aclassslog_1_1LogRecord_html"><div class="ttname"><a href="classslog_1_1LogRecord.html">slog::LogRecord</a></div><div class="ttdoc">A LogRecord is a message string combined with the associated metadata.</div><div class="ttdef"><b>Definition</b> LogRecord.hpp:80</div></div>
+<div class="line"><a id="l00067" name="l00067"></a><span class="lineno">   67</span><span class="keywordtype">void</span> format_location(<span class="keywordtype">char</span>* location_str, <span class="keywordtype">char</span> <span class="keyword">const</span>* file_name, <span class="keywordtype">int</span> line_number);</div>
+<div class="line"><a id="l00068" name="l00068"></a><span class="lineno">   68</span> </div>
+<div class="line"><a id="l00073" name="l00073"></a><span class="lineno">   73</span>uint32_t total_record_size(LogRecord <span class="keyword">const</span>&amp; node);</div>
+<div class="line"><a id="l00074" name="l00074"></a><span class="lineno">   74</span> </div>
+<div class="line"><a id="l00083" name="l00083"></a><span class="lineno">   83</span><span class="keywordtype">long</span> write_message_to_file(FILE* sink, LogRecord <span class="keyword">const</span>&amp; rec);</div>
+<div class="line"><a id="l00084" name="l00084"></a><span class="lineno">   84</span> </div>
+<div class="line"><a id="l00091" name="l00091"></a><span class="lineno">   91</span><span class="keywordtype">long</span> default_format(FILE* sink, LogRecord <span class="keyword">const</span>&amp; node);</div>
+<div class="line"><a id="l00092" name="l00092"></a><span class="lineno">   92</span> </div>
+<div class="line"><a id="l00096" name="l00096"></a><span class="lineno">   96</span><span class="keywordtype">long</span> no_meta_format(FILE* sink, LogRecord <span class="keyword">const</span>&amp; node);</div>
+<div class="line"><a id="l00097" name="l00097"></a><span class="lineno">   97</span> </div>
+<div class="line"><a id="l00108" name="l00108"></a><span class="lineno">  108</span><span class="keywordtype">long</span> default_binary_format(FILE* sink, LogRecord <span class="keyword">const</span>&amp; node);</div>
+<div class="line"><a id="l00109" name="l00109"></a><span class="lineno">  109</span> </div>
+<div class="line"><a id="l00123" name="l00123"></a><span class="lineno">  123</span><span class="keywordtype">long</span> long_binary_format(FILE* sink, LogRecord <span class="keyword">const</span>&amp; node);</div>
+<div class="line"><a id="l00124" name="l00124"></a><span class="lineno">  124</span> </div>
+<div class="line"><a id="l00130" name="l00130"></a><span class="lineno">  130</span><span class="keywordtype">long</span> default_binary_header_furniture(FILE* sink, <span class="keywordtype">int</span> sequence, uint64_t time);</div>
+<div class="line"><a id="l00131" name="l00131"></a><span class="lineno">  131</span> </div>
+<div class="line"><a id="l00135" name="l00135"></a><span class="lineno">  135</span><span class="keyword">inline</span> <span class="keywordtype">long</span> no_op_furniture(FILE*, <span class="keywordtype">int</span>, uint64_t) { <span class="keywordflow">return</span> 0; }</div>
+<div class="line"><a id="l00136" name="l00136"></a><span class="lineno">  136</span> </div>
+<div class="line"><a id="l00137" name="l00137"></a><span class="lineno">  137</span>} <span class="comment">// namespace slog</span></div>
+<div class="ttc" id="aclassslog_1_1LogRecord_html"><div class="ttname"><a href="classslog_1_1LogRecord.html">slog::LogRecord</a></div><div class="ttdoc">A LogRecord is a message string combined with the associated metadata.</div><div class="ttdef"><b>Definition</b> LogRecord.hpp:89</div></div>
 <div class="ttc" id="aclassslog_1_1LogSink_html"><div class="ttname"><a href="classslog_1_1LogSink.html">slog::LogSink</a></div><div class="ttdoc">Base class for all log sinks.</div><div class="ttdef"><b>Definition</b> LogSink.hpp:17</div></div>
 <div class="ttc" id="aclassslog_1_1LogSink_html_a1801fe16cd221cf4f79bf204a41e40b6"><div class="ttname"><a href="classslog_1_1LogSink.html#a1801fe16cd221cf4f79bf204a41e40b6">slog::LogSink::record</a></div><div class="ttdeci">virtual void record(LogRecord const &amp;node)=0</div><div class="ttdoc">Save a record to a device.</div></div>
 <div class="ttc" id="aclassslog_1_1LogSink_html_a2281fc9b3d810139c1d5f18e8a642581"><div class="ttname"><a href="classslog_1_1LogSink.html#a2281fc9b3d810139c1d5f18e8a642581">slog::LogSink::finalize</a></div><div class="ttdeci">virtual void finalize()</div><div class="ttdoc">Notification that logging is done (i.e. close up any files)</div><div class="ttdef"><b>Definition</b> LogSink.hpp:25</div></div>

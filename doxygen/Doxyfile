@@ -8,7 +8,7 @@
 DOXYFILE_ENCODING      = UTF-8
 PROJECT_NAME           = "Slog"
 # TODO have cmake do this
-PROJECT_NUMBER         = 1.0
+PROJECT_NUMBER         = 2.1
 PROJECT_BRIEF          = "Stream-oriented logging"
 
 # With the PROJECT_LOGO tag one can specify a logo or an icon that is included

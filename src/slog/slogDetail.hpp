@@ -29,8 +29,7 @@ LogRecord* get_fresh_record(int channel, char const* file, char const* function,
 #define SLOG_BlogBase(severity, tag, channel)                                                                          \
     if (!(SLOG_LOGGING_ENABLED && slog::will_log((severity), (tag), (channel)))) {                                     \
     } else                                                                                                             \
-        slog::CaptureBinary(slog::get_fresh_record((channel), __FILE__, __FUNCTION__, __LINE__, (severity), (tag)),    \
-                            (channel))
+        slog::CaptureBinary(slog::get_fresh_record((channel), __FILE__, __FUNCTION__, __LINE__, (severity), (tag)))
 
 namespace slog
 {

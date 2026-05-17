@@ -27,7 +27,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">Slog<span id="projectnumber">&#160;1.0</span>
+   <div id="projectname">Slog<span id="projectnumber">&#160;2.1</span>
    </div>
    <div id="projectbrief">Stream-oriented logging</div>
   </td>
@@ -121,6 +121,14 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>set_sink</b> (std::sh
 <tr class="memitem:a866ec8c0e452a0830a8fc39e72447e14" id="r_a866ec8c0e452a0830a8fc39e72447e14"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classslog_1_1LogConfig.html#a866ec8c0e452a0830a8fc39e72447e14">set_pool</a> (std::shared_ptr&lt; <a class="el" href="classslog_1_1LogRecordPool.html">LogRecordPool</a> &gt; new_pool)</td></tr>
 <tr class="memdesc:a866ec8c0e452a0830a8fc39e72447e14"><td class="mdescLeft">&#160;</td><td class="mdescRight">Use a special record pool.  <br /></td></tr>
 <tr class="separator:a866ec8c0e452a0830a8fc39e72447e14"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:adc1944f134e8fbc6bdedfdfba2fdb274" id="r_adc1944f134e8fbc6bdedfdfba2fdb274"><td class="memItemLeft" align="right" valign="top"><a id="adc1944f134e8fbc6bdedfdfba2fdb274" name="adc1944f134e8fbc6bdedfdfba2fdb274"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><b>set_worker_thread_id</b> (int id)</td></tr>
+<tr class="memdesc:adc1944f134e8fbc6bdedfdfba2fdb274"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set which thread this channel should operate on. Id values don't have any intrinsic meaning. If they match another <a class="el" href="classslog_1_1LogConfig.html">LogConfig</a>, those channels will be serviced by the same work thread. <br /></td></tr>
+<tr class="separator:adc1944f134e8fbc6bdedfdfba2fdb274"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:abcea9348ee29c39c70b9492bc48555f7" id="r_abcea9348ee29c39c70b9492bc48555f7"><td class="memItemLeft" align="right" valign="top"><a id="abcea9348ee29c39c70b9492bc48555f7" name="abcea9348ee29c39c70b9492bc48555f7"></a>
+int&#160;</td><td class="memItemRight" valign="bottom"><b>get_worker_thread_id</b> () const</td></tr>
+<tr class="memdesc:abcea9348ee29c39c70b9492bc48555f7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the thread id for this channel. <br /></td></tr>
+<tr class="separator:abcea9348ee29c39c70b9492bc48555f7"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a6a97ea51230c6b6a8d94d3047ac2a872" id="r_a6a97ea51230c6b6a8d94d3047ac2a872"><td class="memItemLeft" align="right" valign="top"><a id="a6a97ea51230c6b6a8d94d3047ac2a872" name="a6a97ea51230c6b6a8d94d3047ac2a872"></a>
 std::shared_ptr&lt; <a class="el" href="classslog_1_1LogSink.html">LogSink</a> &gt; const &amp;&#160;</td><td class="memItemRight" valign="bottom"><b>get_sink</b> ()</td></tr>
 <tr class="memdesc:a6a97ea51230c6b6a8d94d3047ac2a872"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the current sink. <br /></td></tr>

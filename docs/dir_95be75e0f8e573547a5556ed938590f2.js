@@ -11,6 +11,7 @@ var dir_95be75e0f8e573547a5556ed938590f2 =
     [ "LogRecordPool.hpp", "LogRecordPool_8hpp_source.html", null ],
     [ "LogSetup.hpp", "LogSetup_8hpp_source.html", null ],
     [ "LogSink.hpp", "LogSink_8hpp_source.html", null ],
+    [ "LogWorker.hpp", "LogWorker_8hpp_source.html", null ],
     [ "PlatformUtilities.hpp", "PlatformUtilities_8hpp_source.html", null ],
     [ "RecordInserter.hpp", "RecordInserter_8hpp_source.html", null ],
     [ "Signal.hpp", "Signal_8hpp_source.html", null ],
@@ -18,5 +19,6 @@ var dir_95be75e0f8e573547a5556ed938590f2 =
     [ "slogDetail.hpp", "slogDetail_8hpp_source.html", null ],
     [ "SlogError.hpp", "SlogError_8hpp_source.html", null ],
     [ "SyslogSink.hpp", "SyslogSink_8hpp_source.html", null ],
-    [ "ThresholdMap.hpp", "ThresholdMap_8hpp_source.html", null ]
+    [ "ThresholdMap.hpp", "ThresholdMap_8hpp_source.html", null ],
+    [ "Timestamp.hpp", "Timestamp_8hpp_source.html", null ]
 ];

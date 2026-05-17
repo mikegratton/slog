@@ -2,7 +2,7 @@ var classslog_1_1FileSink =
 [
     [ "finalize", "classslog_1_1FileSink.html#a74a95c18b1d9f82205dc1ce9100c3020", null ],
     [ "get_file_name", "classslog_1_1FileSink.html#ae1ad5c339e6d1a7a542fb23b43021cd4", null ],
-    [ "get_start_timestamp", "classslog_1_1FileSink.html#ac6fa8d26f63e4de28821680ee61de3bd", null ],
+    [ "get_start_timestamp", "classslog_1_1FileSink.html#a5a9a54281d27887d04c22d0750b598a7", null ],
     [ "record", "classslog_1_1FileSink.html#a3b2d7814a8051fcc18ebb7a651e79b91", null ],
     [ "set_echo", "classslog_1_1FileSink.html#af32782d050502f54e464f0d02401bfea", null ],
     [ "set_file", "classslog_1_1FileSink.html#aa67629468c296a9b930360dbec19cfce", null ],

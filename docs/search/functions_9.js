@@ -1,5 +1,5 @@
 var searchData=
 [
-  ['pool_5ffree_5fcount_0',['pool_free_count',['../classslog_1_1LogChannel.html#aa83fffe31c0efd5d2898af708f7d5a99',1,'slog::LogChannel']]],
-  ['push_1',['push',['../classslog_1_1LogChannel.html#ac10d70cbc593b6a8457d4cffb9749660',1,'slog::LogChannel']]]
+  ['operator_3d_0',['operator=',['../structslog_1_1RecordInserterIterator.html#a55082a7c83831e0df3dde26ae6ac3832',1,'slog::RecordInserterIterator']]],
+  ['operator_5b_5d_1',['operator[]',['../classslog_1_1FlatThresholdMap.html#afb00866274b0193144363fb3f16014bd',1,'slog::FlatThresholdMap']]]
 ];

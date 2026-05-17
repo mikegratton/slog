@@ -1,6 +1,6 @@
 #include "slog/LogRecordPool.hpp"
 #include "slog/slog.hpp"
-#ifdef SLOG_PRINTF_LOG
+#if SLOG_PRINTF_LOG
 #include "doctest.h"
 #include "slog/slog.hpp"
 #include "InMemorySink.hpp"

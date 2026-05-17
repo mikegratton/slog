@@ -9,9 +9,9 @@ var searchData=
   ['logconfig_6',['logconfig',['../classslog_1_1LogConfig.html',1,'slog::LogConfig'],['../index.html#autotoc_md22',1,'LogConfig'],['../classslog_1_1LogConfig.html#ac14cbcee56e99285e4e70f954e13ee7c',1,'slog::LogConfig::LogConfig()']]],
   ['logging_7',['Asynchronous Logging',['../index.html#autotoc_md3',1,'']]],
   ['logging_20library_20for_20robotic_20systems_8',['Slog: A C++ Logging Library for Robotic Systems',['../index.html',1,'']]],
-  ['logqueue_9',['LogQueue',['../classslog_1_1LogChannel_1_1LogQueue.html',1,'slog::LogChannel']]],
-  ['logrecord_10',['LogRecord',['../classslog_1_1LogRecord.html',1,'slog']]],
-  ['logrecordmetadata_11',['LogRecordMetadata',['../classslog_1_1LogRecordMetadata.html',1,'slog']]],
-  ['logrecordpool_12',['logrecordpool',['../classslog_1_1LogRecordPool.html',1,'slog::LogRecordPool'],['../index.html#autotoc_md23',1,'LogRecordPool']]],
-  ['logsink_13',['LogSink',['../classslog_1_1LogSink.html',1,'slog']]]
+  ['logrecord_9',['LogRecord',['../classslog_1_1LogRecord.html',1,'slog']]],
+  ['logrecordmetadata_10',['LogRecordMetadata',['../classslog_1_1LogRecordMetadata.html',1,'slog']]],
+  ['logrecordpool_11',['logrecordpool',['../classslog_1_1LogRecordPool.html',1,'slog::LogRecordPool'],['../index.html#autotoc_md23',1,'LogRecordPool']]],
+  ['logsink_12',['LogSink',['../classslog_1_1LogSink.html',1,'slog']]],
+  ['logworker_13',['LogWorker',['../classslog_1_1LogWorker.html',1,'slog']]]
 ];
