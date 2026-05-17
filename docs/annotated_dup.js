@@ -12,10 +12,12 @@ var annotated_dup =
       [ "LogRecordMetadata", "classslog_1_1LogRecordMetadata.html", "classslog_1_1LogRecordMetadata" ],
       [ "LogRecordPool", "classslog_1_1LogRecordPool.html", "classslog_1_1LogRecordPool" ],
       [ "LogSink", "classslog_1_1LogSink.html", "classslog_1_1LogSink" ],
+      [ "LogWorker", "classslog_1_1LogWorker.html", "classslog_1_1LogWorker" ],
       [ "NullSink", "classslog_1_1NullSink.html", "classslog_1_1NullSink" ],
       [ "PoolMemory", "classslog_1_1PoolMemory.html", null ],
       [ "RecordInserter", "classslog_1_1RecordInserter.html", "classslog_1_1RecordInserter" ],
       [ "RecordInserterIterator", "structslog_1_1RecordInserterIterator.html", "structslog_1_1RecordInserterIterator" ],
-      [ "SyslogSink", "classslog_1_1SyslogSink.html", "classslog_1_1SyslogSink" ]
+      [ "SyslogSink", "classslog_1_1SyslogSink.html", "classslog_1_1SyslogSink" ],
+      [ "Timestamp", "classslog_1_1Timestamp.html", "classslog_1_1Timestamp" ]
     ] ]
 ];

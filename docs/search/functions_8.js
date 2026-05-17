@@ -1,5 +1,5 @@
 var searchData=
 [
-  ['operator_3d_0',['operator=',['../structslog_1_1RecordInserterIterator.html#a55082a7c83831e0df3dde26ae6ac3832',1,'slog::RecordInserterIterator']]],
-  ['operator_5b_5d_1',['operator[]',['../classslog_1_1FlatThresholdMap.html#afb00866274b0193144363fb3f16014bd',1,'slog::FlatThresholdMap']]]
+  ['nanoseconds_5fsince_5fepoch_0',['nanoseconds_since_epoch',['../classslog_1_1Timestamp.html#adb7e6033880bde3f7a5fa40738e9a493',1,'slog::Timestamp']]],
+  ['now_1',['now',['../classslog_1_1Timestamp.html#ae0b99295be5014a3217acd36c2d236a5',1,'slog::Timestamp']]]
 ];

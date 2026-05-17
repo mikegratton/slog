@@ -27,7 +27,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">Slog<span id="projectnumber">&#160;1.0</span>
+   <div id="projectname">Slog<span id="projectnumber">&#160;2.1</span>
    </div>
    <div id="projectbrief">Stream-oriented logging</div>
   </td>
@@ -109,9 +109,9 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a9b6b2dacf4fe172e0def1b2f426a11c2" id="r_a9b6b2dacf4fe172e0def1b2f426a11c2"><td class="memItemLeft" align="right" valign="top"><a id="a9b6b2dacf4fe172e0def1b2f426a11c2" name="a9b6b2dacf4fe172e0def1b2f426a11c2"></a>
 void&#160;</td><td class="memItemRight" valign="bottom"><b>reset</b> ()</td></tr>
 <tr class="separator:a9b6b2dacf4fe172e0def1b2f426a11c2"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a8df59259d9916e920b0462f2d43a8263" id="r_a8df59259d9916e920b0462f2d43a8263"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classslog_1_1LogRecordMetadata.html#a8df59259d9916e920b0462f2d43a8263">capture</a> (char const *<a class="el" href="classslog_1_1LogRecordMetadata.html#a00e1504aea5194bf32e424a5cd834bb1">filename</a>, char const *<a class="el" href="classslog_1_1LogRecordMetadata.html#a3ed3c2dea8c35f485462266c29d1b3ca">function</a>, int <a class="el" href="classslog_1_1LogRecordMetadata.html#a2f09abb3bdce2ab7a2c08152981f3a88">line</a>, int <a class="el" href="classslog_1_1LogRecordMetadata.html#a5148f6dfc3706af08da82022e9996ac2">severity</a>, char const *<a class="el" href="classslog_1_1LogRecordMetadata.html#a27f383c5d0f4e8ec29027321737437f1">tag</a>)</td></tr>
-<tr class="memdesc:a8df59259d9916e920b0462f2d43a8263"><td class="mdescLeft">&#160;</td><td class="mdescRight">Capture the metadata.  <br /></td></tr>
-<tr class="separator:a8df59259d9916e920b0462f2d43a8263"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a13818767ac64bec98f62755c2fc65ea7" id="r_a13818767ac64bec98f62755c2fc65ea7"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classslog_1_1LogRecordMetadata.html#a13818767ac64bec98f62755c2fc65ea7">capture</a> (char const *<a class="el" href="classslog_1_1LogRecordMetadata.html#a00e1504aea5194bf32e424a5cd834bb1">filename</a>, char const *<a class="el" href="classslog_1_1LogRecordMetadata.html#a3ed3c2dea8c35f485462266c29d1b3ca">function</a>, int <a class="el" href="classslog_1_1LogRecordMetadata.html#a2f09abb3bdce2ab7a2c08152981f3a88">line</a>, int <a class="el" href="classslog_1_1LogRecordMetadata.html#a5148f6dfc3706af08da82022e9996ac2">severity</a>, char const *<a class="el" href="classslog_1_1LogRecordMetadata.html#a27f383c5d0f4e8ec29027321737437f1">tag</a>, int channel)</td></tr>
+<tr class="memdesc:a13818767ac64bec98f62755c2fc65ea7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Capture the metadata.  <br /></td></tr>
+<tr class="separator:a13818767ac64bec98f62755c2fc65ea7"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a27f383c5d0f4e8ec29027321737437f1" id="r_a27f383c5d0f4e8ec29027321737437f1"><td class="memItemLeft" align="right" valign="top"><a id="a27f383c5d0f4e8ec29027321737437f1" name="a27f383c5d0f4e8ec29027321737437f1"></a>
 char const *&#160;</td><td class="memItemRight" valign="bottom"><b>tag</b> () const</td></tr>
 <tr class="memdesc:a27f383c5d0f4e8ec29027321737437f1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Inspect the tag. This string is TAG_SIZE long. <br /></td></tr>
@@ -124,9 +124,13 @@ char const *&#160;</td><td class="memItemRight" valign="bottom"><b>filename</b> 
 char const *&#160;</td><td class="memItemRight" valign="bottom"><b>function</b> () const</td></tr>
 <tr class="memdesc:a3ed3c2dea8c35f485462266c29d1b3ca"><td class="mdescLeft">&#160;</td><td class="mdescRight">Inspect the function where the record was recorded. <br /></td></tr>
 <tr class="separator:a3ed3c2dea8c35f485462266c29d1b3ca"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aae1bb39be271b6cfc44e191d696dc047" id="r_aae1bb39be271b6cfc44e191d696dc047"><td class="memItemLeft" align="right" valign="top"><a id="aae1bb39be271b6cfc44e191d696dc047" name="aae1bb39be271b6cfc44e191d696dc047"></a>
+<a class="el" href="classslog_1_1Timestamp.html">Timestamp</a>&#160;</td><td class="memItemRight" valign="bottom"><b>timestamp</b> () const</td></tr>
+<tr class="memdesc:aae1bb39be271b6cfc44e191d696dc047"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the time when the record was recorded. <br /></td></tr>
+<tr class="separator:aae1bb39be271b6cfc44e191d696dc047"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ae21350ec1a51e827dd14a92f2baf92e6" id="r_ae21350ec1a51e827dd14a92f2baf92e6"><td class="memItemLeft" align="right" valign="top"><a id="ae21350ec1a51e827dd14a92f2baf92e6" name="ae21350ec1a51e827dd14a92f2baf92e6"></a>
 uint64_t&#160;</td><td class="memItemRight" valign="bottom"><b>time</b> () const</td></tr>
-<tr class="memdesc:ae21350ec1a51e827dd14a92f2baf92e6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the nanoseconds since unix epoch when the record was recorded. <br /></td></tr>
+<tr class="memdesc:ae21350ec1a51e827dd14a92f2baf92e6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the time when the record was recorded. <br /></td></tr>
 <tr class="separator:ae21350ec1a51e827dd14a92f2baf92e6"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a7ef822f002234114c61d1d8625a68f84" id="r_a7ef822f002234114c61d1d8625a68f84"><td class="memItemLeft" align="right" valign="top"><a id="a7ef822f002234114c61d1d8625a68f84" name="a7ef822f002234114c61d1d8625a68f84"></a>
 unsigned long&#160;</td><td class="memItemRight" valign="bottom"><b>thread_id</b> () const</td></tr>
@@ -140,16 +144,19 @@ int&#160;</td><td class="memItemRight" valign="bottom"><b>line</b> () const</td>
 int&#160;</td><td class="memItemRight" valign="bottom"><b>severity</b> () const</td></tr>
 <tr class="memdesc:a5148f6dfc3706af08da82022e9996ac2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the attached severity. Lower numbers are more important. <br /></td></tr>
 <tr class="separator:a5148f6dfc3706af08da82022e9996ac2"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a82dbfafe292c3ce3a8857987f7d40200" id="r_a82dbfafe292c3ce3a8857987f7d40200"><td class="memItemLeft" align="right" valign="top"><a id="a82dbfafe292c3ce3a8857987f7d40200" name="a82dbfafe292c3ce3a8857987f7d40200"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>set_data</b> (char const *<a class="el" href="classslog_1_1LogRecordMetadata.html#a00e1504aea5194bf32e424a5cd834bb1">filename</a>, char const *<a class="el" href="classslog_1_1LogRecordMetadata.html#a3ed3c2dea8c35f485462266c29d1b3ca">function</a>, int <a class="el" href="classslog_1_1LogRecordMetadata.html#a2f09abb3bdce2ab7a2c08152981f3a88">line</a>, int <a class="el" href="classslog_1_1LogRecordMetadata.html#a5148f6dfc3706af08da82022e9996ac2">severity</a>, char const *<a class="el" href="classslog_1_1LogRecordMetadata.html#a27f383c5d0f4e8ec29027321737437f1">tag</a>, uint64_t <a class="el" href="classslog_1_1LogRecordMetadata.html#ae21350ec1a51e827dd14a92f2baf92e6">time</a>, unsigned long threadh_id)</td></tr>
-<tr class="memdesc:a82dbfafe292c3ce3a8857987f7d40200"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set all fields in the metdata. <br /></td></tr>
-<tr class="separator:a82dbfafe292c3ce3a8857987f7d40200"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1f763bc0478472371776aec1d73fc467" id="r_a1f763bc0478472371776aec1d73fc467"><td class="memItemLeft" align="right" valign="top"><a id="a1f763bc0478472371776aec1d73fc467" name="a1f763bc0478472371776aec1d73fc467"></a>
+int&#160;</td><td class="memItemRight" valign="bottom"><b>channel</b> () const</td></tr>
+<tr class="separator:a1f763bc0478472371776aec1d73fc467"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6384e98260ae5966ecc67ca617f3736c" id="r_a6384e98260ae5966ecc67ca617f3736c"><td class="memItemLeft" align="right" valign="top"><a id="a6384e98260ae5966ecc67ca617f3736c" name="a6384e98260ae5966ecc67ca617f3736c"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><b>set_data</b> (char const *<a class="el" href="classslog_1_1LogRecordMetadata.html#a00e1504aea5194bf32e424a5cd834bb1">filename</a>, char const *<a class="el" href="classslog_1_1LogRecordMetadata.html#a3ed3c2dea8c35f485462266c29d1b3ca">function</a>, int <a class="el" href="classslog_1_1LogRecordMetadata.html#a2f09abb3bdce2ab7a2c08152981f3a88">line</a>, int <a class="el" href="classslog_1_1LogRecordMetadata.html#a5148f6dfc3706af08da82022e9996ac2">severity</a>, char const *<a class="el" href="classslog_1_1LogRecordMetadata.html#a27f383c5d0f4e8ec29027321737437f1">tag</a>, <a class="el" href="classslog_1_1Timestamp.html">Timestamp</a> <a class="el" href="classslog_1_1LogRecordMetadata.html#ae21350ec1a51e827dd14a92f2baf92e6">time</a>, unsigned long <a class="el" href="classslog_1_1LogRecordMetadata.html#a7ef822f002234114c61d1d8625a68f84">thread_id</a>, int channel)</td></tr>
+<tr class="memdesc:a6384e98260ae5966ecc67ca617f3736c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set all fields in the metdata. <br /></td></tr>
+<tr class="separator:a6384e98260ae5966ecc67ca617f3736c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Metadata associated with every log message. </p>
 </div><h2 class="groupheader">Member Function Documentation</h2>
-<a id="a8df59259d9916e920b0462f2d43a8263" name="a8df59259d9916e920b0462f2d43a8263"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a8df59259d9916e920b0462f2d43a8263">&#9670;&#160;</a></span>capture()</h2>
+<a id="a13818767ac64bec98f62755c2fc65ea7" name="a13818767ac64bec98f62755c2fc65ea7"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a13818767ac64bec98f62755c2fc65ea7">&#9670;&#160;</a></span>capture()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -182,7 +189,13 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>set_data</b> (char co
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">char const *&#160;</td>
-          <td class="paramname"><em>tag</em>&#160;</td>
+          <td class="paramname"><em>tag</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>channel</em>&#160;</td>
         </tr>
         <tr>
           <td></td>

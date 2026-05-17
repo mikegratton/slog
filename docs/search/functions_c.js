@@ -1,7 +1,27 @@
 var searchData=
 [
-  ['tag_0',['tag',['../classslog_1_1LogRecordMetadata.html#a27f383c5d0f4e8ec29027321737437f1',1,'slog::LogRecordMetadata']]],
-  ['thread_5fid_1',['thread_id',['../classslog_1_1LogRecordMetadata.html#a7ef822f002234114c61d1d8625a68f84',1,'slog::LogRecordMetadata']]],
-  ['threshold_2',['threshold',['../classslog_1_1LogChannel.html#ab5e531fb64c2aa3d0ccf1907487b12b9',1,'slog::LogChannel']]],
-  ['time_3',['time',['../classslog_1_1LogRecordMetadata.html#ae21350ec1a51e827dd14a92f2baf92e6',1,'slog::LogRecordMetadata']]]
+  ['send_5fto_5fsink_0',['send_to_sink',['../classslog_1_1LogChannel.html#a15af51e06d9b7f2224fdfec7efeaf724',1,'slog::LogChannel']]],
+  ['set_5fapplication_5fname_1',['set_application_name',['../classslog_1_1SyslogSink.html#a034aa3933ee523d5cf92f5152aff0edf',1,'slog::SyslogSink']]],
+  ['set_5fdata_2',['set_data',['../classslog_1_1LogRecordMetadata.html#a6384e98260ae5966ecc67ca617f3736c',1,'slog::LogRecordMetadata']]],
+  ['set_5fdefault_3',['set_default',['../classslog_1_1FlatThresholdMap.html#afbabb794e56c6a081e8a1ec087ff9f1c',1,'slog::FlatThresholdMap']]],
+  ['set_5fdefault_5fthreshold_4',['set_default_threshold',['../classslog_1_1LogConfig.html#a8cafc838a4c0a4d28aa68c61bc76b437',1,'slog::LogConfig']]],
+  ['set_5fecho_5',['set_echo',['../classslog_1_1FileSink.html#af32782d050502f54e464f0d02401bfea',1,'slog::FileSink::set_echo()'],['../classslog_1_1JournaldSink.html#a02eef0bd84db294aeba45efd7d2dfddf',1,'slog::JournaldSink::set_echo()'],['../classslog_1_1SyslogSink.html#a43af735fc7e469d34131c101d1384fea',1,'slog::SyslogSink::set_echo(bool doit=true)']]],
+  ['set_5ffacility_6',['set_facility',['../classslog_1_1SyslogSink.html#afe6f816640429bcace5dba52690a6a01',1,'slog::SyslogSink']]],
+  ['set_5ffile_7',['set_file',['../classslog_1_1FileSink.html#aa67629468c296a9b930360dbec19cfce',1,'slog::FileSink']]],
+  ['set_5ffile_5ffooter_5fformat_8',['set_file_footer_format',['../classslog_1_1FileSink.html#ac886768d8535b203d296edc27a2c990c',1,'slog::FileSink']]],
+  ['set_5ffile_5fheader_5fformat_9',['set_file_header_format',['../classslog_1_1FileSink.html#a338b9769a6336b4126b9ae306eb5aaf9',1,'slog::FileSink']]],
+  ['set_5fformatter_10',['set_formatter',['../classslog_1_1SyslogSink.html#a3770f8cffe3ef12414134ed857f59a38',1,'slog::SyslogSink::set_formatter()'],['../classslog_1_1JournaldSink.html#a4ac23c881136cbc57f6743af8cc91276',1,'slog::JournaldSink::set_formatter()'],['../classslog_1_1FileSink.html#a4564dac756b845b9e41314528a190b76',1,'slog::FileSink::set_formatter()'],['../classslog_1_1ConsoleSink.html#ab75b0088a35c5647fc144ec1f95a79c5',1,'slog::ConsoleSink::set_formatter()']]],
+  ['set_5fmax_5fconnection_5fattempts_11',['set_max_connection_attempts',['../classslog_1_1SyslogSink.html#a1326e51199e0fe1b54ad9271321df4b3',1,'slog::SyslogSink']]],
+  ['set_5fmax_5fconnection_5fwait_12',['set_max_connection_wait',['../classslog_1_1SyslogSink.html#a1650f2eac6f8037db1c34661a878c361',1,'slog::SyslogSink']]],
+  ['set_5fmax_5ffile_5fsize_13',['set_max_file_size',['../classslog_1_1FileSink.html#ae289bb0b312dc7638371caa809b44f02',1,'slog::FileSink']]],
+  ['set_5fpool_14',['set_pool',['../classslog_1_1LogConfig.html#a866ec8c0e452a0830a8fc39e72447e14',1,'slog::LogConfig']]],
+  ['set_5frfc3164_5fprotocol_15',['set_rfc3164_protocol',['../classslog_1_1SyslogSink.html#a8698dd3b4ecd3335ac00cda6102b732c',1,'slog::SyslogSink']]],
+  ['set_5fsink_16',['set_sink',['../classslog_1_1LogConfig.html#a9f4e0865405e139cc43688d76ded2c58',1,'slog::LogConfig']]],
+  ['set_5fworker_5fthread_5fid_17',['set_worker_thread_id',['../classslog_1_1LogConfig.html#adc1944f134e8fbc6bdedfdfba2fdb274',1,'slog::LogConfig']]],
+  ['severity_18',['severity',['../classslog_1_1LogRecordMetadata.html#a5148f6dfc3706af08da82022e9996ac2',1,'slog::LogRecordMetadata']]],
+  ['size_19',['size',['../classslog_1_1LogRecord.html#a438a423c603ffc1a670750a188d923d3',1,'slog::LogRecord::size() const'],['../classslog_1_1LogRecord.html#a13bca2254811b888ccad249a9b2b58e1',1,'slog::LogRecord::size(uint32_t count)']]],
+  ['start_20',['start',['../classslog_1_1LogWorker.html#a06ea960cdbc1811e1585018db27efbc8',1,'slog::LogWorker']]],
+  ['stop_21',['stop',['../classslog_1_1LogWorker.html#af83f64487431b6540156effe13376aa1',1,'slog::LogWorker']]],
+  ['syslog_5fpriority_22',['syslog_priority',['../classslog_1_1SyslogSink.html#a7adabd415f16818f5cd59ed919de97b2',1,'slog::SyslogSink']]],
+  ['syslogsink_23',['SyslogSink',['../classslog_1_1SyslogSink.html#aae1f6c6d80c6f2966a4925fb201fd2eb',1,'slog::SyslogSink']]]
 ];

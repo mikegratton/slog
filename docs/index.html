@@ -27,7 +27,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">Slog<span id="projectnumber">&#160;1.0</span>
+   <div id="projectname">Slog<span id="projectnumber">&#160;2.1</span>
    </div>
    <div id="projectbrief">Stream-oriented logging</div>
   </td>
@@ -145,10 +145,10 @@ Quickstart</h1>
 <div class="line"> </div>
 <div class="line">    <span class="keywordflow">return</span> 0;</div>
 <div class="line">}</div>
-<div class="ttc" id="aclassslog_1_1LogConfig_html"><div class="ttname"><a href="classslog_1_1LogConfig.html">slog::LogConfig</a></div><div class="ttdef"><b>Definition</b> LogSetup.hpp:70</div></div>
-<div class="ttc" id="aclassslog_1_1LogConfig_html_a8cafc838a4c0a4d28aa68c61bc76b437"><div class="ttname"><a href="classslog_1_1LogConfig.html#a8cafc838a4c0a4d28aa68c61bc76b437">slog::LogConfig::set_default_threshold</a></div><div class="ttdeci">void set_default_threshold(int thr)</div><div class="ttdoc">Set the default threshold at which to accept records.</div><div class="ttdef"><b>Definition</b> LogSetup.hpp:84</div></div>
-<div class="ttc" id="aclassslog_1_1LogConfig_html_a8fed42621e9feb98871e1aadd1b2d16d"><div class="ttname"><a href="classslog_1_1LogConfig.html#a8fed42621e9feb98871e1aadd1b2d16d">slog::LogConfig::add_tag</a></div><div class="ttdeci">void add_tag(char const *tag, int thr)</div><div class="ttdoc">Add a custom threshold for a tag.</div><div class="ttdef"><b>Definition</b> LogSetup.hpp:92</div></div>
-<div class="ttc" id="aclassslog_1_1LogConfig_html_a9f4e0865405e139cc43688d76ded2c58"><div class="ttname"><a href="classslog_1_1LogConfig.html#a9f4e0865405e139cc43688d76ded2c58">slog::LogConfig::set_sink</a></div><div class="ttdeci">void set_sink(std::shared_ptr&lt; LogSink &gt; new_sink)</div><div class="ttdoc">Set the sink The sink saves log records. There are three sinks included: FileSink,...</div><div class="ttdef"><b>Definition</b> LogSetup.hpp:99</div></div>
+<div class="ttc" id="aclassslog_1_1LogConfig_html"><div class="ttname"><a href="classslog_1_1LogConfig.html">slog::LogConfig</a></div><div class="ttdef"><b>Definition</b> LogSetup.hpp:73</div></div>
+<div class="ttc" id="aclassslog_1_1LogConfig_html_a8cafc838a4c0a4d28aa68c61bc76b437"><div class="ttname"><a href="classslog_1_1LogConfig.html#a8cafc838a4c0a4d28aa68c61bc76b437">slog::LogConfig::set_default_threshold</a></div><div class="ttdeci">void set_default_threshold(int thr)</div><div class="ttdoc">Set the default threshold at which to accept records.</div><div class="ttdef"><b>Definition</b> LogSetup.hpp:87</div></div>
+<div class="ttc" id="aclassslog_1_1LogConfig_html_a8fed42621e9feb98871e1aadd1b2d16d"><div class="ttname"><a href="classslog_1_1LogConfig.html#a8fed42621e9feb98871e1aadd1b2d16d">slog::LogConfig::add_tag</a></div><div class="ttdeci">void add_tag(char const *tag, int thr)</div><div class="ttdoc">Add a custom threshold for a tag.</div><div class="ttdef"><b>Definition</b> LogSetup.hpp:95</div></div>
+<div class="ttc" id="aclassslog_1_1LogConfig_html_a9f4e0865405e139cc43688d76ded2c58"><div class="ttname"><a href="classslog_1_1LogConfig.html#a9f4e0865405e139cc43688d76ded2c58">slog::LogConfig::set_sink</a></div><div class="ttdeci">void set_sink(std::shared_ptr&lt; LogSink &gt; new_sink)</div><div class="ttdoc">Set the sink The sink saves log records. There are three sinks included: FileSink,...</div><div class="ttdef"><b>Definition</b> LogSetup.hpp:102</div></div>
 </div><!-- fragment --><p> The <code>LogConfig</code> object contains the configuration for the logger. See the example project in <code>example</code> for a basic setup.</p>
 <h1><a class="anchor" id="autotoc_md2"></a>
 Design</h1>
@@ -192,7 +192,7 @@ Tags</h3>
 </div><!-- fragment --><p> would log at most once, if we set the threshold for tag "noisy" to INFO or lower.</p>
 <h3><a class="anchor" id="autotoc_md9"></a>
 Channels</h3>
-<p>Slog can be configured to have multiple <em>channels</em>. A channel corresponds to an independent back-end, with its own worker thread, its own sink, and its own set of severity thresholds. You can use this to separate events from data, for instance. Note that a particular message can be sent to only one channel. Channels may have independent memory pools with different policies and sizes or they can share pools with other channels. Slog represents a channel by an integer, with the default channel being channel 0.</p>
+<p>Slog can be configured to have multiple <em>channels</em>. A channel corresponds to an independent sink and severity thresholds. You can use this to separate events from data, for instance. Note that a particular message can be sent to only one channel. Channels may have independent memory pools with different policies and sizes or they can share pools with other channels. Likewise, channels may have independent worker threads or share threads with other channels. Slog represents a channel by an integer, with the default channel being channel 0.</p>
 <h2><a class="anchor" id="autotoc_md10"></a>
 General Use</h2>
 <p>Slog provides a set of function-like macros in <code><a class="el" href="slog_8hpp_source.html">slog.hpp</a></code> for logging. In general, this is the only include you'll need in locations where you log. The macros are</p>
@@ -206,9 +206,10 @@ General Use</h2>
 <li><code>Flog(SEVERITY, "tag", 2)("A good number is {}", 42)</code> : Log "A good number
 is 42" to channel 2 with tag "tag". This uses format-style formatting.</li>
 <li><code>Blog(SEVERITY, "tag", 2)(my_bytes, my_byte_count)(more_bytes, count2)</code> : Capture a binary log message in two parts with tag "tag" to channel two.</li>
+<li><code>Plog(SEVERITY, "Printf logs may be truncated over {} bytes", 511)</code>: Log using <code>sprintf()</code> formatting. Note that <code>Plog()</code> is limited in the size of records, unlike other macros. See also <code>Plogt()</code> and <code>Plogtc()</code> to add tags and channel ids.</li>
 </ul>
 <p>All of these macros first check if the message will be logged given the current severity threshold for the tag and channel. If the message won't be logged, the code afterwards <em>will not be executed</em>. That is, no strings are formatted, no work is done. Moreover, depending on the pool policy, if the message pool is empty, these macros may (a) allocate, causing a delay (b) block for a configurable amount of time waiting for a free record to become available or (c) simply discard the log message. The default policy is to allocate.</p>
-<p>Slog uses a custom <code>std::ostream</code> class that avoids some of the inefficiencies of <code>std::stringstream</code>. For the Flog family of macros, formatting is performed with <code>vformat_to</code>.</p>
+<p>Slog uses a custom <code>std::ostream</code> class that avoids some of the inefficiencies of <code>std::stringstream</code>. For the Flog family of macros, formatting is performed with <code>vformat_to</code>. For Plog, formatting is performed by <code>snprintf()</code>.</p>
 <p>For binary logging, it is usually a good idea to define your own macros of the form </p><div class="fragment"><div class="line"><span class="preprocessor">#define LogPoly Blog(NOTE, &quot;poly&quot;, 2)</span></div>
 </div><!-- fragment --><p> so you can simply log with </p><div class="fragment"><div class="line">Polygon myPolygon = ...;</div>
 <div class="line"><span class="keyword">auto</span> buffer = serialize(myPolygon);</div>
@@ -222,12 +223,13 @@ Setup</h2>
 <li><code>void start_logger(LogConfig const&amp; config)</code> : Start the logger using the given configuration for the default channel. See below for the <code>LogConfig</code> object.</li>
 <li><code>void start_logger(std::vector&lt;LogConfig&gt; const&amp; configs)</code>: Start the logger using the given set of configs for each channel. The default channel <code>0</code> uses the first config.</li>
 </ol>
-<p>The LogConfig object allows for configuring the logger behavior. It has four main methods:</p>
+<p>The LogConfig object allows for configuring the logger behavior. It has five main methods:</p>
 <ul>
 <li><code>set_default_threshold(int thr)</code> : Sets the default severity threshold for all (or no) tags.</li>
 <li><code>add_tag(const char* tag, int thr)</code> : Sets the threshold <code>thr</code> for tag <code>tag</code>.</li>
 <li><code>set_sink(std::shared_ptr&lt;LogSink&gt; sink)</code> : Sets the sink where records will be written.</li>
 <li><code>set_pool(std::shared_ptr&lt;LogRecordPool&gt; pool_)</code> : Configures the logger to use a custom log record pool.</li>
+<li><code>set_worker_thread_id(int id)</code> : Configures the channel to use a specific worker thread.</li>
 </ul>
 <p>In addition, you may call <code>stop_logger()</code> to cease logging, but this isn't required before program termination.</p>
 <h2><a class="anchor" id="autotoc_md12"></a>
@@ -296,13 +298,13 @@ BinarySink</h3>
 </div><!-- fragment --><p> where "SLOG" is literally these four characters. The BOM is a byte order mark, 0xfeff. The sequence number identifies which file in the rotating file sequence this is (counting up from zero). You may provide your own header via <code>set_file_header_format()</code>.</p>
 <h2><a class="anchor" id="autotoc_md18"></a>
 Tweaking the Format</h2>
-<p>The built-in sinks all use the <code>Formatter</code> functor defined in <code><a class="el" href="LogSink_8hpp_source.html">LogSink.hpp</a></code> to format messages: </p><div class="fragment"><div class="line"><span class="keyword">using </span>Formatter = std::function&lt;int (FILE* sink, LogRecord <span class="keyword">const</span>&amp; node)&gt;;</div>
+<p>The built-in sinks all use the <code>Formatter</code> functor defined in <code><a class="el" href="LogSink_8hpp_source.html">LogSink.hpp</a></code> to format messages: </p><div class="fragment"><div class="line"><span class="keyword">using </span>Formatter = std::function&lt;long (FILE* sink, LogRecord <span class="keyword">const</span>&amp; node)&gt;;</div>
 </div><!-- fragment --><p> This should return the number of bytes written to the <code>sink</code>. You can use a lambda in the setup to customize the format to your liking. Functions in <code><a class="el" href="LogSink_8hpp_source.html">LogSink.hpp</a></code> provide date, severity, and code location format helpers that should make creating your own formatter easy. The <code>write_message_to_file()</code> will insert just the message portion into the FILE stream, returning the number of bytes written. Its companion <code>total_record_size()</code> just returns the total size of the record (including any <code>more()</code> data).</p>
 <p>For example, suppose we want to write records like "[1970-01-01T12:34:56.001]
-Important message". We could format these like </p><div class="fragment"><div class="line"><span class="keywordtype">int</span> my_format(FILE* sink, LogRecord <span class="keyword">const</span>&amp; rec) {        </div>
+Important message". We could format these like </p><div class="fragment"><div class="line"><span class="keywordtype">long</span> my_format(FILE* sink, LogRecord <span class="keyword">const</span>&amp; rec) {        </div>
 <div class="line">    <span class="keywordtype">char</span> time_str[32];    </div>
 <div class="line">    format_time(time_str, rec.meta().time(), 3, <span class="keyword">true</span>);</div>
-<div class="line">    <span class="keywordtype">int</span> count = fprintf(sink, <span class="stringliteral">&quot;[%s] &quot;</span>, time_str);</div>
+<div class="line">    <span class="keywordtype">long</span> count = fprintf(sink, <span class="stringliteral">&quot;[%s] &quot;</span>, time_str);</div>
 <div class="line">    count += write_message_to_file(sink, rec);    </div>
 <div class="line">    <span class="keywordflow">return</span> count;</div>
 <div class="line">}</div>
@@ -315,7 +317,7 @@ Writing Your Own Sink</h2>
 <div class="line">    <span class="keyword">virtual</span> <span class="keywordtype">void</span> record(LogRecord <span class="keyword">const</span>&amp; record) = 0;</div>
 <div class="line">    <span class="keyword">virtual</span> <span class="keywordtype">void</span> finalize() { }</div>
 <div class="line">};</div>
-</div><!-- fragment --><p> The <code>record</code> method provides you with control over how messages are recorded. The <code>LogRecord</code> contains </p><div class="fragment"><div class="line">LogRecordMetadata <span class="keyword">const</span>&amp; meta();  </div>
+</div><!-- fragment --><p> The <code>record</code> method provides you with control over how messages are recorded. Slog guarantees that each sink's <code>record()</code> method is only called from one worker thread. The <code>LogRecord</code> contains </p><div class="fragment"><div class="line">LogRecordMetadata <span class="keyword">const</span>&amp; meta();  </div>
 <div class="line">uint32_t size();                  </div>
 <div class="line"><span class="keywordtype">char</span> <span class="keyword">const</span>* message();            </div>
 <div class="line">LogRecord <span class="keyword">const</span>* more();          </div>
@@ -324,7 +326,7 @@ Writing Your Own Sink</h2>
 <div class="line"><span class="keywordtype">char</span> <span class="keyword">const</span>* function();    </div>
 <div class="line"><span class="keywordtype">int</span> line();                </div>
 <div class="line"><span class="keywordtype">unsigned</span> <span class="keywordtype">long</span> thread_id(); </div>
-<div class="line">uint64_t time();           </div>
+<div class="line">Timestamp timestamp();     </div>
 <div class="line"><span class="keywordtype">int</span> severity();            </div>
 <div class="line"><span class="keywordtype">char</span> <span class="keyword">const</span>* tag();         </div>
 </div><!-- fragment --><h2><a class="anchor" id="autotoc_md20"></a>
@@ -352,6 +354,7 @@ LogConfig</h1>
 <li><code>add_tag(const char* tag, int thr)</code>: Set a special threshold for the given tag</li>
 <li><code>set_sink(std::shared_ptr&lt;LogSink&gt; sink_)</code>: Set the sink you'd like to use (FileSink, JournaldSink, etc.). The default sink is the FileSink.</li>
 <li><code>set_pool(std::shared_ptr&lt;LogRecordPool&gt; pool_)</code>: Set the record pool. The default pool is an allocating record pool that allocates memory according to the CMake variables below.</li>
+<li><code>set_worker_thread_id(int id)</code>: Set the worker that will service this channel. If this id matches another LogConfig, the corresponding channels will share a work thread. Note all <code>LogConfig</code> objects use worker id <code>0</code> by default.</li>
 </ul>
 <h2><a class="anchor" id="autotoc_md23"></a>
 LogRecordPool</h2>
@@ -381,20 +384,22 @@ Compile-time Configuration</h1>
 <tr class="markdownTableRowOdd">
 <td class="markdownTableBodyNone"><code>SLOG_BINARY_LOG</code>   </td><td class="markdownTableBodyNone">OFF   </td><td class="markdownTableBodyNone">Turn on Blog() binary logging macro    </td></tr>
 <tr class="markdownTableRowEven">
-<td class="markdownTableBodyNone"><code>SLOG_FORMAT_LOG</code>   </td><td class="markdownTableBodyNone">OFF   </td><td class="markdownTableBodyNone">Flog() uses std::format(). Implies c++20    </td></tr>
+<td class="markdownTableBodyNone"><code>SLOG_FORMAT_LOG</code>   </td><td class="markdownTableBodyNone">OFF   </td><td class="markdownTableBodyNone">Turn on Flog() std::format()-based logging macro. Implies c++20    </td></tr>
 <tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone"><code>SLOG_PRINTF_LOG</code>   </td><td class="markdownTableBodyNone">OFF   </td><td class="markdownTableBodyNone">Turn of Plog() printf()-style logging macro.    </td></tr>
+<tr class="markdownTableRowEven">
 <td class="markdownTableBodyNone"><code>SLOG_JOURNALD</code>   </td><td class="markdownTableBodyNone">OFF   </td><td class="markdownTableBodyNone">Build the Journald sink (requires libsystemd-dev)    </td></tr>
-<tr class="markdownTableRowEven">
+<tr class="markdownTableRowOdd">
 <td class="markdownTableBodyNone"><code>SLOG_PRINT_ERROR</code>   </td><td class="markdownTableBodyNone">ON   </td><td class="markdownTableBodyNone">Write system errors to stderr    </td></tr>
-<tr class="markdownTableRowOdd">
+<tr class="markdownTableRowEven">
 <td class="markdownTableBodyNone"><code>SLOG_DEFAULT_RECORD_SIZE</code>   </td><td class="markdownTableBodyNone">512   </td><td class="markdownTableBodyNone">Default size of records    </td></tr>
-<tr class="markdownTableRowEven">
+<tr class="markdownTableRowOdd">
 <td class="markdownTableBodyNone"><code>SLOG_DEFAULT_POOL_RECORD_COUNT</code>   </td><td class="markdownTableBodyNone">256   </td><td class="markdownTableBodyNone">Default number of records in the pool    </td></tr>
-<tr class="markdownTableRowOdd">
-<td class="markdownTableBodyNone"><code>SLOG_BUILD_TEST</code>   </td><td class="markdownTableBodyNone">OFF   </td><td class="markdownTableBodyNone">Build unit tests    </td></tr>
 <tr class="markdownTableRowEven">
-<td class="markdownTableBodyNone"><code>SLOG_BUILD_EXAMPLE</code>   </td><td class="markdownTableBodyNone">OFF   </td><td class="markdownTableBodyNone">Build example programs    </td></tr>
+<td class="markdownTableBodyNone"><code>SLOG_BUILD_TEST</code>   </td><td class="markdownTableBodyNone">OFF   </td><td class="markdownTableBodyNone">Build unit tests    </td></tr>
 <tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone"><code>SLOG_BUILD_EXAMPLE</code>   </td><td class="markdownTableBodyNone">OFF   </td><td class="markdownTableBodyNone">Build example programs    </td></tr>
+<tr class="markdownTableRowEven">
 <td class="markdownTableBodyNone"><code>SLOG_BUILD_BENCHMARK</code>   </td><td class="markdownTableBodyNone">OFF   </td><td class="markdownTableBodyNone">Build benchmark program   </td></tr>
 </table>
 <p>Note the total memory allocation will be <code>SLOG_DEFAULT_POOL_RECORD_COUNT * SLOG_DEFAULT_RECORD_SIZE</code>.</p>
@@ -416,6 +421,15 @@ Migrating from Version 1 to Version 2</h1>
 <h1><a class="anchor" id="autotoc_md26"></a>
 Version History</h1>
 <ul>
+<li><em>2.1.0</em><ul>
+<li>Change <code>config.hpp</code> tp <code>SlogConfig.hpp</code> to avoid clashing with other include files.</li>
+<li>Use <code>long</code> for byte counts written to sinks. Only use explicitly sized ints for binary output.</li>
+<li>Add <code>is_channel_active()</code> to check if a logging channel id is active.</li>
+<li>Add <code>Timestamp</code> class as alternative to raw nanosecond counts. The old count API is still available.</li>
+<li>Allow multiple channels to share a worker thread. See <code>LogConfig.set_worker_thread_id()</code>. By default, all channels now share a single worker thread.</li>
+<li>Restore <code>printf()</code>-like formatting with new optional macro, <code>Plog()</code>. This is only available if slog is built with <code>SLOG_PRINTF_LOG</code> defined.</li>
+</ul>
+</li>
 <li><em>2.0.0</em><ul>
 <li><code>Flog()</code> has changed to providing <code>std::format</code>-based logging.</li>
 <li><em>Breaking change:</em> LogRecord and LogRecordMetadata fields are now accessed by methods. Fields like <code>message</code> are now access via <code>message()</code></li>

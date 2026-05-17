@@ -186,12 +186,12 @@ lower.
 
 #### Channels
 Slog can be configured to have multiple *channels*. A channel corresponds to an
-independent back-end, with its own worker thread, its own sink, and its own set
-of severity thresholds.  You can use this to separate events from data, for
-instance.  Note that a particular message can be sent to only one channel.
-Channels may have independent memory pools with different policies and sizes or
-they can share pools with other channels. Slog represents a channel by an
-integer, with the default channel being channel 0.
+independent sink and severity thresholds.  You can use this to separate events
+from data, for instance.  Note that a particular message can be sent to only one
+channel. Channels may have independent memory pools with different policies and
+sizes or they can share pools with other channels. Likewise, channels may have
+independent worker threads or share threads with other channels. Slog represents
+a channel by an integer, with the default channel being channel 0.
 
 
 ### General Use
@@ -215,6 +215,10 @@ is 42" to channel 2 with tag "tag". This uses format-style formatting.
 * `Blog(SEVERITY, "tag", 2)(my_bytes, my_byte_count)(more_bytes,
 count2)` : Capture a binary log message in two parts with tag "tag" to channel
 two.
+* `Plog(SEVERITY, "Printf logs may be truncated over {} bytes", 511)`: Log using
+`sprintf()` formatting. Note that `Plog()` is limited in the size of records,
+unlike other macros.  See also `Plogt()` and `Plogtc()` to add tags and channel
+ids.
 
 All of these macros first check if the message will be logged given the current
 severity threshold for the tag and channel.  If the message won't be logged, the
@@ -226,7 +230,7 @@ simply discard the log message. The default policy is to allocate.
 
 Slog uses a custom `std::ostream` class that avoids some of the inefficiencies
 of `std::stringstream`.  For the Flog family of macros, formatting is performed
-with `vformat_to`.
+with `vformat_to`. For Plog, formatting is performed by `snprintf()`.
 
 For binary logging, it is usually a good idea to define your own macros of the
 form
@@ -257,7 +261,7 @@ object.
 using the given set of configs for each channel. The default channel `0` uses
 the first config.
 
-The LogConfig object allows for configuring the logger behavior. It has four
+The LogConfig object allows for configuring the logger behavior. It has five
 main methods:
 
 * `set_default_threshold(int thr)` : Sets the default severity threshold for all
@@ -267,6 +271,8 @@ main methods:
   be written.
 * `set_pool(std::shared_ptr<LogRecordPool> pool_)` : Configures the logger to
   use a custom log record pool.
+* `set_worker_thread_id(int id)` : Configures the channel to use a specific
+  worker thread. 
 
 In addition, you may call `stop_logger()` to cease logging, but this isn't
 required before program termination.
@@ -415,7 +421,7 @@ this is (counting up from zero). You may provide your own header via
 The built-in sinks all use the `Formatter` functor defined in `LogSink.hpp` to
 format messages:
 ```cpp
-using Formatter = std::function<int (FILE* sink, LogRecord const& node)>;
+using Formatter = std::function<long (FILE* sink, LogRecord const& node)>;
 ```
 This should return the number of bytes written to the `sink`.  You can use a
 lambda in the setup to customize the format to your liking. Functions in
@@ -428,10 +434,10 @@ size of the record (including any `more()` data).
 For example, suppose we want to write records like "[1970-01-01T12:34:56.001]
 Important message". We could format these like
 ```cpp
-int my_format(FILE* sink, LogRecord const& rec) {        
+long my_format(FILE* sink, LogRecord const& rec) {        
     char time_str[32];    
     format_time(time_str, rec.meta().time(), 3, true);
-    int count = fprintf(sink, "[%s] ", time_str);
+    long count = fprintf(sink, "[%s] ", time_str);
     count += write_message_to_file(sink, rec);    
     return count;
 }
@@ -450,7 +456,8 @@ public:
 };
 ```
 The `record` method provides you with control over how messages are recorded.
-The `LogRecord` contains
+Slog guarantees that each sink's `record()` method is only called from one
+worker thread. The `LogRecord` contains
 ```cpp
     LogRecordMetadata const& meta();  //! Metadata about the record (see below)
     uint32_t size();                  //! The number of bytes in message()
@@ -467,8 +474,8 @@ not meaningful. The `LogRecordMetadata` contains the following:
     char const* filename();    //! filename containing the function where this message was recorded
     char const* function();    //! name of the function where this message was recorded
     int line();                //! program line number    
-    unsigned long thread_id(); //! unique ID of the thread this message was recorded on
-    uint64_t time();           //! ns since Unix epoch
+    unsigned long thread_id(); //! unique ID of the thread this message was recorded on    
+    Timestamp timestamp();     //! Time the message was recorded
     int severity();            //! Message importance. Lower numbers are more important
     char const* tag();         //! The tag (null terminated)
 ```
@@ -540,6 +547,10 @@ The setup methods are:
 default pool is an allocating record pool that allocates memory according to the
 CMake variables below.
 
+* `set_worker_thread_id(int id)`: Set the worker that will service this channel.
+  If this id matches another LogConfig, the corresponding channels will share a
+  work thread.  Note all `LogConfig` objects use worker id `0` by default.
+
 
 ### LogRecordPool
 
@@ -573,19 +584,20 @@ by multiple channels.
 ## Compile-time Configuration
 Slog has several compile-time cmake options:
 
-| Name                                |   Default  |    Notes                                                      |
-|-------------------------------------|------------|---------------------------------------------------------------|
-| `SLOG_LOG_TO_CONSOLE_WHEN_STOPPED`  |  OFF       | When the logger is stopped, dump records to the console       |
-| `SLOG_STREAM_LOG`                   |  ON        | Turn this off to avoid including <iostream> and Slog() macros |
-| `SLOG_BINARY_LOG`                   |  OFF       | Turn on Blog() binary logging macro                           |
-| `SLOG_FORMAT_LOG`                   |  OFF       | Flog() uses std::format(). Implies c++20                      |
-| `SLOG_JOURNALD`                     |  OFF       | Build the Journald sink (requires libsystemd-dev)             |
-| `SLOG_PRINT_ERROR`                  |  ON        | Write system errors to stderr                                 |
-| `SLOG_DEFAULT_RECORD_SIZE`          |  512       | Default size of records                                       |
-| `SLOG_DEFAULT_POOL_RECORD_COUNT`    |  256       | Default number of records in the pool                         |
-| `SLOG_BUILD_TEST`                   |  OFF       | Build unit tests                                              |
-| `SLOG_BUILD_EXAMPLE`                |  OFF       | Build example programs                                        |
-| `SLOG_BUILD_BENCHMARK`              |  OFF       | Build benchmark program                                       |
+| Name                                |   Default  |    Notes                                                        |
+|-------------------------------------|------------|-----------------------------------------------------------------|
+| `SLOG_LOG_TO_CONSOLE_WHEN_STOPPED`  |  OFF       | When the logger is stopped, dump records to the console         |
+| `SLOG_STREAM_LOG`                   |  ON        | Turn this off to avoid including <iostream> and Slog() macros   |
+| `SLOG_BINARY_LOG`                   |  OFF       | Turn on Blog() binary logging macro                             |
+| `SLOG_FORMAT_LOG`                   |  OFF       | Turn on Flog() std::format()-based logging macro. Implies c++20 |
+| `SLOG_PRINTF_LOG`                   |  OFF       | Turn of Plog() printf()-style logging macro.                    |
+| `SLOG_JOURNALD`                     |  OFF       | Build the Journald sink (requires libsystemd-dev)               |
+| `SLOG_PRINT_ERROR`                  |  ON        | Write system errors to stderr                                   |
+| `SLOG_DEFAULT_RECORD_SIZE`          |  512       | Default size of records                                         |
+| `SLOG_DEFAULT_POOL_RECORD_COUNT`    |  256       | Default number of records in the pool                           |
+| `SLOG_BUILD_TEST`                   |  OFF       | Build unit tests                                                |
+| `SLOG_BUILD_EXAMPLE`                |  OFF       | Build example programs                                          |
+| `SLOG_BUILD_BENCHMARK`              |  OFF       | Build benchmark program                                         |
 
 Note the total memory allocation will be `SLOG_DEFAULT_POOL_RECORD_COUNT *
 SLOG_DEFAULT_RECORD_SIZE`.
@@ -615,6 +627,19 @@ Slog 2 has some breaking changes with Slog 1. Here's what to expect when updatin
 
 
 # Version History
+* *2.1.0*
+    * Change `config.hpp` tp `SlogConfig.hpp` to avoid clashing with other
+      include files.
+    * Use `long` for byte counts written to sinks. Only use explicitly sized
+      ints for binary output.
+    * Add `is_channel_active()` to check if a logging channel id is active.
+    * Add `Timestamp` class as alternative to raw nanosecond counts. The old
+      count API is still available.
+    * Allow multiple channels to share a worker thread. See
+      `LogConfig.set_worker_thread_id()`. By default, all channels now share a
+      single worker thread.
+    * Restore `printf()`-like formatting with new optional macro, `Plog()`.
+      This is only available if slog is built with `SLOG_PRINTF_LOG` defined.
 * *2.0.0*
     * `Flog()` has changed to providing `std::format`-based logging.
     * *Breaking change:* LogRecord and LogRecordMetadata fields are now accessed
