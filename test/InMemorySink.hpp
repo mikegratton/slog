@@ -12,6 +12,9 @@ class InMemorySink : public slog::LogSink {
 
     std::vector<std::string> const& contents() const { return mcontents; }
 
+    std::vector<std::string> const& tags() const { return mtags; }
+
    protected:
     std::vector<std::string> mcontents;
+    std::vector<std::string> mtags;
 };

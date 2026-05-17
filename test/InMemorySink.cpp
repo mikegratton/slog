@@ -9,4 +9,5 @@ void InMemorySink::record(slog::LogRecord const& rec)
     for (slog::LogRecord const* cursor = &rec; cursor != nullptr; cursor = cursor->more()) {
         next_record.insert(next_record.end(), rec.message(), rec.message() + rec.size());        
     }
+    mtags.emplace_back(rec.meta().tag());
 }

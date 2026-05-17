@@ -64,7 +64,7 @@ LogRecordPool::LogRecordPool(LogRecordPoolPolicy new_policy, long new_alloc_size
                              long new_max_blocking_time_ms)
     : policy(new_policy),
       max_blocking_time_ms(new_max_blocking_time_ms),
-      message_size(std::max<long>(sizeof(LogRecord), new_message_size)),
+      message_size(new_message_size),
       chunks(std::max<long>(16L, new_alloc_size / (sizeof(LogRecord) + message_size))),
       head(nullptr),
       pool(new PoolMemory)
