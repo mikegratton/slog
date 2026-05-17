@@ -8,6 +8,7 @@
 #cmakedefine01 SLOG_STREAM_LOG
 #cmakedefine01 SLOG_BINARY_LOG
 #cmakedefine01 SLOG_FORMAT_LOG
+#cmakedefine01 SLOG_PRINTF_LOG
 #cmakedefine01 SLOG_PRINT_ERROR
 
 namespace slog {

@@ -15,6 +15,7 @@ set(source
     JumboTest.cpp
     main.cpp
     PlatformUtilitiesTest.cpp
+    PlogTest.cpp
     SlowSink.cpp
     StoppedTest.cpp
     testUtilities.cpp

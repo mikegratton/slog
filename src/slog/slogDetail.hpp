@@ -176,3 +176,16 @@ class CaptureFlog
 
 } // namespace slog
 #endif
+
+#ifdef SLOG_PRINTF_LOG
+
+#define SLOG_PlogBase(severity, tag, channel, ...)                                                                     \
+    if ((SLOG_LOGGING_ENABLED && slog::will_log((severity), (tag), (channel)))) {                                      \
+        slog::LogRecord* record =                                                                                      \
+            slog::get_fresh_record((channel), __FILE__, __FUNCTION__, __LINE__, (severity), (tag));                    \
+        int bytes_maybe = snprintf(record->message(), record->capacity(), __VA_ARGS__);                                \
+        record->size(std::min<uint32_t>(bytes_maybe, record->capacity()-1));                                           \
+        slog::push_to_sink(record);                                                                                    \
+    }
+
+#endif
