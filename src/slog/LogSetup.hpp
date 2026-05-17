@@ -5,11 +5,11 @@
 #include <ostream>
 #endif
 
-#include <locale>
 #include "LogRecordPool.hpp"
 #include "LogSink.hpp"
 #include "ThresholdMap.hpp"
 #include "slog.hpp"
+#include <locale>
 
 namespace slog
 {
@@ -43,12 +43,15 @@ class LogConfig;
 
 /**
  * @brief Start a logger on the default channel with the given config.
+ * @param config The configuration for the only channel
  */
 void start_logger(LogConfig const& config);
 
 /**
  * @brief Start loggers on channels [0, configs.size()) with the
  * given configs.
+ *
+ * @param configs One config object per active channel
  */
 void start_logger(std::vector<LogConfig> configs);
 
@@ -106,6 +109,16 @@ class LogConfig
      */
     void set_pool(std::shared_ptr<LogRecordPool> new_pool) { pool = new_pool; }
 
+    /**
+     * @brief Set which thread this channel should operate on.
+     * Id values don't have any intrinsic meaning.  If they match another LogConfig,
+     * those channels will be serviced by the same work thread.
+     */
+    void set_worker_thread_id(int id) { workerThreadId = id; }
+
+    /// Get the thread id for this channel
+    int get_worker_thread_id() const { return workerThreadId; }
+
     /// Get the current sink
     std::shared_ptr<LogSink> const& get_sink() { return sink; }
 
@@ -116,6 +129,7 @@ class LogConfig
     std::shared_ptr<LogRecordPool> const& get_pool() { return pool; }
 
   private:
+    int workerThreadId;
     std::shared_ptr<LogRecordPool> pool;
     std::shared_ptr<LogSink> sink;
     ThresholdMap threshold;

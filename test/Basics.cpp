@@ -86,6 +86,7 @@ struct TestSink : public slog::LogSink {
 };
 } // namespace
 
+// FIXME checking for finalization
 TEST_CASE("LogChannel")
 {
     ThresholdMap map;
@@ -104,8 +105,8 @@ TEST_CASE("LogChannel")
 
     CHECK(sink->finalized == 0);
     slog::set_signal_state(SLOG_ACTIVE);
-    c.start();
-    c.stop();
+
+    c.finalize();    
     CHECK(sink->finalized == 1);
 }
 
@@ -128,12 +129,13 @@ TEST_CASE("LoggerSingleton")
 TEST_CASE("LogRecord")
 {
     LogRecordMetadata meta;
-    meta.capture("filename", "function", 1, 2, "tag");
+    meta.capture("filename", "function", 1, 2, "tag", 7);
     CHECK(strcmp(meta.filename(), "filename") == 0);
     CHECK(strcmp(meta.function(), "function") == 0);
     CHECK(meta.line() == 1);
     CHECK(meta.severity() == 2);
     CHECK(strcmp(meta.tag() , "tag") == 0);
+    CHECK(meta.channel() == 7);
 
     meta.reset();
     CHECK(strcmp(meta.filename(), "") == 0);
@@ -141,6 +143,7 @@ TEST_CASE("LogRecord")
     CHECK(meta.line() == -1);
     CHECK(meta.severity() > slog::DBUG);
     for (int i = 0 ; i < slog::TAG_SIZE; i++) { CHECK(meta.tag()[i] == 0); }
+    CHECK(meta.channel() == -1);
 }
 
 TEST_CASE("Locale")
@@ -155,7 +158,7 @@ TEST_CASE("Locale")
     std::locale loc("en_US.UTF-8");
     slog::set_locale(loc);
     auto* record = slog::get_fresh_record(0, __FILE__, __FUNCTION__, __LINE__, slog::INFO, "foo");
-    CHECK(slog::CaptureStream(record, 0).stream().getloc().name() == "en_US.UTF-8");
+    CHECK(slog::CaptureStream(record).stream().getloc().name() == "en_US.UTF-8");
 }
 
 TEST_CASE("LogConfig")
@@ -174,16 +177,16 @@ TEST_CASE("LogConfig")
 
 TEST_CASE("Stream")
 {
-    LogConfig conifg;
-    conifg.set_sink(std::make_shared<NullSink>());    
+    LogConfig config;
+    config.set_sink(std::make_shared<NullSink>());    
     int pool_size = 8;
     int message_size = 1024;
     auto pool = std::make_shared<LogRecordPool>(slog::ALLOCATE, pool_size, message_size);
-    conifg.set_pool(pool);
-    slog::start_logger(conifg);
-    auto* record = pool->allocate();
+    config.set_pool(pool);
+    slog::start_logger(config);    
+    slog::LogRecord* record = slog::get_fresh_record(slog::DEFAULT_CHANNEL, __FILE__, __FUNCTION__, __LINE__, slog::INFO, "");
     {
-        slog::CaptureStream testStream(record, 0);
+        slog::CaptureStream testStream(record);
         testStream.stream().put('a');
         testStream.stream().put('b');
         CHECK(record->message()[0] == 'a');
@@ -203,6 +206,7 @@ TEST_CASE("StoppedLogger")
 
 TEST_CASE("StartStop")
 {
+    slog::stop_logger();
     std::remove(SlowSink::file_name());
 
     auto sink = std::make_shared<SlowSink>();

@@ -1,9 +1,10 @@
 #include "FileSink.hpp"
 #include "LoggerSingleton.hpp"
 #include "RecordInserter.hpp"
+#include "slog/Locale.hpp"
 #include <cstdarg>
 #include <cassert>
-#include "Locale.hpp"
+#include <locale>
 
 namespace slog
 {
@@ -20,7 +21,7 @@ void start_logger(int severity)
 
 void stop_logger()
 {
-    Logger::stop_all_channels();
+    Logger::stop();
 }
 
 bool will_log(int severity, char const* tag, int channel)
@@ -33,14 +34,17 @@ long free_record_count(int channel)
     return Logger::get_channel(channel).pool_free_count();
 }
 
-void push_to_sink(LogRecord* node, int channel) { Logger::get_channel(channel).push(node); }
+void push_to_sink(LogRecord* node) 
+{ 
+    Logger::push_to_sink(node);
+}
 
 LogRecord* get_fresh_record(int channel, char const* file, char const* function, int line, int severity,
                             char const* tag)
 {
     LogRecord* node = Logger::get_channel(channel).get_fresh_record();
     if (node) {
-        node->meta().capture(file, function, line, severity, tag);
+        node->meta().capture(file, function, line, severity, tag, channel);
     }
     return node;
 }
@@ -70,15 +74,17 @@ bool is_channel_active(int channel)
 
 #if SLOG_FORMAT_LOG
 #include <format>
+#include "Locale.hpp"
 namespace slog {
+
 
 /**
  * @brief std::format log capture
  */
-void format_log(LogRecord* rec, int channel, std::string_view format, std::format_args args)
+void format_log(LogRecord* rec, std::string_view format, std::format_args args)
 {
     assert(rec);
-    RecordInserter inserter(rec, channel);
+    RecordInserter inserter(rec);
     std::vformat_to<RecordInserterIterator>(RecordInserterIterator(&inserter), get_locale(), format, args);
 }
 } // namespace slog

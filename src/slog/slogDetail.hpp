@@ -1,6 +1,6 @@
 #pragma once
-#include "SlogConfig.hpp"
 #include "RecordInserter.hpp"
+#include "SlogConfig.hpp"
 
 #define SLOG_GET_MACRO(_1, _2, _3, NAME, ...) NAME
 
@@ -14,7 +14,7 @@ class LogRecord;
 /**
  * @brief Send a completed record to the back end for recording.
  */
-void push_to_sink(LogRecord* rec, int channel);
+void push_to_sink(LogRecord* rec);
 
 /**
  * @brief Obtain a record from the pool, setting the metadata
@@ -51,7 +51,7 @@ class CaptureBinary
      * @brief Construct a capture object with the given head node destined for
      *the given channel.
      */
-    CaptureBinary(LogRecord* node, int channel);
+    CaptureBinary(LogRecord* node);
 
     /**
      * @brief Write bytes into the record
@@ -65,20 +65,20 @@ class CaptureBinary
     RecordInserter inserter;
 };
 
-inline CaptureBinary::CaptureBinary(LogRecord* node, int channel)
-    : inserter(node, channel)
+inline CaptureBinary::CaptureBinary(LogRecord* node)
+    : inserter(node)
 {
 }
 
 inline CaptureBinary& CaptureBinary::record(void const* message, long byte_count)
 {
     inserter.write(message, byte_count);
-    return *this;    
+    return *this;
 }
 
-inline CaptureBinary& CaptureBinary::operator()(void const* bytes, long byte_count) 
+inline CaptureBinary& CaptureBinary::operator()(void const* bytes, long byte_count)
 {
-  return record(bytes, byte_count);
+    return record(bytes, byte_count);
 }
 
 } // namespace slog
@@ -92,8 +92,7 @@ inline CaptureBinary& CaptureBinary::operator()(void const* bytes, long byte_cou
 #define SLOG_LogStreamBase(severity, tag, channel)                                                                     \
     if (!(SLOG_LOGGING_ENABLED && slog::will_log((severity), (tag), (channel)))) {                                     \
     } else                                                                                                             \
-        slog::CaptureStream(slog::get_fresh_record((channel), __FILE__, __FUNCTION__, __LINE__, (severity), (tag)),    \
-                            (channel))                                                                                 \
+        slog::CaptureStream(slog::get_fresh_record((channel), __FILE__, __FUNCTION__, __LINE__, (severity), (tag)))    \
             .stream()
 
 namespace slog
@@ -110,7 +109,7 @@ class CaptureStream
 {
   public:
     /// Make a capture object that writes to node destined for channel_
-    CaptureStream(LogRecord* node, int channel);
+    CaptureStream(LogRecord* node);
 
     /// These are not copyable (this is enforced by inserter, but let's make it
     /// explicit)
@@ -146,7 +145,7 @@ namespace slog
 /**
  * @brief std::vformat log capture. This assumes rec is not null.
  */
-void format_log(LogRecord* rec, int channel, std::string_view format, std::format_args args);
+void format_log(LogRecord* rec, std::string_view format, std::format_args args);
 
 class CaptureFlog
 {
@@ -154,8 +153,7 @@ class CaptureFlog
     CaptureFlog(int severity, char const* tag = "", int channel_ = DEFAULT_CHANNEL,
                 std::source_location const& location = std::source_location::current())
         : rec(get_fresh_record(channel_, location.file_name(), location.function_name(), location.line(), severity,
-                               tag)),
-          channel(channel_)
+                               tag))
     {
     }
 
@@ -165,7 +163,7 @@ class CaptureFlog
     template <class... Args> void operator()(std::string_view format, Args&&... args)
     {
         if (rec) {
-            format_log(rec, channel, format, std::make_format_args(unmove(args)...));
+            format_log(rec, format, std::make_format_args(unmove(args)...));
         }
     }
 
@@ -174,7 +172,6 @@ class CaptureFlog
     template <class T> static T const& unmove(T&& t) { return t; }
 
     LogRecord* rec;
-    int channel;
 };
 
 } // namespace slog

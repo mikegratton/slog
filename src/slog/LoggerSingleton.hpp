@@ -1,7 +1,9 @@
 #pragma once
 #include "LogChannel.hpp"
-#include "LogSetup.hpp"
 #include "LogRecordPool.hpp"
+#include "LogSetup.hpp"
+#include "LogWorker.hpp"
+#include "slog/LogRecord.hpp"
 #include <memory>
 #include <vector>
 
@@ -17,12 +19,16 @@ namespace detail
  */
 class Logger
 {
-
   public:
     /**
      * @brief Number of active channels
      */
     static int channel_count();
+
+    /**
+     * @brief Number of active workers
+     */
+    static int worker_count();
 
     /**
      *  @brief Set up a channel for each LogConfig.
@@ -39,31 +45,34 @@ class Logger
     static LogChannel& get_channel(int channel);
 
     /**
+     * Push a record to the backend
+     */
+    static void push_to_sink(LogRecord* record);
+
+    /**
      * Internal log start function.
      */
-    static void start_all_channels();
+    static void start();
 
     /**
      * Internal log stop function.
      */
-    static void stop_all_channels();
-
-    /**
-     * @brief When slog is "stopped", we may still install a channel to log to
-     * the console. This method handles that logic.
-     */
-    static void setup_stopped_channel();
+    static void stop();
 
   private:
     Logger();
 
     static Logger& instance();
 
-    void do_setup_stopped_channel();
+    void setup_default_channel();
 
     static std::shared_ptr<LogRecordPool> make_default_pool();
 
-    std::vector<std::unique_ptr<LogChannel>> backend;
+    /// nominal number of workers
+    int num_worker;
+
+    /// Lists the worker for each channel id
+    std::vector<std::shared_ptr<LogWorker>> channel_worker;
 };
 
 /// (For debugging the logger) Check that all pool records are either free or in
@@ -72,15 +81,20 @@ long get_pool_missing_count();
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////
 
-inline int Logger::channel_count() { return static_cast<int>(instance().backend.size()); }
-
 inline LogChannel& Logger::get_channel(int channel)
 {
-    if (instance().backend.size() == 0) { setup_stopped_channel(); }
+    if (channel_count() == 0) {
+        instance().setup_default_channel();
+    }
     if (channel < 0 || channel >= channel_count()) {
         channel = DEFAULT_CHANNEL;
     }
-    return *instance().backend[channel];
+    return *instance().channel_worker[channel]->get_channel(channel);
+}
+
+inline void Logger::push_to_sink(LogRecord* record)
+{
+    instance().channel_worker[record->meta().channel()]->push_to_queue(record);
 }
 
 } // namespace detail

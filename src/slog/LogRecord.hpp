@@ -22,7 +22,7 @@ class LogRecordMetadata {
      * change on the caller's thread. Therefore tag is copied, but filename and
      * function just take the pointer values.
      */
-    void capture(char const* filename, char const* function, int line, int severity, char const* tag);
+    void capture(char const* filename, char const* function, int line, int severity, char const* tag, int channel);
 
     /// Inspect the tag. This string is TAG_SIZE long
     char const* tag() const { return m_tag; }
@@ -48,9 +48,11 @@ class LogRecordMetadata {
     /// Get the attached severity. Lower numbers are more important
     int severity() const { return m_severity; }
 
+    int channel() const { return m_channelId; }
+
     /// Set all fields in the metdata
     void set_data(char const* filename, char const* function, int line, int severity, char const* tag, Timestamp time,
-                  unsigned long threadh_id);
+                  unsigned long thread_id, int channel);
 
   private:
     //! Associated tag metadata
@@ -73,6 +75,9 @@ class LogRecordMetadata {
 
     //! Message importance. Lower numbers are more important
     int m_severity;
+
+    //! The channel this record is for
+    int m_channelId;
 };
 
 /**
@@ -119,7 +124,7 @@ class LogRecord
 
   private:
     friend class LogRecordPool;
-    friend class LogChannel;
+    friend class LogWorker;
     friend class PoolMemory;
 
     /// These are only created in LogRecordPool

@@ -20,6 +20,7 @@ set(source
     testUtilities.cpp
     ThresholdMapTest.cpp
     TimestampTest.cpp
+    WorkerTest.cpp
 )
 
 if (SLOG_JOURNALD)

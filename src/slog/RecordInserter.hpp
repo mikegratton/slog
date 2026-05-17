@@ -18,7 +18,7 @@ class RecordInserter
 
     /// Construct a capture object with the given head node destined for
     /// the given channel
-    RecordInserter(LogRecord* node, int channel);
+    RecordInserter(LogRecord* node);
 
     /// Push the record to the channel sink
     ~RecordInserter();
@@ -49,8 +49,7 @@ class RecordInserter
     LogRecord* head_node;
     LogRecord* current_node;
     char* cursor;
-    char const* buffer_end;
-    int channel;
+    char const* buffer_end;    
 };
 
 struct RecordInserterIterator {

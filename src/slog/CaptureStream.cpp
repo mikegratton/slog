@@ -127,8 +127,8 @@ NullStream s_null;                   // Since NullStream has no state, all threa
 
 } // namespace
 
-CaptureStream::CaptureStream(LogRecord* node, int channel)
-: inserter(node, channel)
+CaptureStream::CaptureStream(LogRecord* node)
+: inserter(node)
 {
     if (node) {
         st_stream.stream_direct().set_inserter(&inserter);

@@ -23,11 +23,12 @@ void start_logger(std::vector<LogConfig> config)
         return;
     }
     Logger::setup_channels(config);
-    Logger::start_all_channels();
+    Logger::start();
 }
 
 LogConfig::LogConfig()
-    : pool(nullptr),
+    : workerThreadId(0),
+      pool(nullptr),
       sink(std::make_shared<ConsoleSink>())
 {
 }

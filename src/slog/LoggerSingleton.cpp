@@ -1,11 +1,12 @@
 #include "LoggerSingleton.hpp"
-#include "PlatformUtilities.hpp"
-#include "Signal.hpp"
-#include "SlogError.hpp"
 #include "LogChannel.hpp"
 #include "LogRecordPool.hpp"
 #include "LogSetup.hpp"
 #include "LogSink.hpp"
+#include "PlatformUtilities.hpp"
+#include "Signal.hpp"
+#include "SlogError.hpp"
+#include "slog/LogWorker.hpp"
 #include <cstdlib>
 #if SLOG_LOG_TO_CONSOLE_WHEN_STOPPED
 #include "ConsoleSink.hpp"
@@ -14,8 +15,8 @@
 #include <csignal>
 #include <cstring>
 #include <endian.h>
+#include <map>
 #include <memory>
-#include <unistd.h>
 
 namespace slog
 {
@@ -23,11 +24,10 @@ namespace slog
 namespace detail
 {
 
-static std::unique_ptr<LogChannel> make_channel(std::shared_ptr<LogSink> sink, ThresholdMap const& threshold,
+static std::shared_ptr<LogChannel> make_channel(std::shared_ptr<LogSink> sink, ThresholdMap const& threshold,
                                                 std::shared_ptr<LogRecordPool> pool)
 {
-    LogChannel* ptr = new LogChannel(sink, threshold, pool);
-    return std::unique_ptr<LogChannel>(ptr);
+    return std::make_shared<LogChannel>(sink, threshold, pool);
 }
 
 /// Install handlers for signals and exit. Idempotent.
@@ -55,85 +55,101 @@ Logger& Logger::instance()
     return s_logger;
 }
 
-Logger::Logger() 
-{ 
-    // We don't set up anything by default. We'll wait for a call to
-    // put any channels in place
+Logger::Logger()
+: num_worker(0)
+{
+    // setup_initial_channel();
 }
 
 std::shared_ptr<LogRecordPool> Logger::make_default_pool()
 {
-    return std::make_shared<LogRecordPool>(ALLOCATE, DEFAULT_POOL_RECORD_COUNT * (DEFAULT_RECORD_SIZE + sizeof(LogRecord)),
-                                           DEFAULT_RECORD_SIZE);
+    return std::make_shared<LogRecordPool>(
+        ALLOCATE, DEFAULT_POOL_RECORD_COUNT * (DEFAULT_RECORD_SIZE + sizeof(LogRecord)), DEFAULT_RECORD_SIZE);
 }
 
 void Logger::setup_channels(std::vector<LogConfig>& config)
 {
-    auto& backend = instance().backend;
-    instance().stop_all_channels();
-    backend.clear();
-    install_slog_handlers();
+    instance().stop();
+    if (config.empty()) {
+        return;
+    }
 
-    auto default_pool = make_default_pool();
+    std::shared_ptr<LogRecordPool> default_pool;
     auto null_sink = std::make_shared<NullSink>();
 
-    for (auto& con : config) {
+    // Determine the number of workers
+    std::map<int, std::shared_ptr<LogWorker>> worker;
+    auto& channel_worker = instance().channel_worker;
+    channel_worker.resize(config.size());
+    for (std::size_t channelId = 0; channelId < config.size(); channelId++) {
+        auto& con = config[channelId];
+
+        if (worker.count(con.get_worker_thread_id()) == 0) {
+            worker[con.get_worker_thread_id()] = std::make_shared<LogWorker>();
+        }
+        std::shared_ptr<LogWorker> this_worker = worker[con.get_worker_thread_id()];
+
         std::shared_ptr<LogRecordPool> pool = con.get_pool();
         if (!pool) {
+            if (!default_pool) {
+                 default_pool = make_default_pool();
+            }
             pool = default_pool;
         }
+
         std::shared_ptr<LogSink> sink = con.get_sink();
-        if (nullptr == sink) {
+        if (!sink) {
             sink = null_sink;
         }
-        backend.emplace_back(make_channel(sink, con.get_threshold_map(), pool));
+
+        auto channel = make_channel(sink, con.get_threshold_map(), pool);
+        this_worker->add_channel(channelId, channel);
+        channel_worker[channelId] = this_worker;
     }
+    instance().num_worker = (int) worker.size();
 }
 
-void Logger::start_all_channels()
+void Logger::start()
 {
-    auto& logger = Logger::instance();
+    install_slog_handlers();
+    reset_worker_counts();
     set_signal_state(SLOG_ACTIVE);
-    for (auto& chan : logger.backend) {
-        chan->start();
+    for (auto& worker : instance().channel_worker) {
+        if (worker) {
+            worker->start();
+        }
     }
 }
 
-/**
- * Inverse of start_all_channels
- */
-void Logger::stop_all_channels()
+void Logger::stop()
 {
-    auto& logger = Logger::instance();
-    if (get_signal_state() == SLOG_ACTIVE) {
-        set_signal_state(SLOG_STOPPED);
-    }
-    logger.backend.clear();
+    set_signal_state(SLOG_STOPPED);
+    instance().channel_worker.clear();
     restore_old_signal_handlers();
     s_installed_signal_handlers = false;
+    instance().num_worker = 0;
+    reset_worker_counts();
 }
 
-void Logger::setup_stopped_channel() { instance().do_setup_stopped_channel(); }
-
-void Logger::do_setup_stopped_channel()
+void Logger::setup_default_channel()
 {
-    if (get_signal_state() == SLOG_ACTIVE) {
-        set_signal_state(SLOG_STOPPED);
-    }
-    backend.clear();
+    stop();
     ThresholdMap threshold;
+    std::shared_ptr<LogRecordPool> pool;
+    std::shared_ptr<LogSink> sink;    
 #if SLOG_LOG_TO_CONSOLE_WHEN_STOPPED
     threshold.set_default(slog::DBUG);
-    auto pool = make_default_pool();
-    auto sink = std::make_shared<ConsoleSink>();
+    pool = make_default_pool();
+    sink = std::make_shared<ConsoleSink>();
 #else
     threshold.set_default(std::numeric_limits<int>::min());
-    auto pool = std::make_shared<LogRecordPool>(DISCARD, 0, 0);
-    auto sink = std::make_shared<NullSink>();
+    pool = std::make_shared<LogRecordPool>(DISCARD, 0, 0);
+    sink = std::make_shared<NullSink>();
 #endif
-    backend.emplace_back(make_channel(sink, threshold, pool));
-    set_signal_state(SLOG_ACTIVE);
-    backend.front()->start();
+    channel_worker.emplace_back(std::make_shared<LogWorker>());
+    channel_worker.back()->add_channel(DEFAULT_CHANNEL, make_channel(sink, threshold, pool));
+    num_worker = 1;
+    start();
 }
 
 long get_pool_missing_count()
@@ -145,6 +161,17 @@ long get_pool_missing_count()
     }
     return count;
 }
+
+int Logger::worker_count()
+{
+    return (int) instance().num_worker;
+}
+
+int Logger::channel_count() 
+{ 
+    return (int) instance().channel_worker.size();    
+}
+
 
 } // namespace detail
 } // namespace slog
