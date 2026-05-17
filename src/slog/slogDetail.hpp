@@ -51,7 +51,7 @@ class CaptureBinary
      * @brief Construct a capture object with the given head node destined for
      *the given channel.
      */
-    CaptureBinary(LogRecord* node, int channel);
+    CaptureBinary(LogRecord* node);
 
     /**
      * @brief Write bytes into the record
@@ -65,8 +65,8 @@ class CaptureBinary
     RecordInserter inserter;
 };
 
-inline CaptureBinary::CaptureBinary(LogRecord* node, int channel)
-    : inserter(node, channel)
+inline CaptureBinary::CaptureBinary(LogRecord* node)
+    : inserter(node)
 {
 }
 
@@ -145,7 +145,7 @@ namespace slog
 /**
  * @brief std::vformat log capture. This assumes rec is not null.
  */
-void format_log(LogRecord* rec, int channel, std::string_view format, std::format_args args);
+void format_log(LogRecord* rec, std::string_view format, std::format_args args);
 
 class CaptureFlog
 {
@@ -153,8 +153,7 @@ class CaptureFlog
     CaptureFlog(int severity, char const* tag = "", int channel_ = DEFAULT_CHANNEL,
                 std::source_location const& location = std::source_location::current())
         : rec(get_fresh_record(channel_, location.file_name(), location.function_name(), location.line(), severity,
-                               tag)),
-          channel(channel_)
+                               tag))
     {
     }
 
@@ -164,7 +163,7 @@ class CaptureFlog
     template <class... Args> void operator()(std::string_view format, Args&&... args)
     {
         if (rec) {
-            format_log(rec, channel, format, std::make_format_args(unmove(args)...));
+            format_log(rec, format, std::make_format_args(unmove(args)...));
         }
     }
 
@@ -173,7 +172,6 @@ class CaptureFlog
     template <class T> static T const& unmove(T&& t) { return t; }
 
     LogRecord* rec;
-    int channel;
 };
 
 } // namespace slog

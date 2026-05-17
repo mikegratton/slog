@@ -1,8 +1,10 @@
 #include "FileSink.hpp"
 #include "LoggerSingleton.hpp"
 #include "RecordInserter.hpp"
+#include "slog/Locale.hpp"
 #include <cstdarg>
 #include <cassert>
+#include <locale>
 
 namespace slog
 {
@@ -72,15 +74,17 @@ bool is_channel_active(int channel)
 
 #if SLOG_FORMAT_LOG
 #include <format>
+#include "Locale.hpp"
 namespace slog {
+
 
 /**
  * @brief std::format log capture
  */
-void format_log(LogRecord* rec, int channel, std::string_view format, std::format_args args)
+void format_log(LogRecord* rec, std::string_view format, std::format_args args)
 {
     assert(rec);
-    RecordInserter inserter(rec, channel);
+    RecordInserter inserter(rec);
     std::vformat_to<RecordInserterIterator>(RecordInserterIterator(&inserter), get_locale(), format, args);
 }
 } // namespace slog
